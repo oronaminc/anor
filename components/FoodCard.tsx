@@ -39,6 +39,7 @@ export function FoodCard({
             alt={food.name_ko}
             fill
             sizes="(max-width: 480px) 50vw, 240px"
+            unoptimized={food.thumbnail_url.startsWith("/demo/")}
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (

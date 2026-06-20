@@ -39,6 +39,7 @@ export default async function FoodDetailPage({
             fill
             priority
             sizes="(max-width: 480px) 100vw, 480px"
+            unoptimized={food.thumbnail_url.startsWith("/demo/")}
             className="object-cover"
           />
         ) : (

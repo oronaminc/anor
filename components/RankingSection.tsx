@@ -36,6 +36,7 @@ export function RankingSection({ foods }: { foods: Food[] }) {
                     alt={food.name_ko}
                     fill
                     sizes="48px"
+                    unoptimized={food.thumbnail_url.startsWith("/demo/")}
                     className="object-cover"
                   />
                 ) : (

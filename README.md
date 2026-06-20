@@ -4,6 +4,15 @@
 서비스입니다. 트렌딩/랭킹, 검색·정렬, 카카오 지도, 길찾기, 관리자 CRUD를
 제공합니다.
 
+## 스크린샷
+
+> 데모 모드(`NEXT_PUBLIC_DEMO_MODE=1`)로 렌더링한 모바일 화면입니다. 지도는
+> Kakao 키 설정 시 표시됩니다.
+
+| 홈 (트렌딩·랭킹·탐색) | 음식 상세 | 관리자 로그인 |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/01-home.png" width="240" alt="홈 화면" /> | <img src="docs/screenshots/02-detail.png" width="240" alt="음식 상세" /> | <img src="docs/screenshots/03-admin-login.png" width="240" alt="관리자 로그인" /> |
+
 ## 기술 스택
 
 - **Next.js 14** (App Router) + **TypeScript**
@@ -67,6 +76,7 @@ cp .env.local.example .env.local
 | `SUPABASE_SERVICE_ROLE_KEY` | 서버 전용 service role 키 (브라우저 노출 금지) |
 | `NEXT_PUBLIC_KAKAO_MAP_KEY` | Kakao JavaScript 키 |
 | `NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET` | 썸네일 버킷명 (기본 `food-thumbnails`) |
+| `NEXT_PUBLIC_DEMO_MODE` | (선택) `1` 이면 Supabase 미설정 시 샘플 데이터 표시 |
 
 Supabase 키는 **Project Settings → API**, Kakao 키는 **내 애플리케이션 →
 앱 키 → JavaScript 키** 에서 확인합니다. Kakao 콘솔의 **플랫폼 → Web** 에

@@ -59,6 +59,7 @@ export default async function AdminDashboard() {
                       alt={food.name_ko}
                       fill
                       sizes="56px"
+                      unoptimized={food.thumbnail_url.startsWith("/demo/")}
                       className="object-cover"
                     />
                   ) : (
