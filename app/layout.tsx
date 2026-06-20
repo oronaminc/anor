@@ -1,44 +1,48 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeScript } from "@/components/theme/ThemeScript";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "명동 길거리 음식 가이드",
-  description:
-    "명동의 인기 길거리 음식을 지도와 함께 한눈에. 떡볶이, 호떡, 계란빵부터 치즈 랍스터까지.",
-  metadataBase: new URL("https://myeongdong-street-food.vercel.app"),
-  openGraph: {
-    title: "명동 길거리 음식 가이드",
-    description: "명동의 인기 길거리 음식을 지도와 함께 한눈에.",
-    type: "website",
-    locale: "ko_KR",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common");
+  return {
+    title: t("appName"),
+    description: t("tagline"),
+    metadataBase: new URL("https://myeongdong-street-food.vercel.app"),
+    openGraph: {
+      title: t("appName"),
+      description: t("tagline"),
+      type: "website",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#ee2a5a",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
-const KAKAO_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="ko">
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-dvh antialiased">
-        {KAKAO_KEY && (
-          <Script
-            strategy="beforeInteractive"
-            src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`}
-          />
-        )}
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider>{children}</ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

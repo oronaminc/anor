@@ -43,6 +43,8 @@ export function filterFoods(foods: Food[], query: string): Food[] {
     const haystack = [
       food.name_ko,
       food.name_en ?? "",
+      food.name_ja ?? "",
+      food.name_es ?? "",
       food.category ?? "",
       ...(food.hashtags ?? []),
     ]

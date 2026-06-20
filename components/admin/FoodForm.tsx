@@ -50,11 +50,27 @@ export function FoodForm({
             placeholder="떡볶이"
           />
         </Field>
-        <Field label="영문 이름" htmlFor="name_en">
+        <Field label="영문 이름 (en)" htmlFor="name_en">
           <Input
             id="name_en"
             name="name_en"
             defaultValue={food?.name_en ?? ""}
+            placeholder="Tteokbokki"
+          />
+        </Field>
+        <Field label="일본어 이름 (ja)" htmlFor="name_ja">
+          <Input
+            id="name_ja"
+            name="name_ja"
+            defaultValue={food?.name_ja ?? ""}
+            placeholder="トッポッキ"
+          />
+        </Field>
+        <Field label="스페인어 이름 (es)" htmlFor="name_es">
+          <Input
+            id="name_es"
+            name="name_es"
+            defaultValue={food?.name_es ?? ""}
             placeholder="Tteokbokki"
           />
         </Field>
@@ -76,7 +92,7 @@ export function FoodForm({
         </Field>
       </div>
 
-      <Field label="설명" htmlFor="description">
+      <Field label="설명 (한국어 / 기본)" htmlFor="description">
         <Textarea
           id="description"
           name="description"
@@ -85,6 +101,36 @@ export function FoodForm({
           placeholder="음식에 대한 설명을 입력하세요."
         />
       </Field>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Field label="설명 (en)" htmlFor="description_en">
+          <Textarea
+            id="description_en"
+            name="description_en"
+            rows={3}
+            defaultValue={food?.translations?.en ?? ""}
+            placeholder="English description"
+          />
+        </Field>
+        <Field label="설명 (ja)" htmlFor="description_ja">
+          <Textarea
+            id="description_ja"
+            name="description_ja"
+            rows={3}
+            defaultValue={food?.translations?.ja ?? ""}
+            placeholder="日本語の説明"
+          />
+        </Field>
+        <Field label="설명 (es)" htmlFor="description_es">
+          <Textarea
+            id="description_es"
+            name="description_es"
+            rows={3}
+            defaultValue={food?.translations?.es ?? ""}
+            placeholder="Descripción en español"
+          />
+        </Field>
+      </div>
 
       <Field label="해시태그 (쉼표 또는 공백 구분)" htmlFor="hashtags">
         <Input

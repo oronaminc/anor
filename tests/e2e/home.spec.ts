@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+// Force Korean so locale auto-detection is deterministic in CI.
+test.use({ locale: "ko-KR" });
+
 test.describe("Home page", () => {
   test("loads and shows the hero header", async ({ page }) => {
     const response = await page.goto("/");

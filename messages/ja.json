@@ -1,0 +1,88 @@
+{
+  "common": {
+    "appName": "明洞ストリートフード",
+    "tagline": "明洞ストリートフードガイド",
+    "open": "開く",
+    "back": "戻る",
+    "viewSite": "サイトを見る",
+    "loading": "読み込み中…"
+  },
+  "nav": {
+    "home": "ホーム",
+    "map": "マップ",
+    "trending": "トレンド",
+    "search": "検索"
+  },
+  "home": {
+    "heroEyebrow": "ソウル · 明洞",
+    "heroTitle": "明洞のストリートフードを\n数タップでチェック",
+    "heroSubtitle": "話題のグルメから場所、道案内まで。明洞を一番おいしく楽しむ方法。",
+    "trendingTitle": "今話題のストリートフード",
+    "rankingTitle": "週間ランキング",
+    "rankingSubtitle": "閲覧数 TOP5",
+    "mapTitle": "マップで見る",
+    "mapHint": "マーカーをタップすると詳細が開きます。",
+    "allMenu": "すべてのメニュー",
+    "count": "{count}件",
+    "seeAll": "すべて見る",
+    "empty": "まだ登録された料理がありません。Supabaseのマイグレーションとシードを実行したか確認してください。"
+  },
+  "sort": {
+    "label": "並び替え",
+    "popular": "人気順",
+    "latest": "新着順"
+  },
+  "search": {
+    "title": "検索",
+    "placeholder": "料理名・ハッシュタグ・カテゴリで検索",
+    "results": "{count}件の結果",
+    "empty": "検索結果がありません",
+    "emptyHint": "別のキーワードでお試しください",
+    "prompt": "食べたい料理を検索してみましょう"
+  },
+  "badge": {
+    "hot": "HOT",
+    "rising": "急上昇"
+  },
+  "detail": {
+    "views": "閲覧数 {count}",
+    "directions": "ルート案内",
+    "youtube": "YouTubeショートで見る",
+    "location": "場所",
+    "about": "紹介"
+  },
+  "trending": {
+    "title": "トレンド",
+    "subtitle": "今、明洞で最も人気のストリートフード"
+  },
+  "map": {
+    "title": "明洞フードマップ",
+    "subtitle": "マーカーをタップして料理情報を確認",
+    "missingKey": "Google Maps APIキーが設定されていません。",
+    "failed": "マップを読み込めませんでした。"
+  },
+  "appearance": {
+    "title": "表示設定",
+    "theme": "アクセントカラー",
+    "language": "言語",
+    "mode": "モード",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム",
+    "presets": {
+      "red": "スパイシーレッド",
+      "orange": "ウォームオレンジ",
+      "mint": "ミント",
+      "purple": "パープル",
+      "mono": "モノ"
+    }
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "desc": "リクエストされた料理またはページは存在しません。",
+    "home": "ホームに戻る"
+  },
+  "footer": {
+    "disclaimer": "情報は参考用であり、実際の営業情報と異なる場合があります。"
+  }
+}

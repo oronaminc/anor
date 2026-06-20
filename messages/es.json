@@ -1,0 +1,88 @@
+{
+  "common": {
+    "appName": "Comida Callejera de Myeongdong",
+    "tagline": "Guía de comida callejera de Myeongdong",
+    "open": "Abrir",
+    "back": "Atrás",
+    "viewSite": "Ver sitio",
+    "loading": "Cargando…"
+  },
+  "nav": {
+    "home": "Inicio",
+    "map": "Mapa",
+    "trending": "Tendencias",
+    "search": "Buscar"
+  },
+  "home": {
+    "heroEyebrow": "Seúl · Myeongdong",
+    "heroTitle": "Comida callejera de Myeongdong,\nen solo unos toques",
+    "heroSubtitle": "Platos de moda, ubicaciones y cómo llegar: la forma más sabrosa de descubrir Myeongdong.",
+    "trendingTitle": "Tendencia ahora mismo",
+    "rankingTitle": "Ranking semanal",
+    "rankingSubtitle": "Top 5 por vistas",
+    "mapTitle": "Ver en el mapa",
+    "mapHint": "Toca un marcador para abrir los detalles.",
+    "allMenu": "Todo el menú",
+    "count": "{count} platos",
+    "seeAll": "Ver todo",
+    "empty": "Aún no hay platos. Asegúrate de haber ejecutado la migración y el seed de Supabase."
+  },
+  "sort": {
+    "label": "Ordenar",
+    "popular": "Populares",
+    "latest": "Recientes"
+  },
+  "search": {
+    "title": "Buscar",
+    "placeholder": "Busca por nombre, hashtag o categoría",
+    "results": "{count} resultados",
+    "empty": "No se encontraron resultados",
+    "emptyHint": "Prueba con otra palabra clave",
+    "prompt": "Busca algo delicioso"
+  },
+  "badge": {
+    "hot": "HOT",
+    "rising": "En alza"
+  },
+  "detail": {
+    "views": "{count} vistas",
+    "directions": "Cómo llegar",
+    "youtube": "Ver en YouTube Shorts",
+    "location": "Ubicación",
+    "about": "Acerca de"
+  },
+  "trending": {
+    "title": "Tendencias",
+    "subtitle": "La comida callejera más popular de Myeongdong ahora mismo"
+  },
+  "map": {
+    "title": "Mapa gastronómico de Myeongdong",
+    "subtitle": "Toca un marcador para ver los detalles",
+    "missingKey": "La clave de la API de Google Maps no está configurada.",
+    "failed": "No se pudo cargar el mapa."
+  },
+  "appearance": {
+    "title": "Apariencia",
+    "theme": "Color de acento",
+    "language": "Idioma",
+    "mode": "Modo",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema",
+    "presets": {
+      "red": "Rojo Picante",
+      "orange": "Naranja Cálido",
+      "mint": "Menta",
+      "purple": "Púrpura",
+      "mono": "Mono"
+    }
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "desc": "El plato o la página que solicitaste no existe.",
+    "home": "Volver al inicio"
+  },
+  "footer": {
+    "disclaimer": "La información es solo de referencia y puede diferir de los datos reales del negocio."
+  }
+}

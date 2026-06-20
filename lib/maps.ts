@@ -1,17 +1,17 @@
 import type { Food } from "./types";
 
+/** Center of Myeongdong, used as the default map center. */
+export const MYEONGDONG_CENTER = { lat: 37.5636, lng: 126.985 };
+
 /**
- * Kakao Map directions deep link ("길찾기").
- * Opens the destination on Kakao Map web/app.
- * https://map.kakao.com/link/to/name,lat,lng
+ * Google Maps directions deep link.
+ * https://www.google.com/maps/dir/?api=1&destination=LAT,LNG
  */
-export function kakaoDirectionsUrl(food: Pick<Food, "name_ko" | "lat" | "lng">) {
-  const name = encodeURIComponent(food.name_ko);
-  return `https://map.kakao.com/link/to/${name},${food.lat},${food.lng}`;
+export function googleDirectionsUrl(food: Pick<Food, "lat" | "lng">) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${food.lat},${food.lng}`;
 }
 
-/** Kakao Map "place" link centered on the coordinates. */
-export function kakaoPlaceUrl(food: Pick<Food, "name_ko" | "lat" | "lng">) {
-  const name = encodeURIComponent(food.name_ko);
-  return `https://map.kakao.com/link/map/${name},${food.lat},${food.lng}`;
+/** Google Maps "search/place" link centered on the coordinates. */
+export function googlePlaceUrl(food: Pick<Food, "lat" | "lng">) {
+  return `https://www.google.com/maps/search/?api=1&query=${food.lat},${food.lng}`;
 }

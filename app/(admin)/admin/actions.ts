@@ -92,23 +92,33 @@ function readFoodForm(formData: FormData): {
     const n = parseFloat(String(v ?? ""));
     return Number.isFinite(n) ? n : null;
   };
+  const str = (key: string) => String(formData.get(key) ?? "").trim();
+
+  // Localized descriptions -> translations JSONB keyed by locale.
+  const translations: Record<string, string> = {};
+  for (const loc of ["en", "ja", "es"] as const) {
+    const value = str(`description_${loc}`);
+    if (value) translations[loc] = value;
+  }
 
   return {
     fields: {
-      name_ko: String(formData.get("name_ko") ?? "").trim(),
-      name_en: String(formData.get("name_en") ?? "").trim() || null,
-      description: String(formData.get("description") ?? "").trim() || null,
-      category: String(formData.get("category") ?? "").trim() || null,
+      name_ko: str("name_ko"),
+      name_en: str("name_en") || null,
+      name_ja: str("name_ja") || null,
+      name_es: str("name_es") || null,
+      description: str("description") || null,
+      translations,
+      category: str("category") || null,
       lat: num(formData.get("lat")),
       lng: num(formData.get("lng")),
-      address: String(formData.get("address") ?? "").trim() || null,
-      youtube_shorts_url:
-        String(formData.get("youtube_shorts_url") ?? "").trim() || null,
-      thumbnail_url: String(formData.get("thumbnail_url") ?? "").trim() || null,
-      price_range: String(formData.get("price_range") ?? "").trim() || null,
+      address: str("address") || null,
+      youtube_shorts_url: str("youtube_shorts_url") || null,
+      thumbnail_url: str("thumbnail_url") || null,
+      price_range: str("price_range") || null,
       is_trending: formData.get("is_trending") === "on",
     },
-    hashtags: parseHashtags(String(formData.get("hashtags") ?? "")),
+    hashtags: parseHashtags(str("hashtags")),
   };
 }
 

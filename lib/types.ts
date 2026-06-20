@@ -1,8 +1,16 @@
+export type FoodTranslations = {
+  /** Localized descriptions keyed by locale code, e.g. { en: "...", ja: "..." } */
+  [locale: string]: string;
+};
+
 export type Food = {
   id: string;
   name_ko: string;
   name_en: string | null;
+  name_ja: string | null;
+  name_es: string | null;
   description: string | null;
+  translations: FoodTranslations | null;
   category: string | null;
   lat: number | null;
   lng: number | null;

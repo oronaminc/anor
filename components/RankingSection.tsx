@@ -1,39 +1,51 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Eye } from "lucide-react";
 
 import type { Food } from "@/lib/types";
 import { rankByViews } from "@/lib/sort";
 import { formatViewCount } from "@/lib/utils";
+import { localizedName } from "@/lib/i18n-food";
 
 const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
-export function RankingSection({ foods }: { foods: Food[] }) {
-  const ranking = rankByViews(foods, 5);
+export async function RankingSection({
+  foods,
+  limit = 5,
+}: {
+  foods: Food[];
+  limit?: number;
+}) {
+  const t = await getTranslations("home");
+  const locale = await getLocale();
+  const ranking = rankByViews(foods, limit);
   if (ranking.length === 0) return null;
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <div className="flex items-baseline gap-2">
-        <h2 className="text-lg font-bold">주간 랭킹</h2>
-        <span className="text-xs text-muted-foreground">조회수 TOP 5</span>
+        <h2 className="text-lg font-bold">{t("rankingTitle")}</h2>
+        <span className="text-xs text-muted-foreground">
+          {t("rankingSubtitle")}
+        </span>
       </div>
 
-      <ol className="divide-y rounded-xl border bg-card">
+      <ol className="divide-y divide-border/60 overflow-hidden rounded-3xl border border-border/60 bg-card">
         {ranking.map(({ rank, food }) => (
           <li key={food.id}>
             <Link
               href={`/food/${food.id}`}
-              className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/40"
+              className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/50"
             >
               <span className="w-6 shrink-0 text-center text-lg font-bold tabular-nums">
                 {MEDALS[rank] ?? rank}
               </span>
-              <div className="relative size-12 shrink-0 overflow-hidden rounded-lg bg-muted">
+              <div className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-muted">
                 {food.thumbnail_url ? (
                   <Image
                     src={food.thumbnail_url}
-                    alt={food.name_ko}
+                    alt={localizedName(food, locale)}
                     fill
                     sizes="48px"
                     unoptimized={food.thumbnail_url.startsWith("/demo/")}
@@ -46,7 +58,9 @@ export function RankingSection({ foods }: { foods: Food[] }) {
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold">{food.name_ko}</p>
+                <p className="truncate font-semibold">
+                  {localizedName(food, locale)}
+                </p>
                 <p className="truncate text-xs text-muted-foreground">
                   {food.category}
                 </p>

@@ -1,17 +1,21 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowLeft, Eye, MapPin, Youtube, Navigation } from "lucide-react";
 
 import { getFoodById } from "@/lib/queries";
 import { formatViewCount } from "@/lib/utils";
-import { kakaoDirectionsUrl } from "@/lib/maps";
-import { Badge } from "@/components/ui/badge";
+import { googleDirectionsUrl } from "@/lib/maps";
+import {
+  localizedName,
+  secondaryName,
+  localizedDescription,
+} from "@/lib/i18n-food";
 import { Button } from "@/components/ui/button";
-import { HashtagChips } from "@/components/HashtagChips";
 import { TrendingBadge } from "@/components/FoodCard";
 import { ViewTracker } from "@/components/ViewTracker";
-import KakaoMap from "@/components/KakaoMap";
+import GoogleMap from "@/components/GoogleMap";
 
 export const dynamic = "force-dynamic";
 
@@ -23,11 +27,16 @@ export default async function FoodDetailPage({
   const food = await getFoodById(params.id);
   if (!food) notFound();
 
+  const locale = await getLocale();
+  const t = await getTranslations("detail");
+  const name = localizedName(food, locale);
+  const secondary = secondaryName(food, locale);
+  const description = localizedDescription(food, locale);
   const hasCoords =
     typeof food.lat === "number" && typeof food.lng === "number";
 
   return (
-    <div className="pb-12">
+    <div className="pb-10">
       <ViewTracker foodId={food.id} />
 
       {/* Hero image */}
@@ -35,7 +44,7 @@ export default async function FoodDetailPage({
         {food.thumbnail_url ? (
           <Image
             src={food.thumbnail_url}
-            alt={food.name_ko}
+            alt={name}
             fill
             priority
             sizes="(max-width: 480px) 100vw, 480px"
@@ -47,9 +56,10 @@ export default async function FoodDetailPage({
             🍢
           </div>
         )}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent" />
         <Link
           href="/"
-          aria-label="뒤로 가기"
+          aria-label="Back"
           className="absolute left-3 top-3 inline-flex size-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur transition-colors hover:bg-black/60"
         >
           <ArrowLeft className="size-5" />
@@ -61,35 +71,51 @@ export default async function FoodDetailPage({
         )}
       </div>
 
-      <div className="space-y-6 px-4 pt-4">
+      <div className="space-y-6 px-4 pt-5">
         {/* Title block */}
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             {food.category && (
-              <Badge variant="secondary">{food.category}</Badge>
+              <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
+                {food.category}
+              </span>
             )}
             {food.price_range && (
-              <span className="text-sm font-semibold text-primary">
+              <span className="text-sm font-bold text-primary">
                 {food.price_range}
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-extrabold">{food.name_ko}</h1>
-          {food.name_en && (
-            <p className="text-sm text-muted-foreground">{food.name_en}</p>
+          <h1 className="text-2xl font-extrabold tracking-tight">{name}</h1>
+          {secondary && (
+            <p className="text-sm text-muted-foreground">{secondary}</p>
           )}
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Eye className="size-4" />
-            조회수 {formatViewCount(food.view_count)}
+            {t("views", { count: formatViewCount(food.view_count) })}
           </div>
         </div>
 
-        <HashtagChips hashtags={food.hashtags} />
+        {food.hashtags && food.hashtags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {food.hashtags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
 
-        {food.description && (
-          <p className="whitespace-pre-line leading-relaxed text-foreground/90">
-            {food.description}
-          </p>
+        {description && (
+          <div className="space-y-2">
+            <h2 className="text-base font-bold">{t("about")}</h2>
+            <p className="whitespace-pre-line leading-relaxed text-foreground/90">
+              {description}
+            </p>
+          </div>
         )}
 
         {/* YouTube Shorts — external link, no embedded streaming */}
@@ -98,13 +124,13 @@ export default async function FoodDetailPage({
             href={food.youtube_shorts_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between rounded-xl border bg-card p-4 transition-colors hover:bg-muted/40"
+            className="flex items-center justify-between rounded-2xl border bg-card p-4 transition-colors hover:bg-muted/40"
           >
             <span className="flex items-center gap-3 font-semibold">
               <Youtube className="size-6 text-red-600" />
-              유튜브 쇼츠로 보기
+              {t("youtube")}
             </span>
-            <span className="text-sm text-muted-foreground">열기 ↗</span>
+            <span className="text-sm text-muted-foreground">↗</span>
           </a>
         )}
 
@@ -113,25 +139,24 @@ export default async function FoodDetailPage({
           <section className="space-y-3">
             <div className="flex items-center gap-2">
               <MapPin className="size-5 text-primary" />
-              <h2 className="text-lg font-bold">위치</h2>
+              <h2 className="text-lg font-bold">{t("location")}</h2>
             </div>
             {food.address && (
               <p className="text-sm text-muted-foreground">{food.address}</p>
             )}
-            <KakaoMap
+            <GoogleMap
               foods={[food]}
-              height="240px"
-              level={3}
-              className="overflow-hidden rounded-xl border"
+              height="220px"
+              className="overflow-hidden rounded-2xl border border-border/60"
             />
             <Button asChild className="w-full" size="lg">
               <a
-                href={kakaoDirectionsUrl(food)}
+                href={googleDirectionsUrl(food)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <Navigation className="size-5" />
-                길찾기
+                {t("directions")}
               </a>
             </Button>
           </section>

@@ -1,8 +1,12 @@
+import { getTranslations } from "next-intl/server";
+import { Flame } from "lucide-react";
+
 import type { Food } from "@/lib/types";
 import { sortFoods } from "@/lib/sort";
 import { FoodCard } from "@/components/FoodCard";
 
-export function TrendingSection({ foods }: { foods: Food[] }) {
+export async function TrendingSection({ foods }: { foods: Food[] }) {
+  const t = await getTranslations("home");
   const trending = sortFoods(
     foods.filter((f) => f.is_trending),
     "popular",
@@ -10,17 +14,15 @@ export function TrendingSection({ foods }: { foods: Food[] }) {
   if (trending.length === 0) return null;
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-baseline gap-2">
-        <h2 className="text-lg font-bold">🔥 지금 뜨는 길거리 음식</h2>
+    <section className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Flame className="size-5 text-primary" />
+        <h2 className="text-lg font-bold">{t("trendingTitle")}</h2>
       </div>
 
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 no-scrollbar">
         {trending.map((food, i) => (
-          <div
-            key={food.id}
-            className="w-40 shrink-0 snap-start sm:w-48"
-          >
+          <div key={food.id} className="w-40 shrink-0 snap-start sm:w-44">
             <FoodCard food={food} rank={i + 1} />
           </div>
         ))}

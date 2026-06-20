@@ -1,76 +1,72 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, TrendingUp, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { TrendingUp, Clock } from "lucide-react";
 
 import type { Food, SortKey } from "@/lib/types";
-import { sortFoods, filterFoods } from "@/lib/sort";
+import { sortFoods } from "@/lib/sort";
 import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
 import { FoodCard } from "@/components/FoodCard";
 
 export function FoodExplorer({ foods }: { foods: Food[] }) {
-  const [query, setQuery] = useState("");
+  const t = useTranslations("home");
+  const ts = useTranslations("sort");
   const [sort, setSort] = useState<SortKey>("popular");
 
-  const visible = useMemo(() => {
-    return sortFoods(filterFoods(foods, query), sort);
-  }, [foods, query, sort]);
+  const visible = useMemo(() => sortFoods(foods, sort), [foods, sort]);
 
   return (
     <section id="explore" className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold">전체 메뉴</h2>
+        <h2 className="text-lg font-bold">{t("allMenu")}</h2>
         <span className="text-sm text-muted-foreground">
-          {visible.length}개
+          {t("count", { count: visible.length })}
         </span>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="음식 이름, 해시태그, 카테고리 검색"
-          className="pl-9"
-          aria-label="음식 검색"
-          type="search"
-        />
-      </div>
-
-      {/* Sort toggle */}
       <div
         role="tablist"
-        aria-label="정렬"
-        className="inline-flex rounded-lg border bg-muted/40 p-1"
+        aria-label={ts("label")}
+        className="inline-flex rounded-full border bg-muted/40 p-1"
       >
         <SortButton
           active={sort === "popular"}
           onClick={() => setSort("popular")}
           icon={<TrendingUp className="size-4" />}
-          label="인기순"
+          label={ts("popular")}
         />
         <SortButton
           active={sort === "latest"}
           onClick={() => setSort("latest")}
           icon={<Clock className="size-4" />}
-          label="최신순"
+          label={ts("latest")}
         />
       </div>
 
-      {/* Grid */}
-      {visible.length === 0 ? (
-        <div className="rounded-xl border border-dashed py-16 text-center text-sm text-muted-foreground">
-          검색 결과가 없습니다 🥲
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {visible.map((food) => (
-            <FoodCard key={food.id} food={food} />
-          ))}
-        </div>
-      )}
+      <motion.div
+        layout
+        className="grid grid-cols-2 gap-3"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: { transition: { staggerChildren: 0.04 } },
+        }}
+      >
+        {visible.map((food) => (
+          <motion.div
+            key={food.id}
+            layout
+            variants={{
+              hidden: { opacity: 0, y: 12 },
+              visible: { opacity: 1, y: 0 },
+            }}
+          >
+            <FoodCard food={food} />
+          </motion.div>
+        ))}
+      </motion.div>
     </section>
   );
 }
@@ -92,7 +88,7 @@ function SortButton({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors",
         active
           ? "bg-background text-foreground shadow-sm"
           : "text-muted-foreground hover:text-foreground",
