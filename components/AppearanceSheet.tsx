@@ -57,7 +57,7 @@ export function AppearanceSheet() {
               role="dialog"
               aria-modal="true"
               aria-label={t("title")}
-              className="relative w-full max-w-md rounded-t-3xl bg-card p-5 shadow-2xl sm:rounded-3xl"
+              className="relative w-full max-w-md rounded-t-3xl bg-card/95 p-5 shadow-2xl backdrop-blur-xl neon-border sm:rounded-3xl"
               variants={{
                 hidden: { y: 40, opacity: 0 },
                 visible: { y: 0, opacity: 1 },
@@ -65,7 +65,9 @@ export function AppearanceSheet() {
               transition={{ type: "spring", damping: 28, stiffness: 320 }}
             >
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-bold">{t("title")}</h2>
+                <h2 className="font-display text-lg font-extrabold uppercase tracking-wide">
+                  {t("title")}
+                </h2>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}

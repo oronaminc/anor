@@ -13,12 +13,10 @@ export default async function MapPage() {
   return (
     <div className="space-y-4 px-4 pt-4">
       <header className="space-y-1">
-        <div className="flex items-center gap-2">
+        <h1 className="flex items-center gap-2.5 font-display text-2xl font-extrabold uppercase tracking-tight gradient-text text-glow">
           <MapPin className="size-6 text-primary" />
-          <h1 className="text-2xl font-extrabold tracking-tight">
-            {t("title")}
-          </h1>
-        </div>
+          {t("title")}
+        </h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </header>
 
@@ -26,7 +24,7 @@ export default async function MapPage() {
         foods={foods}
         height="calc(100dvh - 14rem)"
         linkToDetail
-        className="overflow-hidden rounded-3xl border border-border/60"
+        className="overflow-hidden rounded-3xl neon-border"
       />
     </div>
   );

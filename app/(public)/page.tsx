@@ -16,36 +16,50 @@ export default async function HomePage() {
   const foods = await getFoods();
 
   return (
-    <div className="space-y-8 pb-6">
+    <div className="space-y-9 pb-6">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary to-accent px-5 pb-6 pt-8 text-primary-foreground">
+      <section className="relative overflow-hidden rounded-b-[2rem] border-b border-white/5 px-5 pb-7 pt-9">
+        {/* neon glow field */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 15% 0%, hsl(var(--primary)/0.35), transparent 70%), radial-gradient(55% 45% at 95% 10%, hsl(var(--accent)/0.3), transparent 70%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-6 -top-8 text-[130px] opacity-20 animate-float"
+        >
+          👹
+        </div>
+
         <div className="relative z-10 space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-wide opacity-90">
+          <p className="inline-flex items-center gap-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+            <span className="size-1.5 rounded-full bg-primary animate-pulse-glow" />
             {t("heroEyebrow")}
           </p>
-          <h1 className="whitespace-pre-line text-[26px] font-extrabold leading-tight">
+          <h1 className="font-display whitespace-pre-line text-[28px] font-extrabold uppercase leading-[1.1] tracking-tight gradient-text text-glow">
             {t("heroTitle")}
           </h1>
-          <p className="max-w-xs text-sm leading-relaxed opacity-90">
+          <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
             {t("heroSubtitle")}
           </p>
 
           <Link
             href="/search"
-            className="mt-2 flex items-center gap-2 rounded-2xl bg-white/95 px-4 py-3 text-sm font-medium text-slate-500 shadow-lg transition-transform active:scale-[0.98]"
+            className="mt-3 flex items-center gap-2.5 rounded-2xl bg-card/70 px-4 py-3 text-sm font-medium text-muted-foreground neon-border backdrop-blur transition-transform active:scale-[0.98]"
           >
-            <Search className="size-5 text-slate-400" />
+            <Search className="size-5 text-primary" />
             {ts("placeholder")}
           </Link>
         </div>
-        <div className="pointer-events-none absolute -right-5 -top-6 text-[120px] opacity-20">
-          🌶️
-        </div>
       </section>
 
-      <div className="space-y-8 px-4">
+      <div className="space-y-9 px-4">
         {foods.length === 0 ? (
-          <div className="rounded-3xl border border-dashed bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+          <div className="rounded-3xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted-foreground">
             {t("empty")}
           </div>
         ) : (
@@ -56,13 +70,14 @@ export default async function HomePage() {
             {/* Map preview */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+                  <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
                   <MapPin className="size-5 text-primary" />
-                  <h2 className="text-lg font-bold">{t("mapTitle")}</h2>
-                </div>
+                  {t("mapTitle")}
+                </h2>
                 <Link
                   href="/map"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-primary"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-primary"
                 >
                   {t("seeAll")}
                   <ArrowRight className="size-4" />
@@ -72,7 +87,7 @@ export default async function HomePage() {
                 foods={foods}
                 height="260px"
                 linkToDetail
-                className="overflow-hidden rounded-3xl border border-border/60"
+                className="overflow-hidden rounded-3xl neon-border"
               />
               <p className="text-xs text-muted-foreground">{t("mapHint")}</p>
             </section>

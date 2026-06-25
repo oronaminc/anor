@@ -15,10 +15,11 @@ export async function TrendingSection({ foods }: { foods: Food[] }) {
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Flame className="size-5 text-primary" />
-        <h2 className="text-lg font-bold">{t("trendingTitle")}</h2>
-      </div>
+      <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+        <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
+        <Flame className="size-5 text-primary animate-pulse-glow" />
+        {t("trendingTitle")}
+      </h2>
 
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 no-scrollbar">
         {trending.map((food, i) => (

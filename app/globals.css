@@ -2,91 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =====================================================================
+   K-Demon-Hunters × Cyberpunk theme
+   Deep void backgrounds, neon glow accents, talisman gold, glass.
+   ===================================================================== */
+
 @layer base {
-  /* ---- Base palette (light) ---------------------------------------- */
+  /* ---- Base palette (light — "daylight hunter") -------------------- */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 260 40% 98%;
+    --foreground: 258 45% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --secondary: 210 40% 96.5%;
-    --secondary-foreground: 222 47% 14%;
-    --muted: 210 40% 96.5%;
-    --muted-foreground: 215 16% 47%;
+    --card-foreground: 258 45% 9%;
+    --secondary: 258 35% 94%;
+    --secondary-foreground: 258 40% 16%;
+    --muted: 258 30% 94%;
+    --muted-foreground: 256 12% 42%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --radius: 1rem;
+    --border: 258 30% 88%;
+    --input: 258 30% 88%;
+    --radius: 1.25rem;
 
     /* accent (overridden by presets below) */
-    --primary: 350 89% 60%;
+    --primary: 330 90% 56%;
     --primary-foreground: 0 0% 100%;
-    --accent: 28 95% 53%;
+    --accent: 280 90% 65%;
     --accent-foreground: 0 0% 100%;
-    --ring: 350 89% 60%;
+    --ring: 330 90% 56%;
+    --glow: 330 90% 56%;
   }
 
-  /* ---- Base palette (dark) ----------------------------------------- */
+  /* ---- Base palette (dark — "demon void", the signature look) ------- */
   .dark {
-    --background: 224 38% 7%;
-    --foreground: 210 40% 98%;
-    --card: 223 34% 10%;
-    --card-foreground: 210 40% 98%;
-    --secondary: 222 24% 16%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 222 24% 16%;
-    --muted-foreground: 217 16% 62%;
-    --destructive: 0 72% 51%;
+    --background: 258 50% 5%;
+    --foreground: 280 25% 96%;
+    --card: 260 42% 9%;
+    --card-foreground: 280 25% 96%;
+    --secondary: 262 35% 15%;
+    --secondary-foreground: 280 25% 96%;
+    --muted: 262 30% 14%;
+    --muted-foreground: 265 18% 64%;
+    --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 22% 20%;
-    --input: 220 22% 22%;
+    --border: 270 45% 20%;
+    --input: 270 40% 18%;
   }
 
-  /* ---- Accent presets ---------------------------------------------- */
-  /* Default = Spicy Red (also applied when no data-accent is set) */
-  [data-accent="red"],
+  /* ---- Neon accent presets ---------------------------------------- */
+  /* Default = Demon Magenta */
+  [data-accent="demon"],
   :root {
-    --primary: 350 89% 60%;
+    --primary: 330 92% 56%;
     --primary-foreground: 0 0% 100%;
-    --accent: 16 90% 56%;
+    --accent: 280 92% 66%;
     --accent-foreground: 0 0% 100%;
-    --ring: 350 89% 60%;
+    --ring: 330 92% 56%;
+    --glow: 330 92% 60%;
   }
-  [data-accent="orange"] {
-    --primary: 24 94% 53%;
+  [data-accent="cyber"] {
+    --primary: 188 95% 50%;
+    --primary-foreground: 222 60% 8%;
+    --accent: 280 92% 68%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 188 95% 50%;
+    --glow: 188 95% 55%;
+  }
+  [data-accent="soul"] {
+    --primary: 266 92% 66%;
     --primary-foreground: 0 0% 100%;
-    --accent: 43 96% 50%;
+    --accent: 322 92% 62%;
     --accent-foreground: 0 0% 100%;
-    --ring: 24 94% 53%;
+    --ring: 266 92% 66%;
+    --glow: 266 92% 68%;
   }
-  [data-accent="mint"] {
-    --primary: 168 80% 40%;
+  [data-accent="gold"] {
+    --primary: 42 96% 56%;
+    --primary-foreground: 36 60% 10%;
+    --accent: 14 92% 58%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 42 96% 56%;
+    --glow: 42 96% 58%;
+  }
+  [data-accent="toxic"] {
+    --primary: 150 90% 48%;
+    --primary-foreground: 160 60% 8%;
+    --accent: 175 90% 50%;
+    --accent-foreground: 160 60% 8%;
+    --ring: 150 90% 48%;
+    --glow: 150 90% 52%;
+  }
+  /* In light mode, cyber/gold/toxic primaries need dark text but
+     their foreground stays readable — light bg keeps default. */
+  :root:not(.dark)[data-accent="cyber"],
+  :root:not(.dark)[data-accent="gold"],
+  :root:not(.dark)[data-accent="toxic"] {
     --primary-foreground: 0 0% 100%;
-    --accent: 190 90% 42%;
-    --accent-foreground: 0 0% 100%;
-    --ring: 168 80% 40%;
-  }
-  [data-accent="purple"] {
-    --primary: 263 84% 62%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 322 82% 60%;
-    --accent-foreground: 0 0% 100%;
-    --ring: 263 84% 62%;
-  }
-  [data-accent="mono"] {
-    --primary: 222 18% 18%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 222 12% 38%;
-    --accent-foreground: 0 0% 100%;
-    --ring: 222 18% 18%;
-  }
-  .dark[data-accent="mono"] {
-    --primary: 210 40% 96%;
-    --primary-foreground: 222 47% 11%;
-    --accent: 215 20% 70%;
-    --accent-foreground: 222 47% 11%;
-    --ring: 210 40% 96%;
   }
 }
 
@@ -97,6 +108,13 @@
   body {
     @apply bg-background text-foreground;
     -webkit-tap-highlight-color: transparent;
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  .font-display {
+    font-family: "Orbitron", "Black Han Sans", ui-sans-serif, system-ui,
+      sans-serif;
+    letter-spacing: 0.01em;
   }
 
   /* Smooth theme switching */
@@ -104,10 +122,11 @@
   html.theme-anim body,
   html.theme-anim *:not(svg):not(path) {
     transition:
-      background-color 0.35s ease,
-      border-color 0.35s ease,
-      color 0.2s ease,
-      fill 0.35s ease;
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      color 0.25s ease,
+      box-shadow 0.4s ease,
+      fill 0.4s ease;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -116,7 +135,148 @@
     html.theme-anim * {
       transition: none !important;
     }
+    .animate-float,
+    .animate-pulse-glow,
+    .animate-scan {
+      animation: none !important;
+    }
   }
+}
+
+@layer components {
+  /* Neon glow shadow driven by --glow */
+  .glow {
+    box-shadow:
+      0 0 0 1px hsl(var(--glow) / 0.25),
+      0 0 24px -4px hsl(var(--glow) / 0.55);
+  }
+  .glow-sm {
+    box-shadow: 0 0 16px -4px hsl(var(--glow) / 0.5);
+  }
+  .glow-strong {
+    box-shadow:
+      0 0 0 1px hsl(var(--glow) / 0.4),
+      0 0 40px -6px hsl(var(--glow) / 0.75);
+  }
+  .text-glow {
+    text-shadow: 0 0 18px hsl(var(--glow) / 0.55);
+  }
+
+  /* Gradient ink text */
+  .gradient-text {
+    background-image: linear-gradient(
+      100deg,
+      hsl(var(--primary)),
+      hsl(var(--accent))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glassmorphism surface */
+  .glass {
+    background-color: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  /* Neon hairline border */
+  .neon-border {
+    position: relative;
+    border: 1px solid hsl(var(--border));
+  }
+  .neon-border::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.7),
+      transparent 40%,
+      transparent 60%,
+      hsl(var(--accent) / 0.7)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+}
+
+/* Decorative cyber background (orbs + grid), placed behind content */
+.cyber-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: hsl(var(--background));
+}
+.cyber-bg::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(
+      40% 35% at 12% 8%,
+      hsl(var(--primary) / 0.22),
+      transparent 70%
+    ),
+    radial-gradient(
+      45% 40% at 90% 12%,
+      hsl(var(--accent) / 0.2),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 45% at 80% 95%,
+      hsl(var(--primary) / 0.16),
+      transparent 70%
+    );
+  filter: saturate(130%);
+}
+.cyber-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(var(--foreground) / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 30%, #000, transparent 80%);
+  opacity: 0.5;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px hsl(var(--glow) / 0.7));
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2.6s ease-in-out infinite;
 }
 
 /* Hide scrollbars on horizontal chip rows while keeping scrollability */
@@ -128,10 +288,14 @@
   scrollbar-width: none;
 }
 
-/* Search term highlight */
+/* Neon search term highlight */
 mark {
-  background-color: hsl(var(--accent) / 0.25);
+  background: linear-gradient(
+    transparent 55%,
+    hsl(var(--accent) / 0.45) 0
+  );
   color: inherit;
-  border-radius: 0.2rem;
+  font-weight: 700;
+  border-radius: 0.15rem;
   padding: 0 0.1rem;
 }

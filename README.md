@@ -1,26 +1,28 @@
 # 명동 길거리 음식 가이드 (Myeongdong Street Food Guide)
 
 명동의 인기 길거리 음식을 지도와 함께 한눈에 볼 수 있는 모바일 우선 웹
-서비스입니다. 트렌딩/랭킹, 검색·정렬, Google 지도, 길찾기, 다국어(i18n),
-테마 색상/다크 모드, 관리자 CRUD를 제공합니다.
+서비스입니다. **사이버펑크 × K-데몬 헌터스** 무드의 네온/글래스 디자인으로,
+트렌딩/랭킹, 검색·정렬, Google 지도, 길찾기, 다국어(i18n), 네온 테마 색상/다크
+모드, 관리자 CRUD를 제공합니다.
 
 ## 스크린샷
 
-> 데모 모드(`NEXT_PUBLIC_DEMO_MODE=1`)로 렌더링한 모바일 화면입니다. 지도는
-> Google Maps API 키 설정 시 표시됩니다.
+> 데모 모드(`NEXT_PUBLIC_DEMO_MODE=1`)로 렌더링한 모바일 화면입니다. 기본 테마는
+> 다크 + 데몬 마젠타이며, 지도는 Google Maps API 키 설정 시 표시됩니다.
 
-| 홈 | 검색 (하이라이트) | 트렌딩 |
+| 홈 (다크·데몬 마젠타) | 검색 (네온 하이라이트) | 트렌딩 |
 | :---: | :---: | :---: |
 | <img src="docs/screenshots/01-home.png" width="230" alt="홈 화면" /> | <img src="docs/screenshots/03-search.png" width="230" alt="검색" /> | <img src="docs/screenshots/04-trending.png" width="230" alt="트렌딩" /> |
 
-| 음식 상세 | 화면 설정 (테마·언어) | 다크 모드 + 퍼플 |
+| 음식 상세 | 화면 설정 (네온 테마·언어) | 테마 전환 (사이버 시안) |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/02-detail.png" width="230" alt="음식 상세" /> | <img src="docs/screenshots/05-appearance.png" width="230" alt="화면 설정" /> | <img src="docs/screenshots/06-home-dark.png" width="230" alt="다크 모드" /> |
+| <img src="docs/screenshots/02-detail.png" width="230" alt="음식 상세" /> | <img src="docs/screenshots/05-appearance.png" width="230" alt="화면 설정" /> | <img src="docs/screenshots/06-home-cyber.png" width="230" alt="사이버 시안 테마" /> |
 
 ## 기술 스택
 
 - **Next.js 14** (App Router) + **TypeScript**
-- **Tailwind CSS** + **shadcn/ui** + **framer-motion** (마이크로 인터랙션)
+- **Tailwind CSS** + **shadcn/ui** + **framer-motion** (네온 글로우·마이크로 인터랙션)
+- 디스플레이 폰트 **Orbitron** (라틴) / **Black Han Sans** (한글) — 런타임 로드
 - **Supabase** (Postgres + Auth + Storage)
 - **Google Maps** (`@react-google-maps/api`)
 - **next-intl** (ko / en / ja / es 다국어)
@@ -29,9 +31,9 @@
 
 ## 주요 기능
 
-- 🎨 **테마 색상 피커** — 5가지 프리셋(스파이시 레드 · 웜 오렌지 · 민트 · 퍼플 ·
-  모노) + 라이트/다크/시스템 모드. `localStorage` 저장, CSS 변수로 부드럽게 전환.
-  헤더의 팔레트 아이콘에서 **화면 설정** 시트 열기.
+- 🎨 **네온 테마 색상 피커** — 5가지 프리셋(데몬 마젠타 · 사이버 시안 · 소울 퍼플 ·
+  골드 부적 · 톡식 그린) + 라이트/다크/시스템 모드(기본 다크). `localStorage` 저장,
+  CSS 변수로 글로우까지 부드럽게 전환. 헤더의 팔레트 아이콘에서 **화면 설정** 시트.
 - 🌏 **다국어(i18n)** — 한국어·영어·일본어·스페인어 4개 로케일. 모든 UI 문구를
   `messages/*.json` 으로 외부화, 브라우저 언어 자동 감지(기본 ko), 설정에서 전환.
 - 🔍 **검색** — 이름·해시태그·카테고리 즉시 검색(디바운스), 매칭어 하이라이트,

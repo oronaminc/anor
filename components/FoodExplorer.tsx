@@ -20,8 +20,11 @@ export function FoodExplorer({ foods }: { foods: Food[] }) {
   return (
     <section id="explore" className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-bold">{t("allMenu")}</h2>
-        <span className="text-sm text-muted-foreground">
+        <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+          <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
+          {t("allMenu")}
+        </h2>
+        <span className="font-display text-sm text-muted-foreground">
           {t("count", { count: visible.length })}
         </span>
       </div>
@@ -29,7 +32,7 @@ export function FoodExplorer({ foods }: { foods: Food[] }) {
       <div
         role="tablist"
         aria-label={ts("label")}
-        className="inline-flex rounded-full border bg-muted/40 p-1"
+        className="inline-flex rounded-full bg-card/70 p-1 neon-border backdrop-blur"
       >
         <SortButton
           active={sort === "popular"}
@@ -88,9 +91,9 @@ function SortButton({
       aria-selected={active}
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors",
+        "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold uppercase tracking-wide transition-all",
         active
-          ? "bg-background text-foreground shadow-sm"
+          ? "bg-gradient-to-r from-primary to-accent text-primary-foreground glow-sm"
           : "text-muted-foreground hover:text-foreground",
       )}
     >

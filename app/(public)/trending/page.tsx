@@ -20,18 +20,19 @@ export default async function TrendingPage() {
   return (
     <div className="space-y-7 px-4 pt-4">
       <header className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Flame className="size-6 text-primary" />
-          <h1 className="text-2xl font-extrabold tracking-tight">
-            {t("title")}
-          </h1>
-        </div>
+        <h1 className="flex items-center gap-2.5 font-display text-2xl font-extrabold uppercase tracking-tight gradient-text text-glow">
+          <Flame className="size-6 text-primary animate-pulse-glow" />
+          {t("title")}
+        </h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </header>
 
       {trending.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold">{th("trendingTitle")}</h2>
+          <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+            <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
+            {th("trendingTitle")}
+          </h2>
           <div className="grid grid-cols-2 gap-3">
             {trending.map((food, i) => (
               <FoodCard key={food.id} food={food} rank={i + 1} />

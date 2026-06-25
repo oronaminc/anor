@@ -38,11 +38,13 @@ export function SearchView({ foods }: { foods: Food[] }) {
 
   return (
     <div className="space-y-5 px-4 pt-3">
-      <h1 className="text-2xl font-extrabold tracking-tight">{t("title")}</h1>
+      <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight gradient-text">
+        {t("title")}
+      </h1>
 
-      <div className="sticky top-14 z-10 -mx-1 bg-background/80 px-1 py-1 backdrop-blur">
+      <div className="sticky top-14 z-10 -mx-1 bg-background/70 px-1 py-1 backdrop-blur">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-primary" />
           <input
             ref={inputRef}
             value={raw}
@@ -51,7 +53,7 @@ export function SearchView({ foods }: { foods: Food[] }) {
             aria-label={t("placeholder")}
             type="search"
             enterKeyHint="search"
-            className="h-12 w-full rounded-2xl border border-input bg-card pl-11 pr-10 text-base shadow-sm outline-none ring-ring focus-visible:ring-2"
+            className="h-12 w-full rounded-2xl bg-card/70 pl-11 pr-10 text-base neon-border backdrop-blur outline-none ring-ring focus-visible:ring-2 focus-visible:glow"
           />
           {raw && (
             <button

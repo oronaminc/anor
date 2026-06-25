@@ -86,9 +86,13 @@ export default async function FoodDetailPage({
               </span>
             )}
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">{name}</h1>
+          <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight gradient-text">
+            {name}
+          </h1>
           {secondary && (
-            <p className="text-sm text-muted-foreground">{secondary}</p>
+            <p className="font-display text-sm uppercase tracking-wider text-muted-foreground">
+              {secondary}
+            </p>
           )}
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Eye className="size-4" />
@@ -111,7 +115,10 @@ export default async function FoodDetailPage({
 
         {description && (
           <div className="space-y-2">
-            <h2 className="text-base font-bold">{t("about")}</h2>
+            <h2 className="flex items-center gap-2 font-display text-base font-extrabold uppercase tracking-wide">
+              <span className="h-4 w-1 rounded-full bg-primary glow-sm" />
+              {t("about")}
+            </h2>
             <p className="whitespace-pre-line leading-relaxed text-foreground/90">
               {description}
             </p>
@@ -124,10 +131,10 @@ export default async function FoodDetailPage({
             href={food.youtube_shorts_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-between rounded-2xl border bg-card p-4 transition-colors hover:bg-muted/40"
+            className="flex items-center justify-between rounded-2xl bg-card/70 p-4 neon-border backdrop-blur transition-colors hover:bg-primary/5"
           >
             <span className="flex items-center gap-3 font-semibold">
-              <Youtube className="size-6 text-red-600" />
+              <Youtube className="size-6 text-red-500" />
               {t("youtube")}
             </span>
             <span className="text-sm text-muted-foreground">↗</span>
@@ -137,17 +144,18 @@ export default async function FoodDetailPage({
         {/* Location + map */}
         {hasCoords && (
           <section className="space-y-3">
-            <div className="flex items-center gap-2">
+            <h2 className="flex items-center gap-2 font-display text-lg font-extrabold uppercase tracking-wide">
+              <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
               <MapPin className="size-5 text-primary" />
-              <h2 className="text-lg font-bold">{t("location")}</h2>
-            </div>
+              {t("location")}
+            </h2>
             {food.address && (
               <p className="text-sm text-muted-foreground">{food.address}</p>
             )}
             <GoogleMap
               foods={[food]}
               height="220px"
-              className="overflow-hidden rounded-2xl border border-border/60"
+              className="overflow-hidden rounded-2xl neon-border"
             />
             <Button asChild className="w-full" size="lg">
               <a

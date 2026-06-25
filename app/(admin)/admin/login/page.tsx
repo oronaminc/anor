@@ -24,11 +24,13 @@ export default function AdminLoginPage({
   const [state, formAction] = useFormState<ActionState, FormData>(login, null);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-muted/30 px-4">
-      <div className="w-full max-w-sm space-y-6 rounded-2xl border bg-card p-6 shadow-sm">
+    <div className="flex min-h-dvh items-center justify-center px-4">
+      <div className="w-full max-w-sm space-y-6 rounded-3xl bg-card/80 p-6 neon-border glow backdrop-blur-xl">
         <div className="space-y-1 text-center">
-          <p className="text-3xl">🍢</p>
-          <h1 className="text-xl font-extrabold">관리자 로그인</h1>
+          <p className="text-3xl">🔥</p>
+          <h1 className="font-display text-xl font-extrabold uppercase tracking-wide gradient-text">
+            관리자 로그인
+          </h1>
           <p className="text-sm text-muted-foreground">
             명동 길거리 음식 가이드 관리
           </p>

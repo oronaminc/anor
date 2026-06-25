@@ -61,10 +61,14 @@ export function AppearancePanel() {
               aria-pressed={accent === a}
               title={t(`presets.${a}`)}
               className={cn(
-                "relative size-10 rounded-full ring-2 ring-offset-2 ring-offset-background transition-transform hover:scale-105",
+                "relative size-10 rounded-full ring-2 ring-offset-2 ring-offset-background transition-transform hover:scale-110",
                 accent === a ? "ring-foreground" : "ring-transparent",
               )}
-              style={{ backgroundColor: ACCENT_SWATCH[a] }}
+              style={{
+                backgroundColor: ACCENT_SWATCH[a],
+                boxShadow:
+                  accent === a ? `0 0 18px ${ACCENT_SWATCH[a]}` : undefined,
+              }}
             >
               {accent === a && (
                 <Check className="absolute inset-0 m-auto size-5 text-white drop-shadow" />

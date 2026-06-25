@@ -15,8 +15,8 @@ export function TrendingBadge({ rank }: { rank?: number }) {
   const t = useTranslations("badge");
   const hot = typeof rank === "number" ? rank <= 2 : true;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold text-primary-foreground shadow-sm">
-      {hot ? `🔥 ${t("hot")}` : `⬆️ ${t("rising")}`}
+    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-primary to-accent px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground glow-sm">
+      {hot ? `🔥 ${t("hot")}` : `⬆ ${t("rising")}`}
     </span>
   );
 }
@@ -37,12 +37,12 @@ export function FoodCard({
   return (
     <motion.div
       whileTap={{ scale: 0.97 }}
-      whileHover={{ y: -3 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 400, damping: 24 }}
     >
       <Link
         href={`/food/${food.id}`}
-        className="group block overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm transition-shadow hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group relative block overflow-hidden rounded-3xl bg-card neon-border shadow-lg transition-shadow hover:glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
           {food.thumbnail_url ? (
@@ -52,7 +52,7 @@ export function FoodCard({
               fill
               sizes="(max-width: 480px) 50vw, 240px"
               unoptimized={food.thumbnail_url.startsWith("/demo/")}
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.08]"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-5xl">
@@ -60,7 +60,7 @@ export function FoodCard({
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
 
           {food.is_trending && (
             <div className="absolute left-2.5 top-2.5">
@@ -68,17 +68,19 @@ export function FoodCard({
             </div>
           )}
           {food.category && (
-            <div className="absolute right-2.5 top-2.5 rounded-full bg-white/85 px-2 py-0.5 text-[11px] font-semibold text-slate-800 backdrop-blur">
+            <div className="absolute right-2.5 top-2.5 rounded-full border border-white/15 bg-black/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white/90 backdrop-blur">
               {food.category}
             </div>
           )}
 
           <div className="absolute inset-x-0 bottom-0 p-3 text-white">
-            <h3 className="truncate text-[15px] font-extrabold leading-tight drop-shadow-sm">
+            <h3 className="truncate text-[15px] font-extrabold leading-tight drop-shadow-md transition-[text-shadow] group-hover:text-glow">
               <HighlightText text={name} query={query} />
             </h3>
             {secondary && (
-              <p className="truncate text-[11px] text-white/80">{secondary}</p>
+              <p className="truncate font-display text-[10px] uppercase tracking-wider text-white/70">
+                {secondary}
+              </p>
             )}
           </div>
         </div>
@@ -86,7 +88,7 @@ export function FoodCard({
         <div className="space-y-2 p-3">
           <div className="flex items-center justify-between gap-2">
             {food.price_range ? (
-              <span className="text-xs font-bold text-primary">
+              <span className="font-display text-xs font-bold tracking-wide text-primary">
                 {food.price_range}
               </span>
             ) : (
@@ -103,7 +105,7 @@ export function FoodCard({
               {food.hashtags.slice(0, 3).map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-secondary-foreground"
+                  className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80"
                 >
                   #<HighlightText text={tag} query={query} />
                 </span>

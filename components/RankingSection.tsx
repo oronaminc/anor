@@ -24,21 +24,24 @@ export async function RankingSection({
 
   return (
     <section className="space-y-3">
-      <div className="flex items-baseline gap-2">
-        <h2 className="text-lg font-bold">{t("rankingTitle")}</h2>
+      <div className="flex items-baseline gap-2.5">
+        <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+          <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
+          {t("rankingTitle")}
+        </h2>
         <span className="text-xs text-muted-foreground">
           {t("rankingSubtitle")}
         </span>
       </div>
 
-      <ol className="divide-y divide-border/60 overflow-hidden rounded-3xl border border-border/60 bg-card">
+      <ol className="divide-y divide-white/5 overflow-hidden rounded-3xl bg-card/70 neon-border backdrop-blur">
         {ranking.map(({ rank, food }) => (
           <li key={food.id}>
             <Link
               href={`/food/${food.id}`}
-              className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/50"
+              className="flex items-center gap-3 p-3 transition-colors hover:bg-primary/5"
             >
-              <span className="w-6 shrink-0 text-center text-lg font-bold tabular-nums">
+              <span className="w-6 shrink-0 text-center font-display text-lg font-extrabold tabular-nums text-primary">
                 {MEDALS[rank] ?? rank}
               </span>
               <div className="relative size-12 shrink-0 overflow-hidden rounded-xl bg-muted">

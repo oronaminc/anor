@@ -22,7 +22,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="sticky bottom-0 z-40 border-t border-border/60 bg-background/90 backdrop-blur-xl"
+      className="sticky bottom-0 z-40 border-t border-white/5 glass"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around">
@@ -37,31 +37,33 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className="relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium"
+                className="relative flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold"
               >
+                {active && (
+                  <motion.span
+                    layoutId="bottom-nav-indicator"
+                    className="absolute -top-px h-[2px] w-9 rounded-full bg-primary glow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
                 <span
                   className={cn(
-                    "flex size-9 items-center justify-center rounded-full transition-colors",
-                    active ? "text-primary" : "text-muted-foreground",
+                    "flex size-9 items-center justify-center rounded-xl transition-all",
+                    active
+                      ? "bg-primary/15 text-primary glow-sm"
+                      : "text-muted-foreground",
                   )}
                 >
-                  <Icon className={cn("size-5", active && "fill-primary/15")} />
+                  <Icon className="size-5" />
                 </span>
                 <span
                   className={cn(
-                    "transition-colors",
+                    "uppercase tracking-wide transition-colors",
                     active ? "text-primary" : "text-muted-foreground",
                   )}
                 >
                   {t(item.key)}
                 </span>
-                {active && (
-                  <motion.span
-                    layoutId="bottom-nav-indicator"
-                    className="absolute -top-px h-0.5 w-8 rounded-full bg-primary"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                )}
               </Link>
             </li>
           );

@@ -9,14 +9,15 @@ export function SiteHeader() {
   const t = useTranslations("common");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/5 glass">
       <div className="mx-auto flex h-14 max-w-md items-center justify-between px-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-[15px] font-extrabold tracking-tight"
-        >
-          <span className="text-xl">🍢</span>
-          <span>{t("appName")}</span>
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="relative flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent text-base glow-sm animate-pulse-glow">
+            🔥
+          </span>
+          <span className="font-display text-[15px] font-extrabold uppercase tracking-wider gradient-text">
+            {t("appName")}
+          </span>
         </Link>
         <AppearanceSheet />
       </div>
