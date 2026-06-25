@@ -11,10 +11,15 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Resilient: on a zero-config sample deploy (no Supabase) this would throw,
+  // so fall back to "no user" and render the bare login screen.
+  let user = null;
+  try {
+    const supabase = createClient();
+    user = (await supabase.auth.getUser()).data.user;
+  } catch {
+    user = null;
+  }
 
   // Unauthenticated requests only reach here on /admin/login
   // (middleware redirects all other /admin/* paths). Render bare.

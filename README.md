@@ -5,6 +5,20 @@
 트렌딩/랭킹, 검색·정렬, Google 지도, 길찾기, 다국어(i18n), 네온 테마 색상/다크
 모드, 관리자 CRUD를 제공합니다.
 
+## 🚀 샘플 바로 배포 (Vercel, 설정 0)
+
+아래 버튼으로 이 브랜치를 Vercel에 가져와 **환경 변수 없이** 바로 배포할 수
+있습니다. Supabase가 설정되지 않으면 내장 **데모 데이터**(명동 길거리 음식 8종)로
+자동 렌더링되어 화면을 즉시 확인할 수 있습니다.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Foronaminc%2Fanor%2Ftree%2Fclaude%2Fsleepy-ride-rpatif&project-name=myeongdong-street-food&repository-name=myeongdong-street-food)
+
+또는 수동으로: **[vercel.com/new](https://vercel.com/new) → `oronaminc/anor` import →
+브랜치 `claude/sleepy-ride-rpatif` 선택 → Deploy** (환경 변수 입력 없이 진행 가능).
+
+> 지도는 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` 를, 실제 데이터/관리자는 Supabase
+> 변수를 추가하면 활성화됩니다. (아래 [환경 변수](#2-환경-변수) 참고)
+
 ## 스크린샷
 
 > 데모 모드(`NEXT_PUBLIC_DEMO_MODE=1`)로 렌더링한 모바일 화면입니다. 기본 테마는
@@ -92,7 +106,10 @@ cp .env.local.example .env.local
 | `SUPABASE_SERVICE_ROLE_KEY` | 서버 전용 service role 키 (브라우저 노출 금지) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps JavaScript API 키 |
 | `NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET` | 썸네일 버킷명 (기본 `food-thumbnails`) |
-| `NEXT_PUBLIC_DEMO_MODE` | (선택) `1` 이면 Supabase 미설정 시 샘플 데이터 표시 |
+| `NEXT_PUBLIC_DEMO_MODE` | (선택) `1` 이면 Supabase가 있어도 강제로 데모 데이터 사용 |
+
+> Supabase 변수가 **없으면 자동으로 데모 데이터**가 표시됩니다(설정 0 배포용).
+> 실제 DB를 쓰려면 아래 Supabase 변수를 채우세요.
 
 Google Maps 키는 **APIs & Services → Credentials** 에서 발급하고 **Maps
 JavaScript API** 를 활성화합니다. 키는 사용 도메인(예: `localhost:3000`,
