@@ -4,7 +4,12 @@ import { useTranslations } from "next-intl";
 import { Sun, Moon, Monitor, Check } from "lucide-react";
 
 import { useTheme } from "@/components/theme/ThemeProvider";
-import { ACCENTS, ACCENT_SWATCH, type Mode } from "@/components/theme/theme";
+import {
+  ACCENTS,
+  ACCENT_SWATCH,
+  ACCENT_GLOW,
+  type Mode,
+} from "@/components/theme/theme";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
@@ -65,9 +70,9 @@ export function AppearancePanel() {
                 accent === a ? "ring-foreground" : "ring-transparent",
               )}
               style={{
-                backgroundColor: ACCENT_SWATCH[a],
+                backgroundImage: ACCENT_SWATCH[a],
                 boxShadow:
-                  accent === a ? `0 0 18px ${ACCENT_SWATCH[a]}` : undefined,
+                  accent === a ? `0 0 20px ${ACCENT_GLOW[a]}` : undefined,
               }}
             >
               {accent === a && (

@@ -15,7 +15,7 @@ export function TrendingBadge({ rank }: { rank?: number }) {
   const t = useTranslations("badge");
   const hot = typeof rank === "number" ? rank <= 2 : true;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-primary to-accent px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground glow-sm">
+    <span className="inline-flex items-center gap-1 rounded-full bg-holo px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground glow-sm">
       {hot ? `🔥 ${t("hot")}` : `⬆ ${t("rising")}`}
     </span>
   );

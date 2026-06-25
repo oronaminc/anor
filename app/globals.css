@@ -33,70 +33,80 @@
     --glow: 330 90% 56%;
   }
 
-  /* ---- Base palette (dark — "demon void", the signature look) ------- */
+  /* ---- Base palette (dark — "demon stage", indigo-violet night) ----- */
   .dark {
-    --background: 258 50% 5%;
-    --foreground: 280 25% 96%;
-    --card: 260 42% 9%;
-    --card-foreground: 280 25% 96%;
-    --secondary: 262 35% 15%;
-    --secondary-foreground: 280 25% 96%;
-    --muted: 262 30% 14%;
-    --muted-foreground: 265 18% 64%;
+    --background: 260 54% 7%;
+    --foreground: 280 30% 97%;
+    --card: 262 42% 10%;
+    --card-foreground: 280 30% 97%;
+    --secondary: 264 38% 16%;
+    --secondary-foreground: 280 30% 97%;
+    --muted: 264 32% 15%;
+    --muted-foreground: 268 22% 68%;
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
-    --border: 270 45% 20%;
-    --input: 270 40% 18%;
+    --border: 274 48% 22%;
+    --input: 274 42% 19%;
   }
 
-  /* ---- Neon accent presets ---------------------------------------- */
-  /* Default = Demon Magenta */
-  [data-accent="demon"],
+  /* ---- Holographic accent presets (pink → violet → blue energy) ----
+     Tri-color (--primary / --accent / --accent2) drives the HUNTR/X look.
+     Defaults tuned to colors Japanese youth love: lavender / 水色 / pink. */
+
+  /* Default = HUNTR/X (hot pink → violet → sax blue holo) */
+  [data-accent="huntrix"],
   :root {
-    --primary: 330 92% 56%;
+    --primary: 328 98% 63%;
     --primary-foreground: 0 0% 100%;
-    --accent: 280 92% 66%;
+    --accent: 272 94% 67%;
     --accent-foreground: 0 0% 100%;
-    --ring: 330 92% 56%;
-    --glow: 330 92% 60%;
+    --accent2: 202 98% 60%;
+    --ring: 328 98% 63%;
+    --glow: 318 98% 65%;
   }
-  [data-accent="cyber"] {
-    --primary: 188 95% 50%;
-    --primary-foreground: 222 60% 8%;
-    --accent: 280 92% 68%;
-    --accent-foreground: 0 0% 100%;
-    --ring: 188 95% 50%;
-    --glow: 188 95% 55%;
+  /* 水色 / sax blue — a perennial Japanese-youth favorite */
+  [data-accent="sax"] {
+    --primary: 200 96% 56%;
+    --primary-foreground: 210 60% 8%;
+    --accent: 187 92% 56%;
+    --accent-foreground: 210 60% 8%;
+    --accent2: 264 92% 72%;
+    --ring: 200 96% 56%;
+    --glow: 196 98% 60%;
   }
-  [data-accent="soul"] {
-    --primary: 266 92% 66%;
+  /* Lavender / 藤色 — yumekawaii pastel pop */
+  [data-accent="lavender"] {
+    --primary: 264 94% 72%;
     --primary-foreground: 0 0% 100%;
+    --accent: 322 94% 72%;
+    --accent-foreground: 0 0% 100%;
+    --accent2: 210 94% 74%;
+    --ring: 264 94% 72%;
+    --glow: 280 94% 74%;
+  }
+  /* Gold talisman (부적) — Saja Boys gold + magenta */
+  [data-accent="gold"] {
+    --primary: 42 98% 57%;
+    --primary-foreground: 36 60% 10%;
     --accent: 322 92% 62%;
     --accent-foreground: 0 0% 100%;
-    --ring: 266 92% 66%;
-    --glow: 266 92% 68%;
+    --accent2: 16 94% 60%;
+    --ring: 42 98% 57%;
+    --glow: 40 98% 60%;
   }
-  [data-accent="gold"] {
-    --primary: 42 96% 56%;
-    --primary-foreground: 36 60% 10%;
-    --accent: 14 92% 58%;
+  /* Demon purple — Saja Boys deep violet-indigo */
+  [data-accent="demon"] {
+    --primary: 268 94% 66%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 322 94% 62%;
     --accent-foreground: 0 0% 100%;
-    --ring: 42 96% 56%;
-    --glow: 42 96% 58%;
+    --accent2: 222 94% 66%;
+    --ring: 268 94% 66%;
+    --glow: 288 94% 66%;
   }
-  [data-accent="toxic"] {
-    --primary: 150 90% 48%;
-    --primary-foreground: 160 60% 8%;
-    --accent: 175 90% 50%;
-    --accent-foreground: 160 60% 8%;
-    --ring: 150 90% 48%;
-    --glow: 150 90% 52%;
-  }
-  /* In light mode, cyber/gold/toxic primaries need dark text but
-     their foreground stays readable — light bg keeps default. */
-  :root:not(.dark)[data-accent="cyber"],
-  :root:not(.dark)[data-accent="gold"],
-  :root:not(.dark)[data-accent="toxic"] {
+  /* In light mode, sax/gold primaries keep white text for contrast. */
+  :root:not(.dark)[data-accent="sax"],
+  :root:not(.dark)[data-accent="gold"] {
     --primary-foreground: 0 0% 100%;
   }
 }
@@ -137,6 +147,7 @@
     }
     .animate-float,
     .animate-pulse-glow,
+    .animate-holo,
     .animate-scan {
       animation: none !important;
     }
@@ -162,16 +173,35 @@
     text-shadow: 0 0 18px hsl(var(--glow) / 0.55);
   }
 
+  /* Holographic tri-color gradient (pink → violet → blue) */
+  .bg-holo {
+    background-image: linear-gradient(
+      100deg,
+      hsl(var(--primary)),
+      hsl(var(--accent)) 52%,
+      hsl(var(--accent2))
+    );
+    background-size: 200% 100%;
+  }
+
   /* Gradient ink text */
   .gradient-text {
     background-image: linear-gradient(
       100deg,
       hsl(var(--primary)),
-      hsl(var(--accent))
+      hsl(var(--accent)) 40%,
+      hsl(var(--accent2)) 70%,
+      hsl(var(--primary))
     );
+    background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+
+  /* Iridescent shimmer for holographic text/fills */
+  .animate-holo {
+    animation: holo-shift 7s ease-in-out infinite;
   }
 
   /* Glassmorphism surface */
@@ -194,10 +224,10 @@
     padding: 1px;
     background: linear-gradient(
       135deg,
-      hsl(var(--primary) / 0.7),
-      transparent 40%,
-      transparent 60%,
-      hsl(var(--accent) / 0.7)
+      hsl(var(--primary) / 0.75),
+      transparent 38%,
+      transparent 58%,
+      hsl(var(--accent2) / 0.75)
     );
     -webkit-mask:
       linear-gradient(#000 0 0) content-box,
@@ -224,21 +254,26 @@
   inset: -20%;
   background:
     radial-gradient(
-      40% 35% at 12% 8%,
-      hsl(var(--primary) / 0.22),
+      42% 38% at 10% 6%,
+      hsl(var(--primary) / 0.3),
       transparent 70%
     ),
     radial-gradient(
-      45% 40% at 90% 12%,
-      hsl(var(--accent) / 0.2),
+      46% 42% at 92% 10%,
+      hsl(var(--accent) / 0.28),
       transparent 70%
     ),
     radial-gradient(
-      50% 45% at 80% 95%,
-      hsl(var(--primary) / 0.16),
+      52% 46% at 82% 96%,
+      hsl(var(--accent2) / 0.26),
+      transparent 70%
+    ),
+    radial-gradient(
+      40% 40% at 30% 80%,
+      hsl(var(--accent) / 0.16),
       transparent 70%
     );
-  filter: saturate(130%);
+  filter: saturate(140%);
 }
 .cyber-bg::after {
   content: "";
@@ -263,6 +298,16 @@
 }
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+@keyframes holo-shift {
+  0%,
+  100% {
+    background-position: 0% 0;
+  }
+  50% {
+    background-position: 200% 0;
+  }
 }
 
 @keyframes pulse-glow {

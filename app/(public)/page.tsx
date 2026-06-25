@@ -25,7 +25,7 @@ export default async function HomePage() {
           className="pointer-events-none absolute inset-0 -z-10"
           style={{
             background:
-              "radial-gradient(60% 50% at 15% 0%, hsl(var(--primary)/0.35), transparent 70%), radial-gradient(55% 45% at 95% 10%, hsl(var(--accent)/0.3), transparent 70%)",
+              "radial-gradient(55% 50% at 12% 0%, hsl(var(--primary)/0.45), transparent 70%), radial-gradient(50% 45% at 95% 8%, hsl(var(--accent)/0.4), transparent 70%), radial-gradient(60% 55% at 60% 105%, hsl(var(--accent2)/0.32), transparent 70%)",
           }}
         />
         <div
@@ -40,7 +40,7 @@ export default async function HomePage() {
             <span className="size-1.5 rounded-full bg-primary animate-pulse-glow" />
             {t("heroEyebrow")}
           </p>
-          <h1 className="font-display whitespace-pre-line text-[28px] font-extrabold uppercase leading-[1.1] tracking-tight gradient-text text-glow">
+          <h1 className="font-display whitespace-pre-line text-[28px] font-extrabold uppercase leading-[1.1] tracking-tight gradient-text animate-holo text-glow">
             {t("heroTitle")}
           </h1>
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">

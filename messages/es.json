@@ -70,11 +70,11 @@
     "dark": "Oscuro",
     "system": "Sistema",
     "presets": {
-      "demon": "Magenta Demonio",
-      "cyber": "Cian Cyber",
-      "soul": "Púrpura Alma",
+      "huntrix": "HUNTR/X Holo",
+      "sax": "Azul Cielo",
+      "lavender": "Lavanda",
       "gold": "Talismán Dorado",
-      "toxic": "Verde Tóxico"
+      "demon": "Púrpura Demonio"
     }
   },
   "notFound": {

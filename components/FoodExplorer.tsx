@@ -93,7 +93,7 @@ function SortButton({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold uppercase tracking-wide transition-all",
         active
-          ? "bg-gradient-to-r from-primary to-accent text-primary-foreground glow-sm"
+          ? "bg-holo text-primary-foreground glow-sm"
           : "text-muted-foreground hover:text-foreground",
       )}
     >
