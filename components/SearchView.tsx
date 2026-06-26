@@ -38,7 +38,7 @@ export function SearchView({ foods }: { foods: Food[] }) {
 
   return (
     <div className="space-y-5 px-4 pt-3">
-      <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight gradient-text">
+      <h1 className="font-display text-xl font-extrabold uppercase tracking-tight gradient-text">
         {t("title")}
       </h1>
 

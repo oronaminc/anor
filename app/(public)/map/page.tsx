@@ -13,7 +13,7 @@ export default async function MapPage() {
   return (
     <div className="space-y-4 px-4 pt-4">
       <header className="space-y-1">
-        <h1 className="flex items-center gap-2.5 font-display text-2xl font-extrabold uppercase tracking-tight gradient-text text-glow">
+        <h1 className="flex items-center gap-2.5 font-display text-xl font-extrabold uppercase tracking-tight gradient-text text-glow">
           <MapPin className="size-6 text-primary" />
           {t("title")}
         </h1>

@@ -65,7 +65,7 @@ export function AppearanceSheet() {
               transition={{ type: "spring", damping: 28, stiffness: 320 }}
             >
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-display text-lg font-extrabold uppercase tracking-wide">
+                <h2 className="font-display text-base font-extrabold uppercase tracking-wide">
                   {t("title")}
                 </h2>
                 <button

@@ -24,7 +24,7 @@ export default async function HomePage() {
             <span className="size-1.5 rounded-full bg-primary animate-pulse-glow" />
             {t("heroEyebrow")}
           </p>
-          <h1 className="font-display whitespace-pre-line text-[28px] font-extrabold uppercase leading-[1.1] tracking-tight gradient-text animate-holo text-glow">
+          <h1 className="font-display whitespace-pre-line text-[20px] font-extrabold uppercase leading-[1.15] tracking-tight gradient-text animate-holo text-glow">
             {t("heroTitle")}
           </h1>
           <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -54,7 +54,7 @@ export default async function HomePage() {
             {/* Map preview */}
             <section className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+                <h2 className="flex items-center gap-2.5 font-display text-base font-extrabold uppercase tracking-wide">
                   <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
                   <MapPin className="size-5 text-primary" />
                   {t("mapTitle")}
