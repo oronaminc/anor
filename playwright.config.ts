@@ -20,8 +20,10 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
     {
+      // Chromium-based mobile device so CI only needs the chromium browser
+      // (iPhone/WebKit would require an extra browser download).
       name: "mobile",
-      use: { ...devices["iPhone 13"] },
+      use: { ...devices["Pixel 5"] },
     },
   ],
   webServer: {
