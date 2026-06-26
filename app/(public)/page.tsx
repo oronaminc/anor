@@ -18,23 +18,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-9 pb-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-b-[2rem] border-b border-white/5 px-5 pb-7 pt-9">
-        {/* neon glow field */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(55% 50% at 12% 0%, hsl(var(--primary)/0.45), transparent 70%), radial-gradient(50% 45% at 95% 8%, hsl(var(--accent)/0.4), transparent 70%), radial-gradient(60% 55% at 60% 105%, hsl(var(--accent2)/0.32), transparent 70%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-6 -top-8 text-[130px] opacity-20 animate-float"
-        >
-          👹
-        </div>
-
+      <section className="relative overflow-hidden rounded-b-[2rem] border-b border-border px-5 pb-7 pt-9">
         <div className="relative z-10 space-y-3">
           <p className="inline-flex items-center gap-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
             <span className="size-1.5 rounded-full bg-primary animate-pulse-glow" />
