@@ -16,7 +16,8 @@ export function FoodExplorer({ foods }: { foods: Food[] }) {
   const visible = useMemo(() => sortFoods(foods, sort), [foods, sort]);
 
   return (
-    <section id="explore">
+    <section id="explore" aria-label={t("allMenu")}>
+      <h2 className="sr-only">{t("allMenu")}</h2>
       <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
         <div role="tablist" aria-label={ts("label")} className="flex gap-5">
           <SortTab
