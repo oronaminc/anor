@@ -25,7 +25,7 @@ export async function RankingSection({
   return (
     <section className="space-y-3">
       <div className="flex items-baseline gap-2.5">
-        <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+        <h2 className="flex items-center gap-2.5 font-display text-base font-extrabold uppercase tracking-wide">
           <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
           {t("rankingTitle")}
         </h2>

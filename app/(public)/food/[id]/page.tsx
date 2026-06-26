@@ -86,7 +86,7 @@ export default async function FoodDetailPage({
               </span>
             )}
           </div>
-          <h1 className="font-display text-2xl font-extrabold uppercase tracking-tight gradient-text">
+          <h1 className="font-display text-xl font-extrabold uppercase tracking-tight gradient-text">
             {name}
           </h1>
           {secondary && (
@@ -144,7 +144,7 @@ export default async function FoodDetailPage({
         {/* Location + map */}
         {hasCoords && (
           <section className="space-y-3">
-            <h2 className="flex items-center gap-2 font-display text-lg font-extrabold uppercase tracking-wide">
+            <h2 className="flex items-center gap-2 font-display text-base font-extrabold uppercase tracking-wide">
               <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
               <MapPin className="size-5 text-primary" />
               {t("location")}

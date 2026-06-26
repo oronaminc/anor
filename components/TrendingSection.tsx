@@ -15,7 +15,7 @@ export async function TrendingSection({ foods }: { foods: Food[] }) {
 
   return (
     <section className="space-y-3">
-      <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+      <h2 className="flex items-center gap-2.5 font-display text-base font-extrabold uppercase tracking-wide">
         <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
         <Flame className="size-5 text-primary animate-pulse-glow" />
         {t("trendingTitle")}

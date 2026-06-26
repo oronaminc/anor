@@ -3,112 +3,64 @@
 @tailwind utilities;
 
 /* =====================================================================
-   K-Demon-Hunters × Cyberpunk theme
-   Deep void backgrounds, neon glow accents, talisman gold, glass.
+   Monochrome theme — clean black & white
+   Neutral grayscale tokens, no neon. Light = paper, dark = ink.
    ===================================================================== */
 
 @layer base {
-  /* ---- Base palette (light — "daylight hunter") -------------------- */
+  /* ---- Base palette (light — paper) -------------------------------- */
   :root {
-    --background: 260 40% 98%;
-    --foreground: 258 45% 9%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 258 45% 9%;
-    --secondary: 258 35% 94%;
-    --secondary-foreground: 258 40% 16%;
-    --muted: 258 30% 94%;
-    --muted-foreground: 256 12% 42%;
-    --destructive: 0 84% 60%;
+    --card-foreground: 0 0% 9%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 12%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 42%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 258 30% 88%;
-    --input: 258 30% 88%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --radius: 1.25rem;
 
-    /* accent (overridden by presets below) */
-    --primary: 330 90% 56%;
+    /* monochrome accents — ink on paper */
+    --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
-    --accent: 280 90% 65%;
+    --accent: 0 0% 10%;
     --accent-foreground: 0 0% 100%;
-    --ring: 330 90% 56%;
-    --glow: 330 90% 56%;
+    --accent2: 0 0% 32%;
+    --ring: 0 0% 10%;
+    --glow: 0 0% 55%;
   }
 
-  /* ---- Base palette (dark — "demon stage", indigo-violet night) ----- */
+  /* ---- Base palette (dark — ink) ----------------------------------- */
   .dark {
-    --background: 260 54% 7%;
-    --foreground: 280 30% 97%;
-    --card: 262 42% 10%;
-    --card-foreground: 280 30% 97%;
-    --secondary: 264 38% 16%;
-    --secondary-foreground: 280 30% 97%;
-    --muted: 264 32% 15%;
-    --muted-foreground: 268 22% 68%;
-    --destructive: 0 72% 56%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 96%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 64%;
+    --destructive: 0 65% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 274 48% 22%;
-    --input: 274 42% 19%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+
+    /* monochrome accents — paper on ink */
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 8%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 8%;
+    --accent2: 0 0% 70%;
+    --ring: 0 0% 80%;
+    --glow: 0 0% 88%;
   }
 
-  /* ---- Holographic accent presets (pink → violet → blue energy) ----
-     Tri-color (--primary / --accent / --accent2) drives the HUNTR/X look.
-     Defaults tuned to colors Japanese youth love: lavender / 水色 / pink. */
-
-  /* Default = HUNTR/X (hot pink → violet → sax blue holo) */
-  [data-accent="huntrix"],
-  :root {
-    --primary: 328 98% 63%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 272 94% 67%;
-    --accent-foreground: 0 0% 100%;
-    --accent2: 202 98% 60%;
-    --ring: 328 98% 63%;
-    --glow: 318 98% 65%;
-  }
-  /* 水色 / sax blue — a perennial Japanese-youth favorite */
-  [data-accent="sax"] {
-    --primary: 200 96% 56%;
-    --primary-foreground: 210 60% 8%;
-    --accent: 187 92% 56%;
-    --accent-foreground: 210 60% 8%;
-    --accent2: 264 92% 72%;
-    --ring: 200 96% 56%;
-    --glow: 196 98% 60%;
-  }
-  /* Lavender / 藤色 — yumekawaii pastel pop */
-  [data-accent="lavender"] {
-    --primary: 264 94% 72%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 322 94% 72%;
-    --accent-foreground: 0 0% 100%;
-    --accent2: 210 94% 74%;
-    --ring: 264 94% 72%;
-    --glow: 280 94% 74%;
-  }
-  /* Gold talisman (부적) — Saja Boys gold + magenta */
-  [data-accent="gold"] {
-    --primary: 42 98% 57%;
-    --primary-foreground: 36 60% 10%;
-    --accent: 322 92% 62%;
-    --accent-foreground: 0 0% 100%;
-    --accent2: 16 94% 60%;
-    --ring: 42 98% 57%;
-    --glow: 40 98% 60%;
-  }
-  /* Demon purple — Saja Boys deep violet-indigo */
-  [data-accent="demon"] {
-    --primary: 268 94% 66%;
-    --primary-foreground: 0 0% 100%;
-    --accent: 322 94% 62%;
-    --accent-foreground: 0 0% 100%;
-    --accent2: 222 94% 66%;
-    --ring: 268 94% 66%;
-    --glow: 288 94% 66%;
-  }
-  /* In light mode, sax/gold primaries keep white text for contrast. */
-  :root:not(.dark)[data-accent="sax"],
-  :root:not(.dark)[data-accent="gold"] {
-    --primary-foreground: 0 0% 100%;
-  }
+  /* Accent presets retained as no-ops so the picker never breaks;
+     every theme resolves to the same monochrome palette. */
 }
 
 @layer base {
@@ -155,91 +107,53 @@
 }
 
 @layer components {
-  /* Neon glow shadow driven by --glow */
+  /* Soft neutral elevation (was neon glow) */
   .glow {
     box-shadow:
-      0 0 0 1px hsl(var(--glow) / 0.25),
-      0 0 24px -4px hsl(var(--glow) / 0.55);
+      0 0 0 1px hsl(var(--border)),
+      0 8px 24px -12px hsl(0 0% 0% / 0.45);
   }
   .glow-sm {
-    box-shadow: 0 0 16px -4px hsl(var(--glow) / 0.5);
+    box-shadow: 0 4px 16px -10px hsl(0 0% 0% / 0.4);
   }
   .glow-strong {
     box-shadow:
-      0 0 0 1px hsl(var(--glow) / 0.4),
-      0 0 40px -6px hsl(var(--glow) / 0.75);
+      0 0 0 1px hsl(var(--border)),
+      0 14px 40px -14px hsl(0 0% 0% / 0.55);
   }
   .text-glow {
-    text-shadow: 0 0 18px hsl(var(--glow) / 0.55);
+    text-shadow: none;
   }
 
-  /* Holographic tri-color gradient (pink → violet → blue) */
+  /* Solid ink fill (was holographic gradient) */
   .bg-holo {
-    background-image: linear-gradient(
-      100deg,
-      hsl(var(--primary)),
-      hsl(var(--accent)) 52%,
-      hsl(var(--accent2))
-    );
-    background-size: 200% 100%;
+    background-color: hsl(var(--primary));
   }
 
-  /* Gradient ink text */
+  /* Solid ink text (was gradient text) */
   .gradient-text {
-    background-image: linear-gradient(
-      100deg,
-      hsl(var(--primary)),
-      hsl(var(--accent)) 40%,
-      hsl(var(--accent2)) 70%,
-      hsl(var(--primary))
-    );
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: hsl(var(--foreground));
   }
 
-  /* Iridescent shimmer for holographic text/fills */
+  /* Shimmer disabled in monochrome theme */
   .animate-holo {
-    animation: holo-shift 7s ease-in-out infinite;
+    animation: none;
   }
 
   /* Glassmorphism surface */
   .glass {
     background-color: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
   }
 
-  /* Neon hairline border */
+  /* Plain hairline border (was neon gradient border) */
   .neon-border {
-    position: relative;
     border: 1px solid hsl(var(--border));
-  }
-  .neon-border::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary) / 0.75),
-      transparent 38%,
-      transparent 58%,
-      hsl(var(--accent2) / 0.75)
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.8;
   }
 }
 
-/* Decorative cyber background (orbs + grid), placed behind content */
+/* Clean background — flat fill with a barely-there neutral grid */
 .cyber-bg {
   position: fixed;
   inset: 0;
@@ -248,43 +162,16 @@
   pointer-events: none;
   background: hsl(var(--background));
 }
-.cyber-bg::before {
-  content: "";
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(
-      42% 38% at 10% 6%,
-      hsl(var(--primary) / 0.3),
-      transparent 70%
-    ),
-    radial-gradient(
-      46% 42% at 92% 10%,
-      hsl(var(--accent) / 0.28),
-      transparent 70%
-    ),
-    radial-gradient(
-      52% 46% at 82% 96%,
-      hsl(var(--accent2) / 0.26),
-      transparent 70%
-    ),
-    radial-gradient(
-      40% 40% at 30% 80%,
-      hsl(var(--accent) / 0.16),
-      transparent 70%
-    );
-  filter: saturate(140%);
-}
 .cyber-bg::after {
   content: "";
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(hsl(var(--foreground) / 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--foreground) / 0.05) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(circle at 50% 30%, #000, transparent 80%);
-  opacity: 0.5;
+    linear-gradient(hsl(var(--foreground) / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--foreground) / 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 20%, #000, transparent 75%);
+  opacity: 0.6;
 }
 
 @keyframes float {
@@ -333,11 +220,11 @@
   scrollbar-width: none;
 }
 
-/* Neon search term highlight */
+/* Neutral search term highlight */
 mark {
   background: linear-gradient(
     transparent 55%,
-    hsl(var(--accent) / 0.45) 0
+    hsl(var(--foreground) / 0.18) 0
   );
   color: inherit;
   font-weight: 700;

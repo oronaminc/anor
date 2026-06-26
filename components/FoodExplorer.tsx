@@ -20,7 +20,7 @@ export function FoodExplorer({ foods }: { foods: Food[] }) {
   return (
     <section id="explore" className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2.5 font-display text-lg font-extrabold uppercase tracking-wide">
+        <h2 className="flex items-center gap-2.5 font-display text-base font-extrabold uppercase tracking-wide">
           <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
           {t("allMenu")}
         </h2>
