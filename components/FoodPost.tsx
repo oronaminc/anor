@@ -3,12 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { Eye, Flame, Heart } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 
 import type { Food } from "@/lib/types";
 import { formatViewCount } from "@/lib/utils";
 import { localizedName, secondaryName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
+import { TrendingFlame } from "@/components/TrendingFlame";
 
 /** Threads-style feed row: small thumbnail + text, hairline-separated. */
 export function FoodPost({ food, query }: { food: Food; query?: string }) {
@@ -43,9 +44,7 @@ export function FoodPost({ food, query }: { food: Food; query?: string }) {
           <h3 className="truncate text-[15px] font-bold leading-tight">
             <HighlightText text={name} query={query} />
           </h3>
-          {food.is_trending && (
-            <Flame className="size-3.5 shrink-0 text-foreground/70" />
-          )}
+          {food.is_trending && <TrendingFlame />}
         </div>
 
         {secondary && (

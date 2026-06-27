@@ -72,6 +72,38 @@ describe("sortFoods", () => {
     sortFoods(sample, "popular");
     expect(sample.map((f) => f.view_count)).toEqual(before);
   });
+
+  it("pins trending items to the top regardless of views with trendingFirst", () => {
+    const foods = [
+      makeFood({ name_ko: "A", view_count: 900, is_trending: false }),
+      makeFood({ name_ko: "B", view_count: 100, is_trending: true }),
+      makeFood({ name_ko: "C", view_count: 500, is_trending: false }),
+      makeFood({ name_ko: "D", view_count: 50, is_trending: true }),
+    ];
+    const result = sortFoods(foods, "popular", { trendingFirst: true });
+    // trending first (B before D by views), then the rest by views (A before C)
+    expect(result.map((f) => f.name_ko)).toEqual(["B", "D", "A", "C"]);
+  });
+
+  it("keeps trending first for 'latest' too", () => {
+    const foods = [
+      makeFood({ name_ko: "old-trend", is_trending: true, created_at: "2024-01-01T00:00:00.000Z" }),
+      makeFood({ name_ko: "new-plain", is_trending: false, created_at: "2024-09-01T00:00:00.000Z" }),
+    ];
+    const result = sortFoods(foods, "latest", { trendingFirst: true });
+    expect(result.map((f) => f.name_ko)).toEqual(["old-trend", "new-plain"]);
+  });
+
+  it("ignores trending when trendingFirst is not set (default)", () => {
+    const foods = [
+      makeFood({ name_ko: "plain-hi", view_count: 900, is_trending: false }),
+      makeFood({ name_ko: "trend-lo", view_count: 100, is_trending: true }),
+    ];
+    expect(sortFoods(foods, "popular").map((f) => f.name_ko)).toEqual([
+      "plain-hi",
+      "trend-lo",
+    ]);
+  });
 });
 
 describe("rankByViews", () => {

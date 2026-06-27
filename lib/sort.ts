@@ -4,19 +4,27 @@ import type { Food, SortKey } from "./types";
  * Sort foods by the chosen key.
  *  - "popular": highest view_count first
  *  - "latest":  newest created_at first
- * Returns a new array (does not mutate input).
+ * With `trendingFirst`, every `is_trending` item is pinned above
+ * non-trending ones regardless of the key (e.g. the home feed) — within each
+ * group the key still applies. Returns a new array (does not mutate input).
  */
-export function sortFoods(foods: Food[], key: SortKey): Food[] {
-  const copy = [...foods];
-  if (key === "popular") {
-    copy.sort((a, b) => b.view_count - a.view_count);
-  } else {
-    copy.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
-  }
-  return copy;
+export function sortFoods(
+  foods: Food[],
+  key: SortKey,
+  opts: { trendingFirst?: boolean } = {},
+): Food[] {
+  const byKey =
+    key === "popular"
+      ? (a: Food, b: Food) => b.view_count - a.view_count
+      : (a: Food, b: Food) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+
+  return [...foods].sort((a, b) => {
+    if (opts.trendingFirst && a.is_trending !== b.is_trending) {
+      return a.is_trending ? -1 : 1;
+    }
+    return byKey(a, b);
+  });
 }
 
 /**

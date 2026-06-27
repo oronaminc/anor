@@ -13,7 +13,12 @@ export function FoodExplorer({ foods }: { foods: Food[] }) {
   const ts = useTranslations("sort");
   const [sort, setSort] = useState<SortKey>("popular");
 
-  const visible = useMemo(() => sortFoods(foods, sort), [foods, sort]);
+  // Trending items are always pinned to the top, regardless of the sort key
+  // (popularity / heart count) — within each group the key still applies.
+  const visible = useMemo(
+    () => sortFoods(foods, sort, { trendingFirst: true }),
+    [foods, sort],
+  );
 
   return (
     <section id="explore" aria-label={t("allMenu")}>

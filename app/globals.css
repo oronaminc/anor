@@ -100,7 +100,8 @@
     .animate-float,
     .animate-pulse-glow,
     .animate-holo,
-    .animate-scan {
+    .animate-scan,
+    .animate-flame {
       animation: none !important;
     }
   }
@@ -209,6 +210,42 @@
 }
 .animate-pulse-glow {
   animation: pulse-glow 2.6s ease-in-out infinite;
+}
+
+/* Trending flame: a one-shot red flare-up on tap. Red-only (the single
+   retained hue). No 100% keyframe on purpose — the icon settles back to its
+   resting monochrome color/scale automatically when the animation ends. */
+@keyframes flame-flicker {
+  0% {
+    color: #ef4444;
+    transform: scale(1);
+    filter: drop-shadow(0 0 1px rgba(239, 68, 68, 0.5));
+  }
+  18% {
+    color: #f87171;
+    transform: scale(1.4) rotate(-6deg);
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.95));
+  }
+  40% {
+    color: #dc2626;
+    transform: scale(1.12) rotate(5deg);
+    filter: drop-shadow(0 0 5px rgba(248, 113, 113, 0.85));
+  }
+  62% {
+    color: #ef4444;
+    transform: scale(1.32) rotate(-3deg);
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9));
+  }
+  82% {
+    color: #f87171;
+    transform: scale(1.08) rotate(2deg);
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.7));
+  }
+}
+.animate-flame {
+  animation: flame-flicker 1s ease-out;
+  transform-origin: 50% 80%;
+  will-change: transform, filter;
 }
 
 /* Hide scrollbars on horizontal chip rows while keeping scrollability */
