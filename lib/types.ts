@@ -77,6 +77,10 @@ export type Shop = {
   growth_weight: number;
   is_trending: boolean;
   created_at: string;
+  /** Organic views/likes per minute, attached server-side for the live ticker
+   *  (not a DB column). 0 when growth is off. */
+  view_rate_per_min?: number;
+  like_rate_per_min?: number;
 };
 
 /** A shop with its menu foods attached — the card / detail shape. */

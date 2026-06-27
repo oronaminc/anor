@@ -92,6 +92,18 @@ export function computeDisplay(
   return { views, likes };
 }
 
+/** Organic growth rate (views/likes per minute) for the live ticker. */
+export function organicRatePerMin(
+  shop: GrowthShop,
+  speed: number,
+): { views: number; likes: number } {
+  const s = clampSpeed(speed);
+  const weight = Number.isFinite(shop.growth_weight) ? shop.growth_weight : 1;
+  const trend = shop.is_trending ? TREND_MULTIPLIER : 1;
+  const views = VIEW_RATE_PER_MIN * s * weight * trend;
+  return { views, likes: views * LIKE_RATIO };
+}
+
 /** Read the 0–5 growth speed from a settings row; falls back to the default. */
 export async function getGrowthSpeed(
   sql: (strings: TemplateStringsArray, ...values: unknown[]) => Promise<unknown[]>,

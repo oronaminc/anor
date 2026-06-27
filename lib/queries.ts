@@ -3,7 +3,7 @@ import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
 import type { Shop, ShopFood, ShopWithFoods } from "@/lib/types";
 import { DEMO_SHOPS, isDemoMode } from "@/lib/demo-data";
-import { computeDisplay, getGrowthSpeed } from "@/lib/growth";
+import { computeDisplay, getGrowthSpeed, organicRatePerMin } from "@/lib/growth";
 
 /** Group menu foods (already globally ordered) under their shop. */
 function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
@@ -24,7 +24,14 @@ function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
  */
 function withDisplay(shop: Shop, speed: number, now: number): Shop {
   const { views, likes } = computeDisplay(shop, speed, now);
-  return { ...shop, view_count: views, like_count: likes };
+  const rate = organicRatePerMin(shop, speed);
+  return {
+    ...shop,
+    view_count: views,
+    like_count: likes,
+    view_rate_per_min: rate.views,
+    like_rate_per_min: rate.likes,
+  };
 }
 
 /**

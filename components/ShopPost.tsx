@@ -6,10 +6,10 @@ import { useLocale } from "next-intl";
 import { Eye, Heart } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { formatViewCount } from "@/lib/utils";
 import { localizedName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
+import { LiveCount } from "@/components/LiveCount";
 
 /** Threads-style feed row: small thumbnail + text, hairline-separated. */
 export function ShopPost({
@@ -82,11 +82,17 @@ export function ShopPost({
           <span className="ml-auto inline-flex shrink-0 items-center gap-2.5">
             <span className="inline-flex items-center gap-1">
               <Heart className="size-3.5" />
-              {formatViewCount(shop.like_count)}
+              <LiveCount
+                initial={shop.like_count}
+                perMinute={shop.like_rate_per_min}
+              />
             </span>
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 tabular-nums">
               <Eye className="size-3.5" />
-              {formatViewCount(shop.view_count)}
+              <LiveCount
+                initial={shop.view_count}
+                perMinute={shop.view_rate_per_min}
+              />
             </span>
           </span>
         </div>

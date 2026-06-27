@@ -5,7 +5,6 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowLeft, Eye, MapPin, Youtube, Navigation } from "lucide-react";
 
 import { getShopById } from "@/lib/queries";
-import { formatViewCount } from "@/lib/utils";
 import { googleDirectionsUrl } from "@/lib/maps";
 import {
   localizedName,
@@ -16,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
 import { ViewTracker } from "@/components/ViewTracker";
 import { LikeButton } from "@/components/LikeButton";
+import { LiveCount } from "@/components/LiveCount";
 import GoogleMap from "@/components/GoogleMap";
 
 export const dynamic = "force-dynamic";
@@ -101,9 +101,12 @@ export default async function ShopDetailPage({
               {shop.address}
             </div>
           )}
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
             <Eye className="size-4" />
-            {t("views", { count: formatViewCount(shop.view_count) })}
+            <LiveCount
+              initial={shop.view_count}
+              perMinute={shop.view_rate_per_min}
+            />
           </div>
           <div className="pt-1">
             <LikeButton shopId={shop.id} initialCount={shop.like_count} />
