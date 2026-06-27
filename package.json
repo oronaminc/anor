@@ -5,10 +5,11 @@
   "description": "Myeongdong street food guide web service",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/db-push.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "db:push": "node scripts/db-push.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"

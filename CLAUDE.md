@@ -26,13 +26,30 @@ default locale; EN / JA / ES are also supported.
 
 ```bash
 npm run dev        # next dev (default port 3000)
-npm run build      # production build
+npm run build      # db:push (schema sync) then production build
 npm run start      # serve the build
 npm run lint       # next lint
 npm run typecheck  # tsc --noEmit
 npm run test       # vitest unit tests
 npm run test:e2e   # playwright (builds + starts, runs chromium + mobile)
+npm run db:push    # apply db/schema.sql to DATABASE_URL (idempotent; no-op w/o DB)
 ```
+
+### Database migrations are automatic — do NOT hand-paste SQL
+
+`scripts/db-push.mjs` applies `db/schema.sql` idempotently and runs
+**automatically as part of `npm run build`** (so every Vercel deploy syncs the
+schema), and on demand via `npm run db:push`. It loads `.env.local` itself and
+no-ops when `DATABASE_URL` is absent (CI/demo).
+
+So when a feature needs a schema change, **edit `db/schema.sql` only**, using
+idempotent DDL — `create table if not exists`, `create index if not exists`,
+`create or replace function`, and for new columns
+`alter table ... add column if not exists`. The next deploy (or a local
+`npm run db:push`) applies it; nobody touches the Neon console.
+
+Destructive changes (drop/rename column or table) are NOT idempotent — write
+those as a deliberate, guarded one-off and call it out explicitly.
 
 Node 22 in CI. Playwright e2e `webServer` runs `build && start`; locally it
 reuses an already-running server (`reuseExistingServer` when not CI).

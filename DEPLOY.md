@@ -23,15 +23,19 @@
 ## 1. Neon 데이터베이스
 
 1. https://neon.tech 에서 프로젝트 생성.
-2. 스키마 적용 (로컬에서 `psql` 또는 Neon SQL Editor에 붙여넣기):
-   ```bash
-   psql "$DATABASE_URL" -f db/schema.sql
-   psql "$DATABASE_URL" -f db/seed.sql   # (선택) 샘플 8개
-   ```
-   `db/schema.sql` 은 테이블(foods/food_likes/search_events) + 함수
-   (increment_view_count / toggle_like / log_search)를 만듭니다. RLS·역할은
+2. 스키마는 **자동 적용**됩니다 — `npm run build`(즉 Vercel 배포)가
+   `scripts/db-push.mjs`로 `db/schema.sql`을 idempotent하게 반영해요. 손으로
+   psql 붙여넣을 필요 없음. 즉시 적용하려면 로컬에서 `npm run db:push`.
+   (원하면 수동도 가능: `psql "$DATABASE_URL" -f db/schema.sql`.)
+   샘플 데이터는 선택: `psql "$DATABASE_URL" -f db/seed.sql`.
+   `db/schema.sql` 은 테이블(foods/food_likes/search_events/login_challenges) +
+   함수(increment_view_count / toggle_like / log_search)를 만듭니다. RLS·역할은
    없습니다 — 모든 DB 접근은 서버에서 `DATABASE_URL` 한 역할로만 일어나고,
    인가는 앱 레이어(비밀번호 세션)가 담당합니다.
+
+> 앞으로 스키마가 바뀌면 `db/schema.sql`만 수정하면 됩니다(추가형 DDL은
+> `if not exists` / `create or replace` / `add column if not exists`). 다음
+> 배포가 자동 반영. 콘솔에 직접 SQL 붙여넣을 일 없음.
 3. **Connection string**(pooled)을 복사 → 배포 환경변수 `DATABASE_URL`.
 
 ## 2. 관리자 로그인 (나만)
