@@ -55,7 +55,8 @@
   },
   "trending": {
     "title": "트렌딩",
-    "subtitle": "지금 명동에서 가장 인기 있는 길거리 음식"
+    "subtitle": "지금 명동에서 가장 인기 있는 길거리 가게",
+    "thisWeek": "이번 주"
   },
   "map": {
     "title": "명동 음식 지도",

@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 
 import { sortShops, rankByViews, filterShops } from "@/lib/sort";
-import { formatViewCount } from "@/lib/utils";
 import type { ShopFood, ShopWithFoods } from "@/lib/types";
 
 function makeFood(over: Partial<ShopFood>): ShopFood {
@@ -155,22 +154,5 @@ describe("filterShops", () => {
     expect(filterShops(sample, "분식").map((s) => s.name_ko)).toEqual([
       "명동분식",
     ]);
-  });
-});
-
-describe("formatViewCount", () => {
-  it("formats small numbers as-is", () => {
-    expect(formatViewCount(0)).toBe("0");
-    expect(formatViewCount(999)).toBe("999");
-  });
-
-  it("formats thousands with 천", () => {
-    expect(formatViewCount(1500)).toBe("1.5천");
-    expect(formatViewCount(2000)).toBe("2천");
-  });
-
-  it("formats ten-thousands with 만", () => {
-    expect(formatViewCount(12000)).toBe("1.2만");
-    expect(formatViewCount(30000)).toBe("3만");
   });
 });

@@ -55,7 +55,8 @@
   },
   "trending": {
     "title": "Tendencias",
-    "subtitle": "La comida callejera más popular de Myeongdong ahora mismo"
+    "subtitle": "Los puestos de comida callejera más populares de Myeongdong ahora mismo",
+    "thisWeek": "Esta semana"
   },
   "map": {
     "title": "Mapa gastronómico de Myeongdong",

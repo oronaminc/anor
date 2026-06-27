@@ -55,7 +55,8 @@
   },
   "trending": {
     "title": "Trending",
-    "subtitle": "The most popular street food in Myeongdong right now"
+    "subtitle": "The most popular street-food shops in Myeongdong right now",
+    "thisWeek": "This week"
   },
   "map": {
     "title": "Myeongdong food map",

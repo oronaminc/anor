@@ -5,13 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-/** Format an integer view count into a compact Korean-friendly string. */
+/**
+ * Compact, Instagram-style count: 1.2K, 12K, 1.2M.
+ *  - < 1,000        → the number as-is (e.g. 999)
+ *  - < 1,000,000    → "K" (one decimal under 10K, integer above: 1.5K, 12K, 340K)
+ *  - ≥ 1,000,000    → "M" with one decimal (1.2M, trims a trailing .0 → 2M)
+ */
 export function formatViewCount(count: number): string {
-  if (count >= 10000) {
-    return `${(count / 10000).toFixed(1).replace(/\.0$/, "")}만`;
+  if (count < 1000) return String(count);
+  if (count < 1_000_000) {
+    const k = count / 1000;
+    const value = k < 10 ? (Math.round(k * 10) / 10).toString() : Math.round(k).toString();
+    return `${value}K`;
   }
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1).replace(/\.0$/, "")}천`;
-  }
-  return String(count);
+  const m = count / 1_000_000;
+  return `${(Math.round(m * 10) / 10).toString()}M`;
 }

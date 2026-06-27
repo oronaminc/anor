@@ -5,6 +5,8 @@ import { hasDb } from "@/lib/env";
 import { isSameOrigin, isUuid } from "@/lib/request-guard";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientIpHash } from "@/lib/ip";
+import { computeDisplay, getGrowthSpeed } from "@/lib/growth";
+import type { Shop } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -45,12 +47,20 @@ export async function POST(
   try {
     const sql = getSql();
     const rows = await sql`SELECT * FROM toggle_shop_like(${id}, ${ipHash})`;
-    const row = rows[0];
+    const liked = rows[0]?.liked ?? null;
+
+    // Report the DISPLAYED weekly count (this-week real + organic) so the
+    // optimistic button reconciles to the same number the page shows.
+    const speed = await getGrowthSpeed(sql);
+    const shopRows = (await sql`SELECT * FROM shops WHERE id = ${id} LIMIT 1`) as Shop[];
+    const display = shopRows[0]
+      ? computeDisplay(shopRows[0], speed, Date.now())
+      : null;
+
     return NextResponse.json({
       ok: true,
-      liked: row?.liked ?? null,
-      like_count: row?.like_count ?? null,
-      weekly_like_count: row?.weekly_like_count ?? null,
+      liked,
+      like_count: display?.likes ?? null,
     });
   } catch (err) {
     console.error("like route exception:", (err as Error).message);
