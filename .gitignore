@@ -30,6 +30,9 @@ yarn-error.log*
 .env
 .env*.local
 
+# local seed / test data (your private test rows — not committed)
+db/*.local.sql
+
 # vercel
 .vercel
 

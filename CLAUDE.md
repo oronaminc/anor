@@ -33,6 +33,8 @@ npm run typecheck  # tsc --noEmit
 npm run test       # vitest unit tests
 npm run test:e2e   # playwright (builds + starts, runs chromium + mobile)
 npm run db:push    # apply db/schema.sql to DATABASE_URL (idempotent; no-op w/o DB)
+npm run db:seed    # insert the demo foods (db/seed.sql) into the DB (idempotent)
+npm run db:seed:clear  # remove ONLY the demo foods (thumbnail_url like /demo/%)
 ```
 
 ### Database migrations are automatic — do NOT hand-paste SQL

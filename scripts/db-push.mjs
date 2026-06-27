@@ -18,74 +18,24 @@
  * or local UI-only work), so it never breaks a build that has no database.
  */
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
-import { neon } from "@neondatabase/serverless";
-
-const here = dirname(fileURLToPath(import.meta.url));
-
-/**
- * Load .env.local (if present) into process.env so a plain `npm run db:push`
- * works without exporting vars by hand — a standalone Node script doesn't read
- * .env.local the way `next` does. On Vercel the vars are already injected and
- * no .env.local is deployed, so this is a harmless no-op there.
- */
-function loadEnvLocal() {
-  try {
-    const text = readFileSync(join(here, "..", ".env.local"), "utf8");
-    for (const line of text.split("\n")) {
-      const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$/);
-      if (!m) continue;
-      const key = m[1];
-      const val = m[2].trim().replace(/^["']|["']$/g, "");
-      if (val && process.env[key] === undefined) process.env[key] = val;
-    }
-  } catch {
-    /* no .env.local — fine (CI/Vercel) */
-  }
-}
+import {
+  loadEnvLocal,
+  databaseUrl,
+  splitStatements,
+  repoPath,
+  neon,
+} from "./lib.mjs";
 
 loadEnvLocal();
-
-const url = process.env.DATABASE_URL;
-if (!url || url.includes("your-") || url.includes("placeholder")) {
+const url = databaseUrl();
+if (!url) {
   console.log("[db:push] DATABASE_URL not set — skipping (demo/CI).");
   process.exit(0);
 }
 
-const schemaPath = join(here, "..", "db", "schema.sql");
-const raw = readFileSync(schemaPath, "utf8");
-
-/**
- * Split a .sql file into individual statements. Whole-line `--` comments are
- * stripped first, then we split on `;` while ignoring semicolons inside
- * `$$ ... $$` blocks (our plpgsql function bodies).
- */
-function splitStatements(sql) {
-  const src = sql.replace(/^\s*--.*$/gm, "");
-  const statements = [];
-  let current = "";
-  let inDollar = false;
-  for (let i = 0; i < src.length; i++) {
-    if (src[i] === "$" && src[i + 1] === "$") {
-      inDollar = !inDollar;
-      current += "$$";
-      i++;
-      continue;
-    }
-    const ch = src[i];
-    if (ch === ";" && !inDollar) {
-      if (current.trim()) statements.push(current.trim());
-      current = "";
-      continue;
-    }
-    current += ch;
-  }
-  if (current.trim()) statements.push(current.trim());
-  return statements;
-}
-
-const statements = splitStatements(raw);
+const statements = splitStatements(
+  readFileSync(repoPath("db", "schema.sql"), "utf8"),
+);
 const sql = neon(url);
 
 try {
