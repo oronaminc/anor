@@ -15,6 +15,17 @@ PORT=3210 npm run dev  # any free port
 To force the demo dataset even with a database configured, set
 `NEXT_PUBLIC_DEMO_MODE=1`.
 
+**With a real backend (Neon + R2):** copy `.env.local.example` → `.env.local`,
+set `DATABASE_URL`, `ADMIN_PASSWORD`, `SESSION_SECRET`, `IP_HASH_SALT` (+ `R2_*`
+for image upload), then apply the schema once:
+
+```bash
+psql "$DATABASE_URL" -f db/schema.sql   # tables + functions
+psql "$DATABASE_URL" -f db/seed.sql     # (optional) 8 sample foods
+```
+
+Admin login is at `/admin/login` (password = `ADMIN_PASSWORD`). See `DEPLOY.md`.
+
 ## 2. Headless screenshot (mobile viewport)
 
 Used to review visual changes. Requires the Chromium browser once:
@@ -38,7 +49,9 @@ const page = await browser.newPage({
 async function shot(theme, file) {
   await page.emulateMedia({ colorScheme: theme });
   await page.addInitScript((t) => { try { localStorage.setItem("md.mode", t); } catch {} }, theme);
-  await page.goto(base + "/", { waitUntil: "networkidle" });
+  // Use domcontentloaded, not networkidle: the external Google Fonts <link>
+  // can keep the page from ever reaching "idle" in a sandbox/offline shell.
+  await page.goto(base + "/", { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(1200);
   await page.screenshot({ path: file, fullPage: true });
 }
@@ -68,13 +81,23 @@ utility classes are neutralized.
 ```bash
 npm run typecheck
 npm run build
-npx vitest run
-npx playwright test tests/e2e/home.spec.ts --project=chromium
+npx vitest run                                   # unit (session/ip/rate-limit/…)
+npx playwright test --project=chromium           # e2e: home/search/like
 ```
 
-The home e2e asserts a hero heading and a `전체 메뉴` heading. The latter is an
-`sr-only` `<h2>` in `components/FoodExplorer.tsx` — keep it (or update the test)
-if you restructure the feed.
+e2e specs: `home` (hero + `전체 메뉴` `sr-only` heading), `search` (filter by
+ko/en, empty state), `like` (optimistic toggle), and `admin-login` — the last
+**self-skips** unless `ADMIN_PASSWORD` is set for both the server and the test
+runner. To exercise login locally:
+
+```bash
+ADMIN_PASSWORD=x SESSION_SECRET=y PORT=3210 npm run start &   # in one shell
+PORT=3210 ADMIN_PASSWORD=x npx playwright test tests/e2e/admin-login.spec.ts --project=chromium
+```
+
+The home e2e asserts a hero heading and a `전체 메뉴` heading (an `sr-only` `<h2>`
+in `components/FoodExplorer.tsx`) — keep it (or update the test) if you
+restructure the feed.
 
 ## 5. Push / open a PR
 

@@ -46,6 +46,14 @@ with **zero config** — no `.env.local` needed for UI work. With `DATABASE_URL`
 configured it always uses the real DB. The map shows a "no API key" placeholder
 locally; it renders normally when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set.
 
+**Run with a real backend (Neon + R2).** Copy `.env.local.example` →
+`.env.local` and set at least `DATABASE_URL` (Neon connection string),
+`ADMIN_PASSWORD` + `SESSION_SECRET` (admin login), and `IP_HASH_SALT`. Apply the
+schema once — `psql "$DATABASE_URL" -f db/schema.sql` (then `db/seed.sql` for
+sample rows). `R2_*` enables image upload; without it the admin form falls back
+to pasting an image URL. Full var list + deploy steps: `.env.local.example` and
+`DEPLOY.md`.
+
 To screenshot a page headlessly (mobile viewport), see the recipe in `SKILL.md`.
 
 ## Layout
