@@ -94,6 +94,13 @@ describe("computeDisplay", () => {
     const b = computeDisplay(base, 3, NOW + 6 * HOUR);
     expect(b.views).toBeGreaterThanOrEqual(a.views);
   });
+
+  it("grows visibly within a minute at high speed", () => {
+    const hot = { ...base, is_trending: true };
+    const a = computeDisplay(hot, 5, NOW);
+    const b = computeDisplay(hot, 5, NOW + 60_000);
+    expect(b.views - a.views).toBeGreaterThanOrEqual(10);
+  });
 });
 
 describe("formatWeekRange", () => {

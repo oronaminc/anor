@@ -18,13 +18,16 @@ export const DEFAULT_GROWTH_SPEED = 2;
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
+const MINUTE_MS = 60 * 1000;
 
-// Organic views per hour, per speed level, for a normal (weight 1) shop.
-const VIEW_RATE_PER_HOUR = 9;
+// Organic views per MINUTE, per speed level, for a normal (weight 1) shop.
+// Tuned so growth is visible on refresh: speed 5 ≈ 15 views/min for a normal
+// shop (≈37/min when trending), speed 2 ≈ 6/min; speed 0 disables it entirely.
+const VIEW_RATE_PER_MIN = 3;
 // Trending shops grow this much faster than the rest.
 const TREND_MULTIPLIER = 2.5;
 // Organic likes accrue as this fraction of organic views (keeps views > likes).
-const LIKE_RATIO = 0.12;
+const LIKE_RATIO = 0.15;
 
 /** Epoch ms of the current KST week's Monday 00:00. */
 export function kstWeekStartMs(now: number): number {
@@ -73,12 +76,12 @@ export function computeDisplay(
   const baseLikes = stale ? 0 : Math.max(0, shop.weekly_like_count ?? 0);
 
   const s = clampSpeed(speed);
-  const elapsedHours = Math.max(0, (now - weekStartMs) / HOUR_MS);
+  const elapsedMinutes = Math.max(0, (now - weekStartMs) / MINUTE_MS);
   const weight = Number.isFinite(shop.growth_weight) ? shop.growth_weight : 1;
   const trend = shop.is_trending ? TREND_MULTIPLIER : 1;
 
   const organicViews = Math.floor(
-    VIEW_RATE_PER_HOUR * s * weight * trend * elapsedHours,
+    VIEW_RATE_PER_MIN * s * weight * trend * elapsedMinutes,
   );
   const organicLikes = Math.floor(organicViews * LIKE_RATIO);
 
