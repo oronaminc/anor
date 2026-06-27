@@ -24,7 +24,9 @@ import {
   CODE_TTL_SECONDS,
 } from "@/lib/login-challenge";
 import { uploadToR2, r2Configured } from "@/lib/storage";
-import type { FoodInput } from "@/lib/types";
+import type { ShopInput, ShopFoodInput, FoodTranslations } from "@/lib/types";
+
+type Sql = ReturnType<typeof getSql>;
 
 export type ActionState = {
   error?: string;
@@ -161,9 +163,58 @@ function parseHashtags(raw: string): string[] {
     .filter(Boolean);
 }
 
-function readFoodForm(formData: FormData): {
-  fields: Omit<FoodInput, "hashtags">;
+/** Coerce an arbitrary JSON value into a clean translations map. */
+function normalizeTranslations(raw: unknown): FoodTranslations {
+  const out: FoodTranslations = {};
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    for (const [loc, value] of Object.entries(raw as Record<string, unknown>)) {
+      if (typeof value === "string" && value.trim()) out[loc] = value.trim();
+    }
+  }
+  return out;
+}
+
+/** Parse the nested menu-foods array from the hidden JSON field. Each entry is
+ *  one menu food belonging to the shop; sort_order is assigned by array index. */
+function readShopFoods(formData: FormData): ShopFoodInput[] {
+  const raw = String(formData.get("foods") ?? "").trim();
+  if (!raw) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+
+  const norm = (v: unknown) => {
+    const s = typeof v === "string" ? v.trim() : "";
+    return s || null;
+  };
+
+  return parsed
+    .map((entry, index) => {
+      const food = (entry ?? {}) as Record<string, unknown>;
+      return {
+        name_ko: typeof food.name_ko === "string" ? food.name_ko.trim() : "",
+        name_en: norm(food.name_en),
+        name_ja: norm(food.name_ja),
+        name_es: norm(food.name_es),
+        description: norm(food.description),
+        translations: normalizeTranslations(food.translations),
+        image_url: norm(food.image_url),
+        price_range: norm(food.price_range),
+        sort_order: index,
+      };
+    })
+    .filter((f) => f.name_ko);
+}
+
+function readShopForm(formData: FormData): {
+  fields: Omit<ShopInput, "hashtags">;
   hashtags: string[];
+  foods: ShopFoodInput[];
 } {
   const num = (v: FormDataEntryValue | null) => {
     const n = parseFloat(String(v ?? ""));
@@ -171,7 +222,7 @@ function readFoodForm(formData: FormData): {
   };
   const str = (key: string) => String(formData.get(key) ?? "").trim();
 
-  const translations: Record<string, string> = {};
+  const translations: FoodTranslations = {};
   for (const loc of ["en", "ja", "es"] as const) {
     const value = str(`description_${loc}`);
     if (value) translations[loc] = value;
@@ -185,7 +236,6 @@ function readFoodForm(formData: FormData): {
       name_es: str("name_es") || null,
       description: str("description") || null,
       translations,
-      category: str("category") || null,
       lat: num(formData.get("lat")),
       lng: num(formData.get("lng")),
       address: str("address") || null,
@@ -195,6 +245,7 @@ function readFoodForm(formData: FormData): {
       is_trending: formData.get("is_trending") === "on",
     },
     hashtags: parseHashtags(str("hashtags")),
+    foods: readShopFoods(formData),
   };
 }
 
@@ -218,8 +269,33 @@ async function resolveThumbnail(
 
 // ---------------------------------------------------------------------
 // CRUD (Neon SQL)
+//
+// A shop (가게) is the unit of engagement: ONE map point + ONE youtube link
+// and MANY menu foods (shop_foods). The menu is replaced wholesale on update
+// (delete + re-insert) so sort order and removals stay consistent.
 // ---------------------------------------------------------------------
-export async function createFood(
+
+/** Insert the menu foods for a shop, preserving their array order. */
+async function insertShopFoods(
+  sql: Sql,
+  shopId: string,
+  foods: ShopFoodInput[],
+): Promise<void> {
+  for (const food of foods) {
+    await sql`
+      INSERT INTO shop_foods
+        (shop_id, name_ko, name_en, name_ja, name_es, description,
+         translations, image_url, price_range, sort_order)
+      VALUES
+        (${shopId}, ${food.name_ko}, ${food.name_en}, ${food.name_ja},
+         ${food.name_es}, ${food.description},
+         ${JSON.stringify(food.translations)}::jsonb,
+         ${food.image_url}, ${food.price_range}, ${food.sort_order})
+    `;
+  }
+}
+
+export async function createShop(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
@@ -227,24 +303,27 @@ export async function createFood(
   if (!hasDb()) return { error: "DATABASE_URL이 설정되지 않았습니다." };
 
   const sql = getSql();
-  const { fields, hashtags } = readFoodForm(formData);
+  const { fields, hashtags, foods } = readShopForm(formData);
   if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
 
   try {
     const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);
-    await sql`
-      INSERT INTO foods
+    const rows = await sql`
+      INSERT INTO shops
         (name_ko, name_en, name_ja, name_es, description, translations,
-         category, lat, lng, address, youtube_shorts_url, thumbnail_url,
+         lat, lng, address, youtube_shorts_url, thumbnail_url,
          price_range, is_trending, hashtags)
       VALUES
         (${fields.name_ko}, ${fields.name_en}, ${fields.name_ja},
          ${fields.name_es}, ${fields.description},
          ${JSON.stringify(fields.translations)}::jsonb,
-         ${fields.category}, ${fields.lat}, ${fields.lng}, ${fields.address},
+         ${fields.lat}, ${fields.lng}, ${fields.address},
          ${fields.youtube_shorts_url}, ${thumbnail}, ${fields.price_range},
          ${fields.is_trending}, ${hashtags})
+      RETURNING id
     `;
+    const shopId = String(rows[0].id);
+    await insertShopFoods(sql, shopId, foods);
   } catch (err) {
     return { error: (err as Error).message };
   }
@@ -254,7 +333,7 @@ export async function createFood(
   redirect("/admin");
 }
 
-export async function updateFood(
+export async function updateShop(
   id: string,
   _prev: ActionState,
   formData: FormData,
@@ -263,20 +342,19 @@ export async function updateFood(
   if (!hasDb()) return { error: "DATABASE_URL이 설정되지 않았습니다." };
 
   const sql = getSql();
-  const { fields, hashtags } = readFoodForm(formData);
+  const { fields, hashtags, foods } = readShopForm(formData);
   if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
 
   try {
     const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);
     await sql`
-      UPDATE foods SET
+      UPDATE shops SET
         name_ko = ${fields.name_ko},
         name_en = ${fields.name_en},
         name_ja = ${fields.name_ja},
         name_es = ${fields.name_es},
         description = ${fields.description},
         translations = ${JSON.stringify(fields.translations)}::jsonb,
-        category = ${fields.category},
         lat = ${fields.lat},
         lng = ${fields.lng},
         address = ${fields.address},
@@ -287,20 +365,23 @@ export async function updateFood(
         hashtags = ${hashtags}
       WHERE id = ${id}
     `;
+    await sql`DELETE FROM shop_foods WHERE shop_id = ${id}`;
+    await insertShopFoods(sql, id, foods);
   } catch (err) {
     return { error: (err as Error).message };
   }
 
   revalidatePath("/admin");
   revalidatePath("/");
-  revalidatePath(`/food/${id}`);
+  revalidatePath(`/shop/${id}`);
   redirect("/admin");
 }
 
-export async function deleteFood(id: string) {
+export async function deleteShop(id: string) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
-  await getSql()`DELETE FROM foods WHERE id = ${id}`;
+  // Cascade (shop_foods, shop_likes) is handled by ON DELETE CASCADE.
+  await getSql()`DELETE FROM shops WHERE id = ${id}`;
   revalidatePath("/admin");
   revalidatePath("/");
 }
@@ -308,7 +389,7 @@ export async function deleteFood(id: string) {
 export async function toggleTrending(id: string, next: boolean) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
-  await getSql()`UPDATE foods SET is_trending = ${next} WHERE id = ${id}`;
+  await getSql()`UPDATE shops SET is_trending = ${next} WHERE id = ${id}`;
   revalidatePath("/admin");
   revalidatePath("/");
 }

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { getFoods } from "@/lib/queries";
+import { getShops } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -16,19 +16,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === "" ? 1 : 0.7,
   }));
 
-  let foods: Awaited<ReturnType<typeof getFoods>> = [];
+  let shops: Awaited<ReturnType<typeof getShops>> = [];
   try {
-    foods = await getFoods();
+    shops = await getShops();
   } catch {
-    foods = [];
+    shops = [];
   }
 
-  const foodRoutes = foods.map((food) => ({
-    url: `${SITE_URL}/food/${food.id}`,
-    lastModified: food.created_at,
+  const shopRoutes = shops.map((shop) => ({
+    url: `${SITE_URL}/shop/${shop.id}`,
+    lastModified: shop.created_at,
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...foodRoutes];
+  return [...staticRoutes, ...shopRoutes];
 }

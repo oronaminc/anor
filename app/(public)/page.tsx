@@ -2,8 +2,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Search, MapPin, ArrowRight } from "lucide-react";
 
-import { getFoods } from "@/lib/queries";
-import { FoodExplorer } from "@/components/FoodExplorer";
+import { getShops } from "@/lib/queries";
+import { ShopExplorer } from "@/components/ShopExplorer";
 import GoogleMap from "@/components/GoogleMap";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const t = await getTranslations("home");
   const ts = await getTranslations("search");
-  const foods = await getFoods();
+  const shops = await getShops();
 
   return (
     <div className="pb-6">
@@ -37,13 +37,13 @@ export default async function HomePage() {
       </section>
 
       <div className="px-4">
-        {foods.length === 0 ? (
+        {shops.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             {t("empty")}
           </div>
         ) : (
           <>
-            <FoodExplorer foods={foods} />
+            <ShopExplorer shops={shops} />
 
             {/* Map preview */}
             <section className="mt-8 space-y-3 border-t border-border pt-6">
@@ -61,7 +61,7 @@ export default async function HomePage() {
                 </Link>
               </div>
               <GoogleMap
-                foods={foods}
+                shops={shops}
                 height="200px"
                 linkToDetail
                 className="overflow-hidden rounded-2xl border border-border"

@@ -7,10 +7,10 @@ import { toggleTrending } from "@/app/(admin)/admin/actions";
 import { cn } from "@/lib/utils";
 
 export function TrendingToggle({
-  id,
+  shopId,
   isTrending,
 }: {
-  id: string;
+  shopId: string;
   isTrending: boolean;
 }) {
   const [pending, startTransition] = useTransition();
@@ -21,7 +21,7 @@ export function TrendingToggle({
       disabled={pending}
       onClick={() =>
         startTransition(() => {
-          void toggleTrending(id, !isTrending);
+          void toggleTrending(shopId, !isTrending);
         })
       }
       aria-pressed={isTrending}

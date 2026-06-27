@@ -9,14 +9,11 @@ import { clientIpHash } from "@/lib/ip";
 export const dynamic = "force-dynamic";
 
 /**
- * Toggle a "like" for a food from an anonymous visitor.
- *
- * Defenses (no login required):
- *  1. Same-origin guard  — only our own site's pages may call this.
- *  2. Per-IP rate limit  — blocks bursts (e.g. 100 clicks/sec).
- *  3. Per-IP dedupe      — the DB's UNIQUE(food_id, ip_hash) makes this
- *                          idempotent: one like per IP, second call un-likes.
- * The raw IP is never stored — only sha256(ip + salt).
+ * Toggle an anonymous "like" for a shop. No login.
+ *  1. Same-origin guard — only our own pages may call this.
+ *  2. Per-IP rate limit — blocks bursts.
+ *  3. Per-IP dedupe via UNIQUE(shop_id, ip_hash) in toggle_shop_like — one like
+ *     per IP, second call un-likes. The raw IP is never stored.
  */
 export async function POST(
   request: Request,
@@ -32,36 +29,28 @@ export async function POST(
   }
 
   if (!isUuid(id)) {
-    return NextResponse.json(
-      { ok: false, error: "invalid id" },
-      { status: 400 },
-    );
+    return NextResponse.json({ ok: false, error: "invalid id" }, { status: 400 });
   }
 
   const ipHash = clientIpHash(request.headers);
-
   const rl = await rateLimit(`like:${ipHash}`, { limit: 20, windowMs: 10_000 });
   if (!rl.success) {
-    return NextResponse.json(
-      { ok: false, error: "rate limited" },
-      { status: 429 },
-    );
+    return NextResponse.json({ ok: false, error: "rate limited" }, { status: 429 });
   }
 
-  // Demo / unconfigured: no DB to write to. Report success so the optimistic
-  // client UI still works on a zero-config preview deploy.
   if (!hasDb()) {
     return NextResponse.json({ ok: true, demo: true });
   }
 
   try {
     const sql = getSql();
-    const rows = await sql`SELECT * FROM toggle_like(${id}, ${ipHash})`;
+    const rows = await sql`SELECT * FROM toggle_shop_like(${id}, ${ipHash})`;
     const row = rows[0];
     return NextResponse.json({
       ok: true,
       liked: row?.liked ?? null,
       like_count: row?.like_count ?? null,
+      weekly_like_count: row?.weekly_like_count ?? null,
     });
   } catch (err) {
     console.error("like route exception:", (err as Error).message);

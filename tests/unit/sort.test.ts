@@ -1,105 +1,122 @@
 import { describe, it, expect } from "vitest";
 
-import { sortFoods, rankByViews, filterFoods } from "@/lib/sort";
+import { sortShops, rankByViews, filterShops } from "@/lib/sort";
 import { formatViewCount } from "@/lib/utils";
-import type { Food } from "@/lib/types";
+import type { ShopFood, ShopWithFoods } from "@/lib/types";
 
-function makeFood(overrides: Partial<Food>): Food {
+function makeFood(over: Partial<ShopFood>): ShopFood {
   return {
     id: crypto.randomUUID(),
-    name_ko: "테스트",
+    shop_id: "s",
+    name_ko: "음식",
     name_en: null,
     name_ja: null,
     name_es: null,
     description: null,
     translations: null,
-    category: null,
+    image_url: null,
+    price_range: null,
+    sort_order: 0,
+    created_at: "2026-01-01T00:00:00.000Z",
+    ...over,
+  };
+}
+
+function makeShop(over: Partial<ShopWithFoods>): ShopWithFoods {
+  return {
+    id: crypto.randomUUID(),
+    name_ko: "가게",
+    name_en: null,
+    name_ja: null,
+    name_es: null,
+    description: null,
+    translations: null,
     lat: null,
     lng: null,
     address: null,
     youtube_shorts_url: null,
     thumbnail_url: null,
     hashtags: [],
+    price_range: null,
     view_count: 0,
     like_count: 0,
+    weekly_view_count: 0,
+    weekly_like_count: 0,
+    week_start: "2026-06-22",
+    growth_weight: 1,
     is_trending: false,
-    price_range: null,
-    created_at: "2024-01-01T00:00:00.000Z",
-    ...overrides,
+    created_at: "2026-01-01T00:00:00.000Z",
+    foods: [],
+    ...over,
   };
 }
 
-const sample: Food[] = [
-  makeFood({
-    name_ko: "떡볶이",
-    name_en: "Tteokbokki",
-    category: "분식",
-    hashtags: ["매콤", "명동맛집"],
+const sample: ShopWithFoods[] = [
+  makeShop({
+    name_ko: "명동분식",
+    name_en: "Myeongdong Bunsik",
+    hashtags: ["분식", "매콤"],
     view_count: 100,
-    created_at: "2024-01-01T00:00:00.000Z",
+    created_at: "2026-01-01T00:00:00.000Z",
+    foods: [makeFood({ name_ko: "떡볶이", name_en: "Tteokbokki" })],
   }),
-  makeFood({
-    name_ko: "호떡",
-    name_en: "Hotteok",
-    category: "간식",
+  makeShop({
+    name_ko: "호떡왕",
+    name_en: "Hotteok King",
     hashtags: ["달달"],
     view_count: 300,
-    created_at: "2024-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+    foods: [makeFood({ name_ko: "호떡", name_en: "Hotteok" })],
   }),
-  makeFood({
-    name_ko: "계란빵",
-    name_en: "Gyeranppang",
-    category: "간식",
+  makeShop({
+    name_ko: "골목간식",
+    name_en: "Alley Snacks",
     hashtags: ["고소함"],
     view_count: 200,
-    created_at: "2024-02-01T00:00:00.000Z",
+    created_at: "2026-02-01T00:00:00.000Z",
+    foods: [makeFood({ name_ko: "계란빵", name_en: "Gyeranppang" })],
   }),
 ];
 
-describe("sortFoods", () => {
+describe("sortShops", () => {
   it("sorts by view_count desc for 'popular'", () => {
-    const result = sortFoods(sample, "popular");
-    expect(result.map((f) => f.view_count)).toEqual([300, 200, 100]);
+    expect(sortShops(sample, "popular").map((s) => s.view_count)).toEqual([
+      300, 200, 100,
+    ]);
   });
 
   it("sorts by created_at desc for 'latest'", () => {
-    const result = sortFoods(sample, "latest");
-    expect(result.map((f) => f.name_ko)).toEqual(["호떡", "계란빵", "떡볶이"]);
+    expect(sortShops(sample, "latest").map((s) => s.name_ko)).toEqual([
+      "호떡왕",
+      "골목간식",
+      "명동분식",
+    ]);
   });
 
   it("does not mutate the input array", () => {
-    const before = sample.map((f) => f.view_count);
-    sortFoods(sample, "popular");
-    expect(sample.map((f) => f.view_count)).toEqual(before);
+    const before = sample.map((s) => s.view_count);
+    sortShops(sample, "popular");
+    expect(sample.map((s) => s.view_count)).toEqual(before);
   });
 
-  it("pins trending items to the top regardless of views with trendingFirst", () => {
-    const foods = [
-      makeFood({ name_ko: "A", view_count: 900, is_trending: false }),
-      makeFood({ name_ko: "B", view_count: 100, is_trending: true }),
-      makeFood({ name_ko: "C", view_count: 500, is_trending: false }),
-      makeFood({ name_ko: "D", view_count: 50, is_trending: true }),
+  it("pins trending shops to the top regardless of views with trendingFirst", () => {
+    const shops = [
+      makeShop({ name_ko: "A", view_count: 900, is_trending: false }),
+      makeShop({ name_ko: "B", view_count: 100, is_trending: true }),
+      makeShop({ name_ko: "C", view_count: 500, is_trending: false }),
+      makeShop({ name_ko: "D", view_count: 50, is_trending: true }),
     ];
-    const result = sortFoods(foods, "popular", { trendingFirst: true });
-    // trending first (B before D by views), then the rest by views (A before C)
-    expect(result.map((f) => f.name_ko)).toEqual(["B", "D", "A", "C"]);
-  });
-
-  it("keeps trending first for 'latest' too", () => {
-    const foods = [
-      makeFood({ name_ko: "old-trend", is_trending: true, created_at: "2024-01-01T00:00:00.000Z" }),
-      makeFood({ name_ko: "new-plain", is_trending: false, created_at: "2024-09-01T00:00:00.000Z" }),
-    ];
-    const result = sortFoods(foods, "latest", { trendingFirst: true });
-    expect(result.map((f) => f.name_ko)).toEqual(["old-trend", "new-plain"]);
+    expect(
+      sortShops(shops, "popular", { trendingFirst: true }).map((s) => s.name_ko),
+    ).toEqual(["B", "D", "A", "C"]);
   });
 
   it("ignores trending when trendingFirst is not set (default)", () => {
-    const foods = [
-      makeFood({ name_ko: "plain-hi", view_count: 900, is_trending: false }),
-      makeFood({ name_ko: "trend-lo", view_count: 100, is_trending: true }),
+    const shops = [
+      makeShop({ name_ko: "plain-hi", view_count: 900, is_trending: false }),
+      makeShop({ name_ko: "trend-lo", view_count: 100, is_trending: true }),
     ];
-    expect(sortFoods(foods, "popular").map((f) => f.name_ko)).toEqual([
+    expect(sortShops(shops, "popular").map((s) => s.name_ko)).toEqual([
       "plain-hi",
       "trend-lo",
     ]);
@@ -107,41 +124,37 @@ describe("sortFoods", () => {
 });
 
 describe("rankByViews", () => {
-  it("assigns 1-based ranks ordered by views", () => {
+  it("assigns 1-based ranks ordered by views, carrying the shop", () => {
     const ranking = rankByViews(sample, 2);
     expect(ranking).toHaveLength(2);
     expect(ranking[0]).toMatchObject({ rank: 1 });
-    expect(ranking[0].food.name_ko).toBe("호떡");
+    expect(ranking[0].shop.name_ko).toBe("호떡왕");
     expect(ranking[1]).toMatchObject({ rank: 2 });
-    expect(ranking[1].food.name_ko).toBe("계란빵");
+    expect(ranking[1].shop.name_ko).toBe("골목간식");
   });
 });
 
-describe("filterFoods", () => {
+describe("filterShops", () => {
   it("returns all when query is blank", () => {
-    expect(filterFoods(sample, "   ")).toHaveLength(3);
+    expect(filterShops(sample, "   ")).toHaveLength(3);
   });
 
-  it("matches by korean name", () => {
-    expect(filterFoods(sample, "호떡").map((f) => f.name_ko)).toEqual(["호떡"]);
+  it("matches by shop korean name", () => {
+    expect(filterShops(sample, "호떡왕").map((s) => s.name_ko)).toEqual([
+      "호떡왕",
+    ]);
   });
 
-  it("matches by english name case-insensitively", () => {
-    expect(filterFoods(sample, "BOKKI").map((f) => f.name_ko)).toEqual([
-      "떡볶이",
+  it("matches by a menu food name (english, case-insensitive)", () => {
+    expect(filterShops(sample, "BOKKI").map((s) => s.name_ko)).toEqual([
+      "명동분식",
     ]);
   });
 
   it("matches by hashtag", () => {
-    expect(filterFoods(sample, "매콤").map((f) => f.name_ko)).toEqual([
-      "떡볶이",
+    expect(filterShops(sample, "분식").map((s) => s.name_ko)).toEqual([
+      "명동분식",
     ]);
-  });
-
-  it("matches by category", () => {
-    expect(filterFoods(sample, "간식").map((f) => f.name_ko).sort()).toEqual(
-      ["계란빵", "호떡"].sort(),
-    );
   });
 });
 

@@ -4,7 +4,7 @@ import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowLeft, Eye, MapPin, Youtube, Navigation } from "lucide-react";
 
-import { getFoodById } from "@/lib/queries";
+import { getShopById } from "@/lib/queries";
 import { formatViewCount } from "@/lib/utils";
 import { googleDirectionsUrl } from "@/lib/maps";
 import {
@@ -13,43 +13,43 @@ import {
   localizedDescription,
 } from "@/lib/i18n-food";
 import { Button } from "@/components/ui/button";
-import { TrendingBadge } from "@/components/FoodCard";
+import { TrendingBadge } from "@/components/ShopCard";
 import { ViewTracker } from "@/components/ViewTracker";
 import { LikeButton } from "@/components/LikeButton";
 import GoogleMap from "@/components/GoogleMap";
 
 export const dynamic = "force-dynamic";
 
-export default async function FoodDetailPage({
+export default async function ShopDetailPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const food = await getFoodById(params.id);
-  if (!food) notFound();
+  const shop = await getShopById(params.id);
+  if (!shop) notFound();
 
   const locale = await getLocale();
   const t = await getTranslations("detail");
-  const name = localizedName(food, locale);
-  const secondary = secondaryName(food, locale);
-  const description = localizedDescription(food, locale);
+  const name = localizedName(shop, locale);
+  const secondary = secondaryName(shop, locale);
+  const description = localizedDescription(shop, locale);
   const hasCoords =
-    typeof food.lat === "number" && typeof food.lng === "number";
+    typeof shop.lat === "number" && typeof shop.lng === "number";
 
   return (
     <div className="pb-10">
-      <ViewTracker foodId={food.id} />
+      <ViewTracker shopId={shop.id} />
 
       {/* Hero image */}
       <div className="relative aspect-[4/3] w-full bg-muted">
-        {food.thumbnail_url ? (
+        {shop.thumbnail_url ? (
           <Image
-            src={food.thumbnail_url}
+            src={shop.thumbnail_url}
             alt={name}
             fill
             priority
             sizes="(max-width: 480px) 100vw, 480px"
-            unoptimized={food.thumbnail_url.startsWith("/demo/")}
+            unoptimized={shop.thumbnail_url.startsWith("/demo/")}
             className="object-cover"
           />
         ) : (
@@ -65,7 +65,7 @@ export default async function FoodDetailPage({
         >
           <ArrowLeft className="size-5" />
         </Link>
-        {food.is_trending && (
+        {shop.is_trending && (
           <div className="absolute right-3 top-3">
             <TrendingBadge />
           </div>
@@ -75,18 +75,13 @@ export default async function FoodDetailPage({
       <div className="space-y-6 px-4 pt-5">
         {/* Title block */}
         <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {food.category && (
-              <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground">
-                {food.category}
-              </span>
-            )}
-            {food.price_range && (
+          {shop.price_range && (
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-bold text-primary">
-                {food.price_range}
+                {shop.price_range}
               </span>
-            )}
-          </div>
+            </div>
+          )}
           <h1 className="font-display text-xl font-extrabold uppercase tracking-tight gradient-text">
             {name}
           </h1>
@@ -95,18 +90,29 @@ export default async function FoodDetailPage({
               {secondary}
             </p>
           )}
+          {description && (
+            <p className="whitespace-pre-line leading-relaxed text-foreground/90">
+              {description}
+            </p>
+          )}
+          {shop.address && (
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <MapPin className="size-4" />
+              {shop.address}
+            </div>
+          )}
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Eye className="size-4" />
-            {t("views", { count: formatViewCount(food.view_count) })}
+            {t("views", { count: formatViewCount(shop.view_count) })}
           </div>
           <div className="pt-1">
-            <LikeButton foodId={food.id} initialCount={food.like_count} />
+            <LikeButton shopId={shop.id} initialCount={shop.like_count} />
           </div>
         </div>
 
-        {food.hashtags && food.hashtags.length > 0 && (
+        {shop.hashtags && shop.hashtags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {food.hashtags.map((tag) => (
+            {shop.hashtags.map((tag) => (
               <span
                 key={tag}
                 className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
@@ -117,22 +123,63 @@ export default async function FoodDetailPage({
           </div>
         )}
 
-        {description && (
-          <div className="space-y-2">
+        {/* Menu — the shop's foods */}
+        {shop.foods.length > 0 && (
+          <section className="space-y-3">
             <h2 className="flex items-center gap-2 font-display text-base font-extrabold uppercase tracking-wide">
               <span className="h-4 w-1 rounded-full bg-primary glow-sm" />
-              {t("about")}
+              {t("menu")}
             </h2>
-            <p className="whitespace-pre-line leading-relaxed text-foreground/90">
-              {description}
-            </p>
-          </div>
+            <ul className="divide-y divide-border overflow-hidden rounded-2xl bg-card/70 neon-border">
+              {shop.foods.map((food) => {
+                const foodName = localizedName(food, locale);
+                const foodDescription = localizedDescription(food, locale);
+                return (
+                  <li key={food.id} className="flex gap-3 p-3">
+                    <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-muted">
+                      {food.image_url ? (
+                        <Image
+                          src={food.image_url}
+                          alt={foodName}
+                          fill
+                          sizes="80px"
+                          unoptimized={food.image_url.startsWith("/demo/")}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-3xl">
+                          🍢
+                        </div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="truncate font-semibold leading-tight">
+                          {foodName}
+                        </h3>
+                        {food.price_range && (
+                          <span className="shrink-0 text-sm font-bold text-primary">
+                            {food.price_range}
+                          </span>
+                        )}
+                      </div>
+                      {foodDescription && (
+                        <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                          {foodDescription}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         )}
 
         {/* YouTube Shorts — external link, no embedded streaming */}
-        {food.youtube_shorts_url && (
+        {shop.youtube_shorts_url && (
           <a
-            href={food.youtube_shorts_url}
+            href={shop.youtube_shorts_url}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-between rounded-2xl bg-card/70 p-4 neon-border backdrop-blur transition-colors hover:bg-primary/5"
@@ -153,17 +200,17 @@ export default async function FoodDetailPage({
               <MapPin className="size-5 text-primary" />
               {t("location")}
             </h2>
-            {food.address && (
-              <p className="text-sm text-muted-foreground">{food.address}</p>
+            {shop.address && (
+              <p className="text-sm text-muted-foreground">{shop.address}</p>
             )}
             <GoogleMap
-              foods={[food]}
+              shops={[shop]}
               height="220px"
               className="overflow-hidden rounded-2xl neon-border"
             />
             <Button asChild className="w-full" size="lg">
               <a
-                href={googleDirectionsUrl(food)}
+                href={googleDirectionsUrl(shop)}
                 target="_blank"
                 rel="noopener noreferrer"
               >

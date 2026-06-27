@@ -16,14 +16,14 @@ const storageKey = (id: string) => `anor:liked:${id}`;
  *  - localStorage remembers this device's liked state so a reload shows the
  *    heart filled and the button doesn't invite re-spamming (UX-layer dedupe).
  *  - The real "one like per IP" guarantee lives in the DB (UNIQUE on
- *    food_likes); this component only POSTs the toggle.
+ *    shop_likes); this component only POSTs the toggle.
  */
 export function LikeButton({
-  foodId,
+  shopId,
   initialCount,
   className,
 }: {
-  foodId: string;
+  shopId: string;
   initialCount: number;
   className?: string;
 }) {
@@ -34,15 +34,15 @@ export function LikeButton({
 
   useEffect(() => {
     try {
-      setLiked(localStorage.getItem(storageKey(foodId)) === "1");
+      setLiked(localStorage.getItem(storageKey(shopId)) === "1");
     } catch {
       /* private mode — ignore */
     }
-  }, [foodId]);
+  }, [shopId]);
 
   function persist(value: boolean) {
     try {
-      localStorage.setItem(storageKey(foodId), value ? "1" : "0");
+      localStorage.setItem(storageKey(shopId), value ? "1" : "0");
     } catch {
       /* ignore */
     }
@@ -62,7 +62,7 @@ export function LikeButton({
     persist(nextLiked);
 
     try {
-      const res = await fetch(`/api/foods/${foodId}/like`, {
+      const res = await fetch(`/api/shops/${shopId}/like`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });

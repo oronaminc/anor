@@ -10,19 +10,19 @@ import {
   useJsApiLoader,
 } from "@react-google-maps/api";
 
-import type { Food } from "@/lib/types";
+import type { Shop } from "@/lib/types";
 import { MYEONGDONG_CENTER } from "@/lib/maps";
 import { localizedName } from "@/lib/i18n-food";
 
-type MapFood = Pick<
-  Food,
-  "id" | "name_ko" | "name_en" | "name_ja" | "name_es" | "lat" | "lng" | "category"
+type MapShop = Pick<
+  Shop,
+  "id" | "name_ko" | "name_en" | "name_ja" | "name_es" | "lat" | "lng"
 >;
 
 interface GoogleMapProps {
-  foods: MapFood[];
+  shops: MapShop[];
   height?: string;
-  /** Clicking a marker navigates to the food detail page. */
+  /** Clicking a marker navigates to the shop detail page. */
   linkToDetail?: boolean;
   className?: string;
   zoom?: number;
@@ -31,7 +31,7 @@ interface GoogleMapProps {
 const containerStyleBase = { width: "100%" };
 
 export default function GoogleMap({
-  foods,
+  shops,
   height = "320px",
   linkToDetail = false,
   className,
@@ -45,10 +45,10 @@ export default function GoogleMap({
 
   const points = useMemo(
     () =>
-      foods.filter(
-        (f) => typeof f.lat === "number" && typeof f.lng === "number",
+      shops.filter(
+        (s) => typeof s.lat === "number" && typeof s.lng === "number",
       ),
-    [foods],
+    [shops],
   );
 
   const center = useMemo(() => {
@@ -112,19 +112,19 @@ export default function GoogleMap({
           gestureHandling: "greedy",
         }}
       >
-        {points.map((food) => {
-          const name = localizedName(food, locale);
+        {points.map((shop) => {
+          const name = localizedName(shop, locale);
           return (
             <MarkerF
-              key={food.id}
-              position={{ lat: food.lat as number, lng: food.lng as number }}
+              key={shop.id}
+              position={{ lat: shop.lat as number, lng: shop.lng as number }}
               title={name}
               onClick={() => {
-                if (linkToDetail) router.push(`/food/${food.id}`);
-                else setActiveId(food.id);
+                if (linkToDetail) router.push(`/shop/${shop.id}`);
+                else setActiveId(shop.id);
               }}
             >
-              {activeId === food.id && !linkToDetail && (
+              {activeId === shop.id && !linkToDetail && (
                 <InfoWindowF onCloseClick={() => setActiveId(null)}>
                   <div style={{ fontWeight: 600, fontSize: 13 }}>{name}</div>
                 </InfoWindowF>

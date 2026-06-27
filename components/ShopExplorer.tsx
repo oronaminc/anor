@@ -3,21 +3,21 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import type { Food, SortKey } from "@/lib/types";
-import { sortFoods } from "@/lib/sort";
+import type { ShopWithFoods, SortKey } from "@/lib/types";
+import { sortShops } from "@/lib/sort";
 import { cn } from "@/lib/utils";
-import { FoodPost } from "@/components/FoodPost";
+import { ShopPost } from "@/components/ShopPost";
 
-export function FoodExplorer({ foods }: { foods: Food[] }) {
+export function ShopExplorer({ shops }: { shops: ShopWithFoods[] }) {
   const t = useTranslations("home");
   const ts = useTranslations("sort");
   const [sort, setSort] = useState<SortKey>("popular");
 
-  // Trending items are always pinned to the top, regardless of the sort key
+  // Trending shops are always pinned to the top, regardless of the sort key
   // (popularity / heart count) — within each group the key still applies.
   const visible = useMemo(
-    () => sortFoods(foods, sort, { trendingFirst: true }),
-    [foods, sort],
+    () => sortShops(shops, sort, { trendingFirst: true }),
+    [shops, sort],
   );
 
   return (
@@ -42,8 +42,8 @@ export function FoodExplorer({ foods }: { foods: Food[] }) {
       </div>
 
       <div className="divide-y divide-border">
-        {visible.map((food) => (
-          <FoodPost key={food.id} food={food} />
+        {visible.map((shop) => (
+          <ShopPost key={shop.id} shop={shop} />
         ))}
       </div>
     </section>

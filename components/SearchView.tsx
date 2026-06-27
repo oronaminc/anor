@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 
-import type { Food } from "@/lib/types";
-import { filterFoods, sortFoods } from "@/lib/sort";
+import type { ShopWithFoods } from "@/lib/types";
+import { filterShops, sortShops } from "@/lib/sort";
 import { normalizeQuery } from "@/lib/search";
-import { FoodCard } from "@/components/FoodCard";
+import { ShopCard } from "@/components/ShopCard";
 
 /** Debounce a changing value. */
 function useDebounced<T>(value: T, delay = 200): T {
@@ -20,7 +20,7 @@ function useDebounced<T>(value: T, delay = 200): T {
   return debounced;
 }
 
-export function SearchView({ foods }: { foods: Food[] }) {
+export function SearchView({ shops }: { shops: ShopWithFoods[] }) {
   const t = useTranslations("search");
   const locale = useLocale();
   const [raw, setRaw] = useState("");
@@ -32,8 +32,8 @@ export function SearchView({ foods }: { foods: Food[] }) {
   }, []);
 
   const results = useMemo(
-    () => sortFoods(filterFoods(foods, query), "popular"),
-    [foods, query],
+    () => sortShops(filterShops(shops, query), "popular"),
+    [shops, query],
   );
 
   const hasQuery = query.trim().length > 0;
@@ -110,8 +110,8 @@ export function SearchView({ foods }: { foods: Food[] }) {
             {t("results", { count: results.length })}
           </p>
           <motion.div layout className="grid grid-cols-2 gap-3">
-            {results.map((food) => (
-              <FoodCard key={food.id} food={food} query={query} />
+            {results.map((shop) => (
+              <ShopCard key={shop.id} shop={shop} query={query} />
             ))}
           </motion.div>
         </>

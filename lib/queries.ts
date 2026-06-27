@@ -1,37 +1,56 @@
 import "server-only";
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
-import type { Food } from "@/lib/types";
-import { DEMO_FOODS, isDemoMode } from "@/lib/demo-data";
+import type { Shop, ShopFood, ShopWithFoods } from "@/lib/types";
+import { DEMO_SHOPS, isDemoMode } from "@/lib/demo-data";
+
+/** Group menu foods (already globally ordered) under their shop. */
+function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
+  const byShop = new Map<string, ShopFood[]>();
+  for (const f of foods) {
+    const arr = byShop.get(f.shop_id);
+    if (arr) arr.push(f);
+    else byShop.set(f.shop_id, [f]);
+  }
+  return shops.map((s) => ({ ...s, foods: byShop.get(s.id) ?? [] }));
+}
 
 /**
- * Fetch all foods. Resilient by design: when no database is configured
- * (DATABASE_URL absent) OR demo mode is forced, returns the built-in demo
- * dataset so the app shows content with zero setup. With Neon configured it
- * always uses the real database.
+ * Fetch all shops with their menu foods. Resilient by design: when no database
+ * is configured (DATABASE_URL absent) OR demo mode is forced, returns the
+ * built-in demo dataset so the app shows content with zero setup. With Neon
+ * configured it always uses the real database.
  */
-export async function getFoods(): Promise<Food[]> {
-  if (isDemoMode() || !hasDb()) return DEMO_FOODS;
+export async function getShops(): Promise<ShopWithFoods[]> {
+  if (isDemoMode() || !hasDb()) return DEMO_SHOPS;
   try {
     const sql = getSql();
-    const rows = await sql`SELECT * FROM foods ORDER BY created_at DESC`;
-    return rows as Food[];
+    const shops = (await sql`SELECT * FROM shops ORDER BY created_at DESC`) as Shop[];
+    const foods = (await sql`
+      SELECT * FROM shop_foods ORDER BY shop_id, sort_order
+    `) as ShopFood[];
+    return attachFoods(shops, foods);
   } catch (err) {
-    console.error("getFoods error:", err);
+    console.error("getShops error:", err);
     return [];
   }
 }
 
-export async function getFoodById(id: string): Promise<Food | null> {
+export async function getShopById(id: string): Promise<ShopWithFoods | null> {
   if (isDemoMode() || !hasDb()) {
-    return DEMO_FOODS.find((f) => f.id === id) ?? null;
+    return DEMO_SHOPS.find((s) => s.id === id) ?? null;
   }
   try {
     const sql = getSql();
-    const rows = await sql`SELECT * FROM foods WHERE id = ${id} LIMIT 1`;
-    return (rows[0] as Food) ?? null;
+    const shops = (await sql`SELECT * FROM shops WHERE id = ${id} LIMIT 1`) as Shop[];
+    const shop = shops[0];
+    if (!shop) return null;
+    const foods = (await sql`
+      SELECT * FROM shop_foods WHERE shop_id = ${id} ORDER BY sort_order
+    `) as ShopFood[];
+    return { ...shop, foods };
   } catch (err) {
-    console.error("getFoodById error:", err);
+    console.error("getShopById error:", err);
     return null;
   }
 }

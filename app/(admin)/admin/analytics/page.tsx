@@ -8,7 +8,7 @@ import { formatViewCount } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-type FoodStat = {
+type ShopStat = {
   id: string;
   name_ko: string;
   view_count: number;
@@ -25,16 +25,16 @@ async function loadAnalytics() {
       configured: false,
       total: 0,
       events: [] as SearchEvent[],
-      topFoods: [] as FoodStat[],
-      likedFoods: [] as FoodStat[],
+      topShops: [] as ShopStat[],
+      likedShops: [] as ShopStat[],
     };
   }
 
   const sql = getSql();
-  const [events, topFoods, likedFoods, totalRows] = await Promise.all([
+  const [events, topShops, likedShops, totalRows] = await Promise.all([
     sql`SELECT * FROM search_events ORDER BY created_at DESC LIMIT ${RECENT_WINDOW}`,
-    sql`SELECT id, name_ko, view_count, like_count FROM foods ORDER BY view_count DESC LIMIT 10`,
-    sql`SELECT id, name_ko, view_count, like_count FROM foods ORDER BY like_count DESC LIMIT 10`,
+    sql`SELECT id, name_ko, view_count, like_count FROM shops ORDER BY view_count DESC LIMIT 10`,
+    sql`SELECT id, name_ko, view_count, like_count FROM shops ORDER BY like_count DESC LIMIT 10`,
     sql`SELECT count(*)::int AS count FROM search_events`,
   ]);
 
@@ -42,8 +42,8 @@ async function loadAnalytics() {
     configured: true,
     total: (totalRows[0]?.count as number) ?? events.length,
     events: events as SearchEvent[],
-    topFoods: topFoods as FoodStat[],
-    likedFoods: likedFoods as FoodStat[],
+    topShops: topShops as ShopStat[],
+    likedShops: likedShops as ShopStat[],
   };
 }
 
@@ -79,7 +79,7 @@ function timeAgo(iso: string): string {
 }
 
 export default async function AdminAnalyticsPage() {
-  const { configured, total, events, topFoods, likedFoods } =
+  const { configured, total, events, topShops, likedShops } =
     await loadAnalytics();
   const { top, zero } = aggregate(events);
 
@@ -116,7 +116,7 @@ export default async function AdminAnalyticsPage() {
               icon={<Eye className="size-4" />}
               label="총 조회"
               value={formatViewCount(
-                topFoods.reduce((s, f) => s + f.view_count, 0),
+                topShops.reduce((s, f) => s + f.view_count, 0),
               )}
               hint="상위 10개 합계"
             />
@@ -124,7 +124,7 @@ export default async function AdminAnalyticsPage() {
               icon={<Heart className="size-4" />}
               label="총 좋아요"
               value={formatViewCount(
-                likedFoods.reduce((s, f) => s + f.like_count, 0),
+                likedShops.reduce((s, f) => s + f.like_count, 0),
               )}
               hint="상위 10개 합계"
             />
@@ -185,11 +185,11 @@ export default async function AdminAnalyticsPage() {
             </Panel>
 
             <Panel title="조회 TOP 10" icon={<Eye className="size-4" />}>
-              <FoodRanking foods={topFoods} metric="view" />
+              <ShopRanking shops={topShops} metric="view" />
             </Panel>
 
             <Panel title="좋아요 TOP 10" icon={<Heart className="size-4" />}>
-              <FoodRanking foods={likedFoods} metric="like" />
+              <ShopRanking shops={likedShops} metric="like" />
             </Panel>
           </div>
 
@@ -271,26 +271,26 @@ function Panel({
   );
 }
 
-function FoodRanking({
-  foods,
+function ShopRanking({
+  shops,
   metric,
 }: {
-  foods: FoodStat[];
+  shops: ShopStat[];
   metric: "view" | "like";
 }) {
-  if (foods.length === 0) return <Empty>데이터가 없습니다.</Empty>;
+  if (shops.length === 0) return <Empty>데이터가 없습니다.</Empty>;
   return (
     <ol className="divide-y">
-      {foods.map((f, i) => (
-        <li key={f.id} className="flex items-center gap-3 py-2.5 text-sm">
+      {shops.map((s, i) => (
+        <li key={s.id} className="flex items-center gap-3 py-2.5 text-sm">
           <span className="w-5 shrink-0 text-right font-bold tabular-nums text-muted-foreground">
             {i + 1}
           </span>
           <Link
-            href={`/admin/foods/${f.id}/edit`}
+            href={`/admin/shops/${s.id}/edit`}
             className="min-w-0 flex-1 truncate font-medium hover:underline"
           >
-            {f.name_ko}
+            {s.name_ko}
           </Link>
           <span className="inline-flex shrink-0 items-center gap-1 tabular-nums text-muted-foreground">
             {metric === "view" ? (
@@ -298,7 +298,7 @@ function FoodRanking({
             ) : (
               <Heart className="size-3.5" />
             )}
-            {formatViewCount(metric === "view" ? f.view_count : f.like_count)}
+            {formatViewCount(metric === "view" ? s.view_count : s.like_count)}
           </span>
         </li>
       ))}
