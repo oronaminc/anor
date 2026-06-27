@@ -1,5 +1,3 @@
-import type { Shop } from "./types";
-
 /**
  * Weekly engagement + time-based "organic" growth (no cron).
  *
@@ -21,13 +19,27 @@ const HOUR_MS = 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
 
 // Organic views per MINUTE, per speed level, for a normal (weight 1) shop.
-// Tuned so growth is visible on refresh: speed 5 ≈ 15 views/min for a normal
-// shop (≈37/min when trending), speed 2 ≈ 6/min; speed 0 disables it entirely.
-const VIEW_RATE_PER_MIN = 3;
-// Trending shops grow this much faster than the rest.
-const TREND_MULTIPLIER = 2.5;
-// Organic likes accrue as this fraction of organic views (keeps views > likes).
-const LIKE_RATIO = 0.15;
+// Kept gentle so the seeded base + each shop's growth_weight keep numbers
+// varied and believable; the live ticker still shows them climbing. Speed 0
+// disables organic growth entirely.
+const VIEW_RATE_PER_MIN = 0.5;
+// Trending shops grow somewhat faster than the rest.
+const TREND_MULTIPLIER = 1.8;
+// Per-shop organic like ratio range (so like/view ratios differ between shops).
+const MIN_LIKE_RATIO = 0.07;
+const MAX_LIKE_RATIO = 0.2;
+
+/** Deterministic per-shop like ratio in [MIN, MAX], from the shop id (FNV-1a),
+ *  so shops don't all share the same like/view ratio. */
+export function likeRatioFor(id: string | undefined): number {
+  if (!id) return 0.15;
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    h = (h ^ id.charCodeAt(i)) >>> 0;
+    h = (h * 16777619) >>> 0;
+  }
+  return MIN_LIKE_RATIO + ((h % 1000) / 1000) * (MAX_LIKE_RATIO - MIN_LIKE_RATIO);
+}
 
 /** Epoch ms of the current KST week's Monday 00:00. */
 export function kstWeekStartMs(now: number): number {
@@ -53,14 +65,14 @@ export function clampSpeed(speed: number): number {
   return Math.min(MAX_SPEED, Math.max(MIN_SPEED, Math.round(speed)));
 }
 
-type GrowthShop = Pick<
-  Shop,
-  | "weekly_view_count"
-  | "weekly_like_count"
-  | "week_start"
-  | "growth_weight"
-  | "is_trending"
->;
+type GrowthShop = {
+  id?: string;
+  weekly_view_count: number;
+  weekly_like_count: number;
+  week_start: string;
+  growth_weight: number;
+  is_trending: boolean;
+};
 
 /** Displayed this-week view/like counts (real + organic), views > likes. */
 export function computeDisplay(
@@ -83,7 +95,7 @@ export function computeDisplay(
   const organicViews = Math.floor(
     VIEW_RATE_PER_MIN * s * weight * trend * elapsedMinutes,
   );
-  const organicLikes = Math.floor(organicViews * LIKE_RATIO);
+  const organicLikes = Math.floor(organicViews * likeRatioFor(shop.id));
 
   const likes = baseLikes + organicLikes;
   let views = baseViews + organicViews;
@@ -101,7 +113,7 @@ export function organicRatePerMin(
   const weight = Number.isFinite(shop.growth_weight) ? shop.growth_weight : 1;
   const trend = shop.is_trending ? TREND_MULTIPLIER : 1;
   const views = VIEW_RATE_PER_MIN * s * weight * trend;
-  return { views, likes: views * LIKE_RATIO };
+  return { views, likes: views * likeRatioFor(shop.id) };
 }
 
 /** Read the 0–5 growth speed from a settings row; falls back to the default. */

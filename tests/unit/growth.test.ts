@@ -99,7 +99,7 @@ describe("computeDisplay", () => {
     const hot = { ...base, is_trending: true };
     const a = computeDisplay(hot, 5, NOW);
     const b = computeDisplay(hot, 5, NOW + 60_000);
-    expect(b.views - a.views).toBeGreaterThanOrEqual(10);
+    expect(b.views - a.views).toBeGreaterThanOrEqual(3);
   });
 });
 

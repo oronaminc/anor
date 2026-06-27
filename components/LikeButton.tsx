@@ -3,20 +3,18 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
+import { motion, useAnimationControls } from "framer-motion";
 
-import { cn, formatViewCount } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const storageKey = (id: string) => `anor:liked:${id}`;
 
 /**
- * Anonymous "like" toggle. No login required.
- *
- *  - Optimistic UI: flips instantly, reconciles with the server's authoritative
- *    count when it responds (demo mode keeps the optimistic value).
- *  - localStorage remembers this device's liked state so a reload shows the
- *    heart filled and the button doesn't invite re-spamming (UX-layer dedupe).
- *  - The real "one like per IP" guarantee lives in the DB (UNIQUE on
- *    shop_likes); this component only POSTs the toggle.
+ * Anonymous "like" toggle. No login. The reaction is the heart: tapping fills
+ * it red with a pop, so a human press is unmistakable even though the big
+ * weekly count barely moves by one. Optimistic, reconciles with the server,
+ * localStorage remembers this device's liked state; the real one-like-per-IP
+ * guarantee lives in the DB (UNIQUE on shop_likes).
  */
 export function LikeButton({
   shopId,
@@ -31,7 +29,9 @@ export function LikeButton({
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [pending, setPending] = useState(false);
+  const heart = useAnimationControls();
 
+  useEffect(() => setCount(initialCount), [initialCount]);
   useEffect(() => {
     try {
       setLiked(localStorage.getItem(storageKey(shopId)) === "1");
@@ -56,10 +56,15 @@ export function LikeButton({
     const prevCount = count;
     const nextLiked = !liked;
 
-    // Optimistic update.
     setLiked(nextLiked);
     setCount((c) => Math.max(0, c + (nextLiked ? 1 : -1)));
     persist(nextLiked);
+    if (nextLiked) {
+      heart.start({
+        scale: [1, 1.45, 0.9, 1.15, 1],
+        transition: { duration: 0.45 },
+      });
+    }
 
     try {
       const res = await fetch(`/api/shops/${shopId}/like`, {
@@ -68,16 +73,12 @@ export function LikeButton({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "failed");
-
-      // Reconcile with the server's authoritative values when present.
       if (data && typeof data.like_count === "number") setCount(data.like_count);
       if (data && typeof data.liked === "boolean") {
         setLiked(data.liked);
         persist(data.liked);
       }
     } catch {
-      // Revert to the captured pre-toggle state (restoring the exact count
-      // avoids the Math.max-clamp asymmetry that could drift +1 at count 0).
       setLiked(prevLiked);
       setCount(prevCount);
       persist(prevLiked);
@@ -95,15 +96,17 @@ export function LikeButton({
       aria-pressed={liked}
       aria-label={t("like")}
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60",
+        "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60",
         liked
-          ? "bg-foreground text-background"
-          : "bg-card text-foreground hover:bg-muted",
+          ? "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400"
+          : "border-border bg-card text-foreground hover:bg-muted",
         className,
       )}
     >
-      <Heart className={cn("size-4", liked && "fill-current")} />
-      <span className="tabular-nums">{formatViewCount(count)}</span>
+      <motion.span animate={heart} className="inline-flex">
+        <Heart className={cn("size-4", liked && "fill-red-500 text-red-500")} />
+      </motion.span>
+      <span className="tabular-nums">{count.toLocaleString()}</span>
     </button>
   );
 }
