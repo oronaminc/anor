@@ -25,12 +25,10 @@ export default function AdminLoginPage({
 
   return (
     <div className="flex min-h-dvh items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6 rounded-3xl bg-card/80 p-6 neon-border glow backdrop-blur-xl">
+      <div className="w-full max-w-sm space-y-6 rounded-3xl border border-border bg-card p-6 shadow-sm">
         <div className="space-y-1 text-center">
-          <p className="text-3xl">🔥</p>
-          <h1 className="font-display text-xl font-extrabold uppercase tracking-wide gradient-text">
-            관리자 로그인
-          </h1>
+          <p className="text-3xl">🍢</p>
+          <h1 className="text-xl font-extrabold tracking-tight">관리자 로그인</h1>
           <p className="text-sm text-muted-foreground">
             명동 길거리 음식 가이드 관리
           </p>
@@ -43,17 +41,6 @@ export default function AdminLoginPage({
             value={searchParams.redirect ?? "/admin"}
           />
           <div className="space-y-1.5">
-            <Label htmlFor="email">이메일</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="admin@example.com"
-            />
-          </div>
-          <div className="space-y-1.5">
             <Label htmlFor="password">비밀번호</Label>
             <Input
               id="password"
@@ -61,6 +48,7 @@ export default function AdminLoginPage({
               type="password"
               autoComplete="current-password"
               required
+              autoFocus
               placeholder="••••••••"
             />
           </div>

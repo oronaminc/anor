@@ -1,10 +1,10 @@
 import type { Food } from "./types";
 
 /**
- * Static demo dataset mirroring supabase/seed.sql. Used as a fallback so the
- * site shows realistic content when Supabase is not configured AND demo mode
- * is explicitly enabled via NEXT_PUBLIC_DEMO_MODE=1 (e.g. previews / docs
- * screenshots). It never overrides a real Supabase connection.
+ * Static demo dataset mirroring db/seed.sql. Used as a fallback so the site
+ * shows realistic content when no database is configured (DATABASE_URL absent)
+ * or demo mode is forced via NEXT_PUBLIC_DEMO_MODE=1 (e.g. previews / docs
+ * screenshots). It never overrides a real Neon connection.
  */
 export const DEMO_FOODS: Food[] = [
   {
@@ -28,6 +28,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/lobster.svg",
     hashtags: ["치즈랍스터", "명동명물", "비주얼", "해산물"],
     view_count: 3015,
+    like_count: 412,
     is_trending: true,
     price_range: "₩15,000~20,000",
     created_at: "2024-05-20T09:00:00.000Z",
@@ -53,6 +54,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/hotteok.svg",
     hashtags: ["겨울간식", "호떡", "달달", "명동"],
     view_count: 2410,
+    like_count: 388,
     is_trending: true,
     price_range: "₩2,000~3,000",
     created_at: "2024-05-18T09:00:00.000Z",
@@ -78,6 +80,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/tteokbokki.svg",
     hashtags: ["매콤", "분식", "명동맛집", "떡볶이"],
     view_count: 1820,
+    like_count: 263,
     is_trending: true,
     price_range: "₩3,000~5,000",
     created_at: "2024-05-15T09:00:00.000Z",
@@ -103,6 +106,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/potato.svg",
     hashtags: ["회오리감자", "바삭", "인스타", "간식"],
     view_count: 1675,
+    like_count: 247,
     is_trending: true,
     price_range: "₩4,000~5,000",
     created_at: "2024-05-12T09:00:00.000Z",
@@ -128,6 +132,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/mandu.svg",
     hashtags: ["만두", "왕만두", "김치만두", "든든"],
     view_count: 1340,
+    like_count: 176,
     is_trending: false,
     price_range: "₩4,000~6,000",
     created_at: "2024-05-10T09:00:00.000Z",
@@ -153,6 +158,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/dakkkochi.svg",
     hashtags: ["닭꼬치", "숯불", "매콤", "꼬치"],
     view_count: 1120,
+    like_count: 152,
     is_trending: false,
     price_range: "₩3,000~4,000",
     created_at: "2024-05-08T09:00:00.000Z",
@@ -178,6 +184,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/gyeranppang.svg",
     hashtags: ["계란빵", "아침대용", "고소함", "간식"],
     view_count: 980,
+    like_count: 121,
     is_trending: false,
     price_range: "₩2,000~3,000",
     created_at: "2024-05-05T09:00:00.000Z",
@@ -202,6 +209,7 @@ export const DEMO_FOODS: Food[] = [
     thumbnail_url: "/demo/bungeoppang.svg",
     hashtags: ["붕어빵", "팥", "겨울간식", "추억"],
     view_count: 760,
+    like_count: 88,
     is_trending: false,
     price_range: "₩2,000~3,000",
     created_at: "2024-05-02T09:00:00.000Z",

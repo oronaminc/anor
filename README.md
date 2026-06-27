@@ -1,95 +1,89 @@
 # 명동 길거리 음식 가이드 (Myeongdong Street Food Guide)
 
 명동의 인기 길거리 음식을 지도와 함께 한눈에 볼 수 있는 모바일 우선 웹
-서비스입니다. **사이버펑크 × K-데몬 헌터스** 무드의 네온/글래스 디자인으로,
-트렌딩/랭킹, 검색·정렬, Google 지도, 길찾기, 다국어(i18n), 네온 테마 색상/다크
-모드, 관리자 CRUD를 제공합니다.
+서비스입니다. 트렌딩/랭킹, 검색·정렬, Google 지도, 길찾기, 다국어(i18n),
+라이트/다크 모드, 로그인 없는 **좋아요**, 검색어 수집, 그리고 비밀번호로 보호되는
+**관리자 CRUD**를 제공합니다.
+
+> 스택: **Next.js + Neon(Postgres) + Cloudflare R2(이미지) + 비밀번호 쿠키 인증**
 
 ## 🚀 샘플 바로 배포 (Vercel, 설정 0)
 
-아래 버튼으로 이 브랜치를 Vercel에 가져와 **환경 변수 없이** 바로 배포할 수
-있습니다. Supabase가 설정되지 않으면 내장 **데모 데이터**(명동 길거리 음식 8종)로
-자동 렌더링되어 화면을 즉시 확인할 수 있습니다.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Foronaminc%2Fanor%2Ftree%2Fclaude%2Fsleepy-ride-rpatif&project-name=myeongdong-street-food&repository-name=myeongdong-street-food)
-
-또는 수동으로: **[vercel.com/new](https://vercel.com/new) → `oronaminc/anor` import →
-브랜치 `claude/sleepy-ride-rpatif` 선택 → Deploy** (환경 변수 입력 없이 진행 가능).
-
-> 지도는 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` 를, 실제 데이터/관리자는 Supabase
-> 변수를 추가하면 활성화됩니다. (아래 [환경 변수](#2-환경-변수) 참고)
+`DATABASE_URL` 등 환경 변수가 **없으면** 내장 **데모 데이터**(명동 길거리 음식
+8종)로 자동 렌더링되어 화면을 즉시 확인할 수 있습니다. 지도는
+`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`, 실제 데이터/관리자는 아래
+[환경 변수](#2-환경-변수)를 추가하면 활성화됩니다.
 
 ## 스크린샷
 
-> 데모 모드(`NEXT_PUBLIC_DEMO_MODE=1`)로 렌더링한 모바일 화면입니다. 기본 테마는
-> 다크 + 데몬 마젠타이며, 지도는 Google Maps API 키 설정 시 표시됩니다.
+> 데모 모드(`NEXT_PUBLIC_DEMO_MODE=1`)로 렌더링한 모바일 화면입니다.
 
-| 홈 (다크·헌트릭스 홀로) | 검색 (네온 하이라이트) | 트렌딩 |
+| 홈 | 검색 | 트렌딩 |
 | :---: | :---: | :---: |
 | <img src="docs/screenshots/01-home.png" width="230" alt="홈 화면" /> | <img src="docs/screenshots/03-search.png" width="230" alt="검색" /> | <img src="docs/screenshots/04-trending.png" width="230" alt="트렌딩" /> |
 
-| 음식 상세 | 화면 설정 (홀로 테마·언어) | 테마 전환 (삭스 블루 / 水色) |
+| 음식 상세 | 화면 설정 (언어) | 테마 전환 |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/02-detail.png" width="230" alt="음식 상세" /> | <img src="docs/screenshots/05-appearance.png" width="230" alt="화면 설정" /> | <img src="docs/screenshots/06-home-sax.png" width="230" alt="삭스 블루 테마" /> |
+| <img src="docs/screenshots/02-detail.png" width="230" alt="음식 상세" /> | <img src="docs/screenshots/05-appearance.png" width="230" alt="화면 설정" /> | <img src="docs/screenshots/06-home-sax.png" width="230" alt="테마" /> |
 
 ## 기술 스택
 
 - **Next.js 14** (App Router) + **TypeScript**
-- **Tailwind CSS** + **shadcn/ui** + **framer-motion** (네온 글로우·마이크로 인터랙션)
-- 디스플레이 폰트 **Orbitron** (라틴) / **Black Han Sans** (한글) — 런타임 로드
-- **Supabase** (Postgres + Auth + Storage)
+- **Tailwind CSS** + **framer-motion** + Radix 프리미티브 (모노크롬 디자인)
+- **Neon Postgres** — `@neondatabase/serverless` 드라이버로 직접 SQL
+- **Cloudflare R2** — 썸네일 이미지 저장(`aws4fetch`), DB엔 URL만
+- **관리자 인증** — 비밀번호 + 서명된 HttpOnly 쿠키 (Web Crypto HMAC, 외부 서비스 X)
 - **Google Maps** (`@react-google-maps/api`)
 - **next-intl** (ko / en / ja / es 다국어)
 - **Vitest** (unit) + **Playwright** (e2e)
-- 배포: **Vercel**
+- 배포: **Vercel** (다른 호스팅도 동작)
 
 ## 주요 기능
 
-- 🎨 **홀로그래픽 테마 색상 피커** — 5가지 프리셋(헌트릭스 홀로 · 삭스 블루(水色) ·
-  라벤더 · 골드 부적 · 데몬 퍼플) + 라이트/다크/시스템 모드(기본 다크). 핑크→퍼플→
-  블루 3색 홀로 그라데이션, `localStorage` 저장, CSS 변수로 글로우까지 부드럽게 전환.
-- 🌏 **다국어(i18n)** — 한국어·영어·일본어·스페인어 4개 로케일. 모든 UI 문구를
-  `messages/*.json` 으로 외부화, 브라우저 언어 자동 감지(기본 ko), 설정에서 전환.
-- 🔍 **검색** — 이름·해시태그·카테고리 즉시 검색(디바운스), 매칭어 하이라이트,
-  깔끔한 빈 상태.
-- 🗺 **Google 지도** — 다중 마커(홈/지도) · 단일 마커(상세), 마커 클릭 시 상세
-  이동, **길찾기** Google Maps 딥링크.
-- 📱 **모바일 하단 내비게이션** — 홈 / 지도 / 트렌딩 / 검색.
-- 🔥 트렌딩(HOT/급상승 배지) + 주간 랭킹(조회수 TOP), 인기순/최신순 정렬.
-- 상세 페이지 방문 시 조회수 증가(API Route → SQL 함수), 유튜브 쇼츠 **외부 링크**.
-- 관리자: 이메일/비밀번호 로그인, 음식 CRUD(서버 액션, 다국어 필드 포함),
-  썸네일 Storage 업로드, 급상승 토글.
+- 🔍 **검색** — 이름·해시태그·카테고리 즉시 검색(디바운스), 매칭어 하이라이트.
+  검색어는 익명 집계되어 관리자 통계에 표시됩니다.
+- ❤️ **좋아요(로그인 없음)** — IP당 1회(DB UNIQUE) + localStorage 중복 방지 +
+  rate limit. 낙관적 UI로 즉시 반영.
+- 📈 **조회수 / 통계** — 상세 방문 시 조회수 집계(6시간 디바이스 중복 방지),
+  `/admin/analytics`에서 인기 검색어·결과 없는 검색어·조회/좋아요 TOP 확인.
+- 🌏 **다국어(i18n)** — 한국어·영어·일본어·스페인어 4개 로케일, 브라우저 언어 감지.
+- 🗺 **Google 지도** — 다중/단일 마커, 마커 클릭 상세 이동, **길찾기** 딥링크.
+- 📱 **모바일 하단 내비** — 홈 / 지도 / 트렌딩 / 검색.
+- 🛠 **관리자** — 비밀번호 로그인, 음식 CRUD(다국어 필드), **R2 이미지 업로드**,
+  급상승 토글.
+- 🔒 **남용 방지** — 동일 출처(CORS) 가드, IP별 rate limit, IP 해시(원본 미저장).
 
 ## 프로젝트 구조
 
 ```
 app/
   (public)/            # 공개 페이지 (헤더 + 하단 내비)
-    page.tsx           # 홈
-    search/            # 검색
-    trending/          # 트렌딩 + 랭킹
-    map/               # 전체 지도
-    food/[id]/         # 음식 상세
-  (admin)/admin/       # 관리자 (미들웨어로 보호)
-  api/foods/[id]/view  # 조회수 증가 API
-components/
-  theme/               # ThemeProvider / 프리셋 / no-FOUC 스크립트
-  GoogleMap.tsx        # 재사용 지도 컴포넌트
-  AppearanceSheet.tsx  # 화면 설정 바텀시트 (테마·언어)
-  BottomNav.tsx, SiteHeader.tsx, FoodCard.tsx, SearchView.tsx ...
-i18n/                  # next-intl 설정 (config / request / locale 액션)
-messages/              # en.json / ja.json / ko.json / es.json
-lib/                   # 타입, 정렬·검색 유틸, 지도 유틸, i18n-food 헬퍼, 쿼리
-supabase/migrations/   # 0001_init.sql, 0002_i18n.sql
-supabase/seed.sql      # 다국어 시드 8종
+    page.tsx           # 홈 (Threads 스타일 피드)
+    search/  trending/  map/  food/[id]/
+  (admin)/admin/       # 관리자 (미들웨어 쿠키 세션으로 보호) + analytics
+  api/foods/[id]/view  # 조회수 증가
+  api/foods/[id]/like  # 좋아요 토글 (IP 중복 방지)
+  api/search/log       # 검색어 수집
+  robots.ts  sitemap.ts
+components/            # FoodPost, FoodCard, SearchView, LikeButton, GoogleMap ...
+i18n/                  # next-intl 설정
+messages/              # ko / en / ja / es
+lib/
+  db.ts                # Neon sql 클라이언트
+  session.ts auth.ts   # 비밀번호 + 서명 쿠키 인증
+  storage.ts           # Cloudflare R2 업로드
+  ip.ts rate-limit.ts request-guard.ts   # 남용 방지
+  queries.ts demo-data.ts sort.ts ...
+db/                    # schema.sql + seed.sql (Neon Postgres)
 tests/                 # vitest(unit) / playwright(e2e)
 ```
 
 ## 1. 사전 준비
 
-- Node.js 20+
-- [Supabase](https://supabase.com) 프로젝트
-- [Google Cloud Console](https://console.cloud.google.com) — Maps JavaScript API 키
+- Node.js 20+ (CI는 22)
+- [Neon](https://neon.tech) 프로젝트 (Postgres)
+- [Cloudflare R2](https://developers.cloudflare.com/r2/) 버킷 (이미지 업로드용, 선택)
+- [Google Cloud Console](https://console.cloud.google.com) — Maps JavaScript API 키 (선택)
 
 ## 2. 환경 변수
 
@@ -101,110 +95,75 @@ cp .env.local.example .env.local
 
 | 변수 | 설명 |
 | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon public 키 |
-| `SUPABASE_SERVICE_ROLE_KEY` | 서버 전용 service role 키 (브라우저 노출 금지) |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps JavaScript API 키 |
-| `NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET` | 썸네일 버킷명 (기본 `food-thumbnails`) |
-| `NEXT_PUBLIC_DEMO_MODE` | (선택) `1` 이면 Supabase가 있어도 강제로 데모 데이터 사용 |
+| `DATABASE_URL` | Neon Postgres 연결 문자열 (없으면 데모 데이터) |
+| `ADMIN_PASSWORD` | 관리자 비밀번호 (또는 `ADMIN_PASSWORD_HASH` = sha256 hex) |
+| `SESSION_SECRET` | 세션 쿠키 서명용 랜덤 문자열 (`openssl rand -hex 32`) |
+| `IP_HASH_SALT` | 좋아요 IP 해시용 비밀값 (원본 IP는 저장 안 함) |
+| `NEXT_PUBLIC_SITE_URL` | 공개 도메인 (robots/sitemap·동일 출처 허용) |
+| `R2_ACCOUNT_ID` 외 | R2 이미지 업로드용 (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps 키 (선택) |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` | (선택) 분산 rate limit |
+| `NEXT_PUBLIC_DEMO_MODE` | (선택) `1` 이면 DB가 있어도 데모 데이터 강제 |
 
-> Supabase 변수가 **없으면 자동으로 데모 데이터**가 표시됩니다(설정 0 배포용).
-> 실제 DB를 쓰려면 아래 Supabase 변수를 채우세요.
+> `DATABASE_URL` 이 **없으면 자동으로 데모 데이터**가 표시됩니다(설정 0 배포용).
 
-Google Maps 키는 **APIs & Services → Credentials** 에서 발급하고 **Maps
-JavaScript API** 를 활성화합니다. 키는 사용 도메인(예: `localhost:3000`,
-배포 도메인)으로 제한하는 것을 권장합니다.
+## 3. 데이터베이스 (Neon)
 
-## 3. 데이터베이스 마이그레이션 & 시드
-
-### 방법 A — Supabase SQL Editor (가장 간단)
-
-1. Supabase 대시보드 → **SQL Editor**
-2. `supabase/migrations/0001_init.sql` 실행
-3. `supabase/migrations/0002_i18n.sql` 실행
-4. `supabase/seed.sql` 실행
-
-### 방법 B — Supabase CLI
+Neon 콘솔에서 프로젝트를 만들고 스키마/시드를 적용합니다.
 
 ```bash
-npm i -g supabase
-supabase link --project-ref <your-project-ref>
-supabase db push                               # 모든 마이그레이션 적용
-supabase db execute --file supabase/seed.sql   # 시드
+psql "$DATABASE_URL" -f db/schema.sql     # 테이블 + 함수
+psql "$DATABASE_URL" -f db/seed.sql       # (선택) 샘플 8종
 ```
 
-마이그레이션은 다음을 생성/변경합니다:
+`db/schema.sql` 는 `foods` / `food_likes` / `search_events` 테이블과
+`increment_view_count` · `toggle_like` · `log_search` 함수를 만듭니다. RLS·역할은
+없으며, 모든 DB 접근은 서버에서 `DATABASE_URL` 한 역할로만 일어납니다.
 
-- `foods` 테이블 + 인덱스, RLS(누구나 SELECT, 인증 사용자만 쓰기)
-- `increment_view_count(food_id uuid)` 함수, `food-thumbnails` Storage 버킷
-- (0002) i18n 컬럼: `name_ja`, `name_es`, `translations jsonb`
+## 4. 다국어(i18n)
 
-## 4. 다국어(i18n) 동작 방식
-
-- **UI 문구**: `messages/{ko,en,ja,es}.json` 에 모두 외부화. next-intl 의 쿠키
-  기반(URL 비변경) 방식으로, 첫 방문 시 `Accept-Language` 로 자동 감지하고
-  이후에는 설정에서 고른 언어를 `NEXT_LOCALE` 쿠키에 저장합니다. 기본은 `ko`.
-- **음식 데이터**:
-  - 이름은 전용 컬럼 `name_ko / name_en / name_ja / name_es` 사용.
-  - 설명은 `translations` **JSONB** 컬럼에 로케일별로 저장
-    (`{ "en": "...", "ja": "...", "es": "..." }`). 기본 `description` 컬럼은
-    한국어 텍스트입니다.
-  - 누락 시 영어 → 한국어 순으로 자동 폴백하여 빈 값이 노출되지 않습니다
-    (`lib/i18n-food.ts`).
+- **UI 문구**: `messages/{ko,en,ja,es}.json`. next-intl 쿠키 기반(URL 비변경),
+  첫 방문 시 `Accept-Language` 자동 감지(기본 `ko`), 이후 `NEXT_LOCALE` 쿠키 저장.
+- **음식 데이터**: 이름은 `name_ko/en/ja/es` 컬럼, 설명은 `translations` JSONB.
+  누락 시 영어 → 한국어로 폴백(`lib/i18n-food.ts`).
 
 ## 5. 테마 시스템
 
-- 액센트 프리셋과 라이트/다크/시스템 모드는 `localStorage`(`md.accent`,
-  `md.mode`)에 저장되고 `<html>` 의 `data-accent` 속성과 `.dark` 클래스로
-  적용됩니다. 색상은 모두 CSS 변수(`app/globals.css`)로 정의되어 전환이
-  부드럽습니다. `<head>` 의 인라인 스크립트가 첫 페인트 전에 적용해 FOUC 를
-  방지합니다.
+액센트/모드는 `localStorage`(`md.accent`, `md.mode`)에 저장되어 `<html>` 속성으로
+적용되며, 색상은 CSS 변수(`app/globals.css`)로 정의됩니다. `<head>` 인라인
+스크립트가 첫 페인트 전에 적용해 FOUC를 방지합니다.
 
-## 6. 관리자 계정 생성
+## 6. 관리자 로그인
 
-Supabase 대시보드 → **Authentication → Users → Add user** 로 이메일/비밀번호
-사용자를 만든 뒤 `/admin/login` 에 로그인합니다. (운영자 백오피스 UI 문구는
-한국어로 고정되어 있습니다.)
+`ADMIN_PASSWORD`(또는 `ADMIN_PASSWORD_HASH`)와 `SESSION_SECRET`을 설정한 뒤
+`/admin/login` 에서 **비밀번호**로 로그인합니다. 비밀번호를 모르면 아무도 접근할 수
+없습니다. (백오피스 UI 문구는 한국어 고정.)
 
 ## 7. 로컬 개발 & 스크립트
 
 ```bash
 npm install
 npm run dev        # 개발 서버 (http://localhost:3000)
-
 npm run build      # 프로덕션 빌드
 npm run start      # 프로덕션 서버
 npm run lint       # ESLint
 npm run typecheck  # tsc --noEmit
 npm run test       # Vitest (단위 테스트)
-npm run test:e2e   # Playwright (e2e, 빌드 후 자동 서버 기동)
+npm run test:e2e   # Playwright (e2e)
 ```
 
-> 빌드/단위 테스트/린트는 실제 Supabase·Google 키 없이도 통과하도록 설계되어
-> 있습니다(키가 없으면 데이터는 빈 목록, 지도는 안내 플레이스홀더로 폴백).
-> `NEXT_PUBLIC_DEMO_MODE=1` 로 빌드/실행하면 내장 샘플 데이터로 미리볼 수
-> 있습니다.
+> 빌드/단위 테스트/린트는 실제 DB·키 없이도 통과합니다(데모 데이터/안내
+> 플레이스홀더로 폴백). 관리자 로그인 e2e는 `ADMIN_PASSWORD`가 있을 때만 실행됩니다.
 
-## 8. CI
+## 8. 배포
 
-`.github/workflows/ci.yml` 가 push/PR 마다 lint → typecheck → vitest →
-playwright 를 실행합니다. 비밀 값이 없으면 placeholder 환경 변수로
-빌드/실행합니다. 실제 값을 쓰려면 리포지토리 **Settings → Secrets** 에
-`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` 를 등록하세요.
-
-## 9. Vercel 배포
-
-1. GitHub 리포지토리를 Vercel 에 import
-2. **Environment Variables** 에 `.env.local` 의 모든 변수를 등록
-3. Google Cloud 콘솔에서 키 허용 도메인에 Vercel 도메인 추가
-4. Deploy — 프레임워크는 자동으로 Next.js 로 감지됩니다 (`vercel.json` 포함,
-   리전 `icn1`).
+Vercel에 import → 환경 변수 등록 → Deploy. 자세한 단계와 보안 요약은
+**[DEPLOY.md](./DEPLOY.md)** 를 참고하세요.
 
 ## 보안 메모
 
-- 하드코딩된 비밀 값 없음 — 모든 키는 환경 변수로 주입됩니다.
-- `SUPABASE_SERVICE_ROLE_KEY` 는 서버에서만 사용되며 클라이언트 번들에
-  포함되지 않습니다.
-- 조회수 증가는 `SECURITY DEFINER` SQL 함수로 처리해 익명 사용자가 테이블
-  UPDATE 권한 없이 카운터만 올릴 수 있습니다.
+- 하드코딩된 비밀 값 없음 — 모든 키는 환경 변수로 주입.
+- 관리자: 비밀번호 + 서명 쿠키(미들웨어 + 레이아웃 + 서버액션 3중 게이트), `noindex`,
+  robots `Disallow`.
+- 좋아요/조회/검색 API: 동일 출처 가드 + IP rate limit + UUID 검증 + 일반화된 오류.
+- 개인정보: 원본 IP 저장 안 함 — `sha256(IP + IP_HASH_SALT)` 만 저장.

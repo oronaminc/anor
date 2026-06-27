@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSql } from "@/lib/db";
+import { hasDb } from "@/lib/env";
 import { updateFood } from "@/app/(admin)/admin/actions";
 import { FoodForm } from "@/components/admin/FoodForm";
+import type { Food } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +15,9 @@ export default async function EditFoodPage({
 }: {
   params: { id: string };
 }) {
-  const supabase = createClient();
-  const { data: food } = await supabase
-    .from("foods")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+  if (!hasDb()) notFound();
+  const rows = await getSql()`SELECT * FROM foods WHERE id = ${params.id} LIMIT 1`;
+  const food = rows[0] as Food | undefined;
 
   if (!food) notFound();
 

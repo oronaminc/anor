@@ -12,7 +12,7 @@ PORT=3210 npm run dev  # any free port
 # open http://localhost:3210
 ```
 
-To force the demo dataset even with Supabase configured, set
+To force the demo dataset even with a database configured, set
 `NEXT_PUBLIC_DEMO_MODE=1`.
 
 ## 2. Headless screenshot (mobile viewport)

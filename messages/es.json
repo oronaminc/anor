@@ -25,7 +25,7 @@
     "allMenu": "Todo el menú",
     "count": "{count} platos",
     "seeAll": "Ver todo",
-    "empty": "Aún no hay platos. Asegúrate de haber ejecutado la migración y el seed de Supabase."
+    "empty": "Aún no hay platos. Asegúrate de haber ejecutado el esquema y el seed de la base de datos."
   },
   "sort": {
     "label": "Ordenar",
@@ -49,7 +49,8 @@
     "directions": "Cómo llegar",
     "youtube": "Ver en YouTube Shorts",
     "location": "Ubicación",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "like": "Me gusta"
   },
   "trending": {
     "title": "Tendencias",

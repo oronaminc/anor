@@ -21,6 +21,7 @@ function makeFood(overrides: Partial<Food>): Food {
     thumbnail_url: null,
     hashtags: [],
     view_count: 0,
+    like_count: 0,
     is_trending: false,
     price_range: null,
     created_at: "2024-01-01T00:00:00.000Z",

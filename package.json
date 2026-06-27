@@ -14,11 +14,11 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@react-google-maps/api": "^2.20.8",
-    "@supabase/ssr": "^0.5.1",
-    "@supabase/supabase-js": "~2.49.8",
+    "aws4fetch": "^1.0.20",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",

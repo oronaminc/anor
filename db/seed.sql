@@ -1,13 +1,13 @@
 -- =====================================================================
 -- Seed data — 8 realistic Myeongdong street foods (multilingual)
 -- Coordinates are real-ish points around Myeongdong, Seoul.
--- Run after 0001_init.sql and 0002_i18n.sql.
+-- Run after db/schema.sql:  psql "$DATABASE_URL" -f db/seed.sql
 -- =====================================================================
 
 insert into public.foods
   (name_ko, name_en, name_ja, name_es, description, translations, category,
    lat, lng, address, youtube_shorts_url, thumbnail_url, hashtags,
-   view_count, is_trending, price_range)
+   view_count, like_count, is_trending, price_range)
 values
   (
     '떡볶이', 'Tteokbokki', 'トッポッキ', 'Tteokbokki',
@@ -19,7 +19,7 @@ values
     ),
     '분식', 37.563600, 126.985700, '서울 중구 명동길 14',
     'https://www.youtube.com/shorts/ZpM0pZ8wMqA', '/demo/tteokbokki.svg',
-    array['매콤', '분식', '명동맛집', '떡볶이'], 1820, true, '₩3,000~5,000'
+    array['매콤', '분식', '명동맛집', '떡볶이'], 1820, 263, true, '₩3,000~5,000'
   ),
   (
     '호떡', 'Hotteok', 'ホットク', 'Hotteok',
@@ -31,7 +31,7 @@ values
     ),
     '간식', 37.563900, 126.982900, '서울 중구 명동8길 21',
     'https://www.youtube.com/shorts/3sJf9bq5mWk', '/demo/hotteok.svg',
-    array['겨울간식', '호떡', '달달', '명동'], 2410, true, '₩2,000~3,000'
+    array['겨울간식', '호떡', '달달', '명동'], 2410, 388, true, '₩2,000~3,000'
   ),
   (
     '계란빵', 'Gyeranppang', 'ケランパン', 'Gyeranppang',
@@ -43,7 +43,7 @@ values
     ),
     '간식', 37.561200, 126.985900, '서울 중구 명동길 27',
     'https://www.youtube.com/shorts/9aQp1mD2kL0', '/demo/gyeranppang.svg',
-    array['계란빵', '아침대용', '고소함', '간식'], 980, false, '₩2,000~3,000'
+    array['계란빵', '아침대용', '고소함', '간식'], 980, 121, false, '₩2,000~3,000'
   ),
   (
     '왕만두', 'Wang Mandu', '왕만두', 'Wang Mandu',
@@ -55,7 +55,7 @@ values
     ),
     '분식', 37.562500, 126.984100, '서울 중구 명동2길 32',
     'https://www.youtube.com/shorts/k2Lp9sQ7wDc', '/demo/mandu.svg',
-    array['만두', '왕만두', '김치만두', '든든'], 1340, false, '₩4,000~6,000'
+    array['만두', '왕만두', '김치만두', '든든'], 1340, 176, false, '₩4,000~6,000'
   ),
   (
     '회오리 감자', 'Tornado Potato', 'トルネードポテト', 'Patata Tornado',
@@ -67,7 +67,7 @@ values
     ),
     '간식', 37.563100, 126.983500, '서울 중구 명동길 18',
     'https://www.youtube.com/shorts/Tq8wZ1nP4xY', '/demo/potato.svg',
-    array['회오리감자', '바삭', '인스타', '간식'], 1675, true, '₩4,000~5,000'
+    array['회오리감자', '바삭', '인스타', '간식'], 1675, 247, true, '₩4,000~5,000'
   ),
   (
     '닭꼬치', 'Dak-kkochi', 'タッコチ', 'Brocheta de Pollo',
@@ -79,7 +79,7 @@ values
     ),
     '꼬치', 37.560900, 126.986300, '서울 중구 명동길 31',
     'https://www.youtube.com/shorts/Bn4kL0qR9sM', '/demo/dakkkochi.svg',
-    array['닭꼬치', '숯불', '매콤', '꼬치'], 1120, false, '₩3,000~4,000'
+    array['닭꼬치', '숯불', '매콤', '꼬치'], 1120, 152, false, '₩3,000~4,000'
   ),
   (
     '치즈 랍스터', 'Cheese Lobster', 'チーズロブスター', 'Langosta con Queso',
@@ -91,7 +91,7 @@ values
     ),
     '해산물', 37.564200, 126.984800, '서울 중구 명동길 12',
     'https://www.youtube.com/shorts/Lr7cH2zX5pQ', '/demo/lobster.svg',
-    array['치즈랍스터', '명동명물', '비주얼', '해산물'], 3015, true, '₩15,000~20,000'
+    array['치즈랍스터', '명동명물', '비주얼', '해산물'], 3015, 412, true, '₩15,000~20,000'
   ),
   (
     '붕어빵', 'Bungeoppang', 'たい焼き', 'Bungeoppang',
@@ -103,5 +103,5 @@ values
     ),
     '간식', 37.562000, 126.983000, '서울 중구 명동7길 8',
     'https://www.youtube.com/shorts/Pf3nQ8wK1aB', '/demo/bungeoppang.svg',
-    array['붕어빵', '팥', '겨울간식', '추억'], 760, false, '₩2,000~3,000'
+    array['붕어빵', '팥', '겨울간식', '추억'], 760, 88, false, '₩2,000~3,000'
   );

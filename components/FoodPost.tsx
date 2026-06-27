@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { Eye, Flame } from "lucide-react";
+import { Eye, Flame, Heart } from "lucide-react";
 
 import type { Food } from "@/lib/types";
 import { formatViewCount } from "@/lib/utils";
@@ -71,9 +71,15 @@ export function FoodPost({ food, query }: { food: Food; query?: string }) {
             </span>
           )}
           {food.category && <span className="truncate">{food.category}</span>}
-          <span className="ml-auto inline-flex shrink-0 items-center gap-1">
-            <Eye className="size-3.5" />
-            {formatViewCount(food.view_count)}
+          <span className="ml-auto inline-flex shrink-0 items-center gap-2.5">
+            <span className="inline-flex items-center gap-1">
+              <Heart className="size-3.5" />
+              {formatViewCount(food.like_count)}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Eye className="size-3.5" />
+              {formatViewCount(food.view_count)}
+            </span>
           </span>
         </div>
       </div>

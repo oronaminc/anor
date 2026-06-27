@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 
 import type { Food } from "@/lib/types";
 import { filterFoods, sortFoods } from "@/lib/sort";
+import { normalizeQuery } from "@/lib/search";
 import { FoodCard } from "@/components/FoodCard";
 
 /** Debounce a changing value. */
@@ -21,6 +22,7 @@ function useDebounced<T>(value: T, delay = 200): T {
 
 export function SearchView({ foods }: { foods: Food[] }) {
   const t = useTranslations("search");
+  const locale = useLocale();
   const [raw, setRaw] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const query = useDebounced(raw, 180);
@@ -35,6 +37,26 @@ export function SearchView({ foods }: { foods: Food[] }) {
   );
 
   const hasQuery = query.trim().length > 0;
+
+  // Collect search terms for the admin analytics dashboard. Fire-and-forget,
+  // logged ~600ms after the query settles, once per distinct term.
+  const lastLogged = useRef("");
+  useEffect(() => {
+    const normalized = normalizeQuery(query);
+    if (!normalized || lastLogged.current === normalized) return;
+    const id = setTimeout(() => {
+      lastLogged.current = normalized;
+      fetch("/api/search/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ q: query, locale, results: results.length }),
+        keepalive: true,
+      }).catch(() => {
+        /* best-effort */
+      });
+    }, 600);
+    return () => clearTimeout(id);
+  }, [query, locale, results.length]);
 
   return (
     <div className="space-y-5 px-4 pt-3">

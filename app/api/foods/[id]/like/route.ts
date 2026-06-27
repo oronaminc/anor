@@ -8,13 +8,22 @@ import { clientIpHash } from "@/lib/ip";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Toggle a "like" for a food from an anonymous visitor.
+ *
+ * Defenses (no login required):
+ *  1. Same-origin guard  — only our own site's pages may call this.
+ *  2. Per-IP rate limit  — blocks bursts (e.g. 100 clicks/sec).
+ *  3. Per-IP dedupe      — the DB's UNIQUE(food_id, ip_hash) makes this
+ *                          idempotent: one like per IP, second call un-likes.
+ * The raw IP is never stored — only sha256(ip + salt).
+ */
 export async function POST(
   request: Request,
   { params }: { params: { id: string } },
 ) {
   const { id } = params;
 
-  // Only our own pages may bump view counts (blocks other sites' JS).
   if (!isSameOrigin(request)) {
     return NextResponse.json(
       { ok: false, error: "forbidden origin" },
@@ -29,9 +38,9 @@ export async function POST(
     );
   }
 
-  // Cap how fast a single IP can inflate view counts.
   const ipHash = clientIpHash(request.headers);
-  const rl = await rateLimit(`view:${ipHash}`, { limit: 60, windowMs: 60_000 });
+
+  const rl = await rateLimit(`like:${ipHash}`, { limit: 20, windowMs: 10_000 });
   if (!rl.success) {
     return NextResponse.json(
       { ok: false, error: "rate limited" },
@@ -39,19 +48,23 @@ export async function POST(
     );
   }
 
+  // Demo / unconfigured: no DB to write to. Report success so the optimistic
+  // client UI still works on a zero-config preview deploy.
   if (!hasDb()) {
-    return NextResponse.json(
-      { ok: false, error: "database not configured" },
-      { status: 503 },
-    );
+    return NextResponse.json({ ok: true, demo: true });
   }
 
   try {
     const sql = getSql();
-    const rows = await sql`SELECT increment_view_count(${id}) AS view_count`;
-    return NextResponse.json({ ok: true, view_count: rows[0]?.view_count ?? null });
+    const rows = await sql`SELECT * FROM toggle_like(${id}, ${ipHash})`;
+    const row = rows[0];
+    return NextResponse.json({
+      ok: true,
+      liked: row?.liked ?? null,
+      like_count: row?.like_count ?? null,
+    });
   } catch (err) {
-    console.error("view route exception:", (err as Error).message);
+    console.error("like route exception:", (err as Error).message);
     return NextResponse.json(
       { ok: false, error: "request failed" },
       { status: 500 },

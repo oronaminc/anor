@@ -3,85 +3,54 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSql } from "@/lib/db";
+import { hasDb } from "@/lib/env";
+import {
+  verifyPassword,
+  createSession,
+  destroySession,
+  isAdmin,
+} from "@/lib/auth";
+import { uploadToR2, r2Configured } from "@/lib/storage";
 import type { FoodInput } from "@/lib/types";
-
-const BUCKET =
-  process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET || "food-thumbnails";
 
 export type ActionState = { error?: string; success?: string } | null;
 
 // ---------------------------------------------------------------------
-// Auth
+// Auth (password + signed cookie)
 // ---------------------------------------------------------------------
 export async function login(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const redirectTo = String(formData.get("redirect") ?? "/admin");
 
-  if (!email || !password) {
-    return { error: "이메일과 비밀번호를 입력해 주세요." };
+  if (!password) {
+    return { error: "비밀번호를 입력해 주세요." };
   }
 
-  const supabase = createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    return { error: "로그인에 실패했습니다. 정보를 확인해 주세요." };
+  if (!(await verifyPassword(password))) {
+    return { error: "비밀번호가 올바르지 않습니다." };
   }
 
+  await createSession();
   redirect(redirectTo.startsWith("/admin") ? redirectTo : "/admin");
 }
 
 export async function logout() {
-  const supabase = createClient();
-  await supabase.auth.signOut();
+  await destroySession();
   redirect("/admin/login");
 }
 
 // ---------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------
-async function requireUser() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
-  return supabase;
-}
-
 function parseHashtags(raw: string): string[] {
   return raw
     .split(/[,\s]+/)
     .map((t) => t.replace(/^#/, "").trim())
     .filter(Boolean);
-}
-
-async function uploadThumbnail(
-  supabase: Awaited<ReturnType<typeof requireUser>>,
-  file: File,
-): Promise<string | null> {
-  if (!file || file.size === 0) return null;
-
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${crypto.randomUUID()}.${ext}`;
-
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, file, { cacheControl: "3600", upsert: false });
-
-  if (error) {
-    throw new Error(`이미지 업로드 실패: ${error.message}`);
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return publicUrl;
 }
 
 function readFoodForm(formData: FormData): {
@@ -94,7 +63,6 @@ function readFoodForm(formData: FormData): {
   };
   const str = (key: string) => String(formData.get(key) ?? "").trim();
 
-  // Localized descriptions -> translations JSONB keyed by locale.
   const translations: Record<string, string> = {};
   for (const loc of ["en", "ja", "es"] as const) {
     const value = str(`description_${loc}`);
@@ -122,31 +90,53 @@ function readFoodForm(formData: FormData): {
   };
 }
 
+/** Resolve the thumbnail URL: upload to R2 when a file is provided, else use
+ *  the pasted URL. Returns the URL string (or null). */
+async function resolveThumbnail(
+  formData: FormData,
+  fallbackUrl: string | null,
+): Promise<string | null> {
+  const file = formData.get("thumbnail_file") as File | null;
+  if (file && file.size > 0) {
+    if (!r2Configured()) {
+      throw new Error(
+        "이미지 업로드를 사용하려면 R2 환경변수를 설정하세요. (또는 썸네일 URL을 직접 입력)",
+      );
+    }
+    return uploadToR2(file);
+  }
+  return fallbackUrl;
+}
+
 // ---------------------------------------------------------------------
-// CRUD
+// CRUD (Neon SQL)
 // ---------------------------------------------------------------------
 export async function createFood(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await requireUser();
-  const { fields, hashtags } = readFoodForm(formData);
+  if (!(await isAdmin())) return { error: "로그인이 필요합니다." };
+  if (!hasDb()) return { error: "DATABASE_URL이 설정되지 않았습니다." };
 
-  if (!fields.name_ko) {
-    return { error: "한글 이름은 필수입니다." };
-  }
+  const sql = getSql();
+  const { fields, hashtags } = readFoodForm(formData);
+  if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
 
   try {
-    const file = formData.get("thumbnail_file") as File | null;
-    const uploaded = file ? await uploadThumbnail(supabase, file) : null;
-
-    const { error } = await supabase.from("foods").insert({
-      ...fields,
-      thumbnail_url: uploaded ?? fields.thumbnail_url,
-      hashtags,
-    });
-
-    if (error) return { error: error.message };
+    const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);
+    await sql`
+      INSERT INTO foods
+        (name_ko, name_en, name_ja, name_es, description, translations,
+         category, lat, lng, address, youtube_shorts_url, thumbnail_url,
+         price_range, is_trending, hashtags)
+      VALUES
+        (${fields.name_ko}, ${fields.name_en}, ${fields.name_ja},
+         ${fields.name_es}, ${fields.description},
+         ${JSON.stringify(fields.translations)}::jsonb,
+         ${fields.category}, ${fields.lat}, ${fields.lng}, ${fields.address},
+         ${fields.youtube_shorts_url}, ${thumbnail}, ${fields.price_range},
+         ${fields.is_trending}, ${hashtags})
+    `;
   } catch (err) {
     return { error: (err as Error).message };
   }
@@ -161,28 +151,34 @@ export async function updateFood(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const supabase = await requireUser();
-  const { fields, hashtags } = readFoodForm(formData);
+  if (!(await isAdmin())) return { error: "로그인이 필요합니다." };
+  if (!hasDb()) return { error: "DATABASE_URL이 설정되지 않았습니다." };
 
-  if (!fields.name_ko) {
-    return { error: "한글 이름은 필수입니다." };
-  }
+  const sql = getSql();
+  const { fields, hashtags } = readFoodForm(formData);
+  if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
 
   try {
-    const file = formData.get("thumbnail_file") as File | null;
-    const uploaded =
-      file && file.size > 0 ? await uploadThumbnail(supabase, file) : null;
-
-    const { error } = await supabase
-      .from("foods")
-      .update({
-        ...fields,
-        thumbnail_url: uploaded ?? fields.thumbnail_url,
-        hashtags,
-      })
-      .eq("id", id);
-
-    if (error) return { error: error.message };
+    const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);
+    await sql`
+      UPDATE foods SET
+        name_ko = ${fields.name_ko},
+        name_en = ${fields.name_en},
+        name_ja = ${fields.name_ja},
+        name_es = ${fields.name_es},
+        description = ${fields.description},
+        translations = ${JSON.stringify(fields.translations)}::jsonb,
+        category = ${fields.category},
+        lat = ${fields.lat},
+        lng = ${fields.lng},
+        address = ${fields.address},
+        youtube_shorts_url = ${fields.youtube_shorts_url},
+        thumbnail_url = ${thumbnail},
+        price_range = ${fields.price_range},
+        is_trending = ${fields.is_trending},
+        hashtags = ${hashtags}
+      WHERE id = ${id}
+    `;
   } catch (err) {
     return { error: (err as Error).message };
   }
@@ -194,15 +190,17 @@ export async function updateFood(
 }
 
 export async function deleteFood(id: string) {
-  const supabase = await requireUser();
-  await supabase.from("foods").delete().eq("id", id);
+  if (!(await isAdmin())) return;
+  if (!hasDb()) return;
+  await getSql()`DELETE FROM foods WHERE id = ${id}`;
   revalidatePath("/admin");
   revalidatePath("/");
 }
 
 export async function toggleTrending(id: string, next: boolean) {
-  const supabase = await requireUser();
-  await supabase.from("foods").update({ is_trending: next }).eq("id", id);
+  if (!(await isAdmin())) return;
+  if (!hasDb()) return;
+  await getSql()`UPDATE foods SET is_trending = ${next} WHERE id = ${id}`;
   revalidatePath("/admin");
   revalidatePath("/");
 }

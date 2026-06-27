@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Plus, Pencil, Eye } from "lucide-react";
+import { Plus, Pencil, Eye, Heart } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSql } from "@/lib/db";
+import { hasDb } from "@/lib/env";
 import type { Food } from "@/lib/types";
 import { formatViewCount } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -12,15 +13,18 @@ import { DeleteFoodButton } from "@/components/admin/DeleteFoodButton";
 export const dynamic = "force-dynamic";
 
 async function getAllFoods(): Promise<Food[]> {
-  const supabase = createClient();
-  const { data } = await supabase
-    .from("foods")
-    .select("*")
-    .order("created_at", { ascending: false });
-  return data ?? [];
+  if (!hasDb()) return [];
+  try {
+    const sql = getSql();
+    const rows = await sql`SELECT * FROM foods ORDER BY created_at DESC`;
+    return rows as Food[];
+  } catch {
+    return [];
+  }
 }
 
 export default async function AdminDashboard() {
+  const configured = hasDb();
   const foods = await getAllFoods();
 
   return (
@@ -40,7 +44,12 @@ export default async function AdminDashboard() {
         </Button>
       </div>
 
-      {foods.length === 0 ? (
+      {!configured ? (
+        <div className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">
+          데이터베이스(DATABASE_URL)가 연결되지 않았습니다. 배포 환경에서 Neon
+          연결 문자열을 설정하면 음식 관리가 활성화됩니다. (DEPLOY.md 참고)
+        </div>
+      ) : foods.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">
           등록된 음식이 없습니다. 우측 상단의 “새 음식”으로 추가해 보세요.
         </div>
@@ -78,6 +87,10 @@ export default async function AdminDashboard() {
                     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                       <Eye className="size-3.5" />
                       {formatViewCount(food.view_count)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                      <Heart className="size-3.5" />
+                      {formatViewCount(food.like_count)}
                     </span>
                     <TrendingToggle
                       id={food.id}

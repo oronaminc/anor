@@ -25,7 +25,7 @@
     "allMenu": "전체 메뉴",
     "count": "{count}개",
     "seeAll": "전체보기",
-    "empty": "아직 등록된 음식이 없습니다. Supabase 마이그레이션과 시드를 실행했는지 확인해 주세요."
+    "empty": "아직 등록된 음식이 없습니다. 데이터베이스 스키마와 시드를 실행했는지 확인해 주세요."
   },
   "sort": {
     "label": "정렬",
@@ -49,7 +49,8 @@
     "directions": "길찾기",
     "youtube": "유튜브 쇼츠로 보기",
     "location": "위치",
-    "about": "소개"
+    "about": "소개",
+    "like": "좋아요"
   },
   "trending": {
     "title": "트렌딩",

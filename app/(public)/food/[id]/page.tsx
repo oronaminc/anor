@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/FoodCard";
 import { ViewTracker } from "@/components/ViewTracker";
+import { LikeButton } from "@/components/LikeButton";
 import GoogleMap from "@/components/GoogleMap";
 
 export const dynamic = "force-dynamic";
@@ -97,6 +98,9 @@ export default async function FoodDetailPage({
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Eye className="size-4" />
             {t("views", { count: formatViewCount(food.view_count) })}
+          </div>
+          <div className="pt-1">
+            <LikeButton foodId={food.id} initialCount={food.like_count} />
           </div>
         </div>
 

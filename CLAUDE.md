@@ -13,7 +13,11 @@ default locale; EN / JA / ES are also supported.
 - **Next.js (App Router)** + React + TypeScript
 - **Tailwind CSS** with CSS-variable design tokens (`app/globals.css`)
 - **next-intl** for i18n (`messages/{ko,en,ja,es}.json`, `middleware.ts`)
-- **Supabase** (`@supabase/ssr`) for data + admin auth
+- **Neon Postgres** (`@neondatabase/serverless`, raw SQL in `lib/db.ts`) for data
+- **Admin auth**: password + signed HttpOnly cookie (Web Crypto HMAC in
+  `lib/session.ts` / `lib/auth.ts`) — no external auth service
+- **Cloudflare R2** (`aws4fetch`, `lib/storage.ts`) for thumbnail images; the DB
+  stores only the public URL
 - **@react-google-maps/api** for the map
 - **framer-motion**, **lucide-react**, Radix primitives (`components/ui`)
 - Tests: **vitest** (unit), **Playwright** (e2e)
@@ -35,10 +39,10 @@ reuses an already-running server (`reuseExistingServer` when not CI).
 
 ## Running / screenshots without a backend
 
-`lib/queries.ts` is resilient: when Supabase env is **absent** (or
+`lib/queries.ts` is resilient: when `DATABASE_URL` is **absent** (or
 `NEXT_PUBLIC_DEMO_MODE=1`), public pages render the built-in sample dataset
 (`lib/demo-data.ts`, thumbnails in `public/demo/*.svg`). So `npm run dev` works
-with **zero config** — no `.env.local` needed for UI work. With Supabase
+with **zero config** — no `.env.local` needed for UI work. With `DATABASE_URL`
 configured it always uses the real DB. The map shows a "no API key" placeholder
 locally; it renders normally when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set.
 
@@ -53,24 +57,55 @@ app/
     page.tsx              # HOME — Threads-style single-column feed
     food/[id]/page.tsx    # detail
     map/  search/  trending/
-  (admin)/admin/...       # CRUD + login (Supabase auth)
+  (admin)/admin/...       # CRUD + login + analytics (password cookie auth)
   api/foods/[id]/view     # view-count increment
+  api/foods/[id]/like     # anonymous like toggle (IP-deduped)
+  api/search/log          # search-term collection (analytics)
+  robots.ts  sitemap.ts   # SEO; /admin + /api are disallowed/noindex
 components/
   FoodPost.tsx            # Threads-style feed row (home)
   FoodExplorer.tsx        # the home feed (sort tabs + list of FoodPost)
   FoodCard.tsx            # grid/carousel card (search, trending pages)
   TrendingSection / RankingSection   # used on /trending (not home anymore)
   GoogleMap, SearchView, SiteHeader, BottomNav, HighlightText, ViewTracker
+  LikeButton.tsx          # anonymous, optimistic, localStorage dedupe
   theme/                  # ThemeProvider, ThemeScript, theme.ts
   AppearancePanel / AppearanceSheet  # mode + accent + language picker
   admin/                  # FoodForm, DeleteFoodButton, TrendingToggle
 lib/
-  queries.ts demo-data.ts sort.ts i18n-food.ts maps.ts utils.ts types.ts
-  supabase/ {client,server,middleware}.ts
+  queries.ts demo-data.ts sort.ts i18n-food.ts maps.ts utils.ts types.ts env.ts
+  db.ts                   # Neon sql client (lazy; getSql())
+  search.ts               # normalizeQuery (shared client/server)
+  session.ts              # Web Crypto HMAC sign/verify (edge + node)
+  auth.ts storage.ts ip.ts rate-limit.ts request-guard.ts  # server-only
 messages/                 # ko (default), en, ja, es
-supabase/                 # migrations + seed.sql
+db/                       # schema.sql + seed.sql (Neon Postgres)
 tests/                    # unit/ (vitest), e2e/ (playwright)
 ```
+
+## Engagement, analytics & admin security
+
+- **Data access**: `lib/db.ts` exposes `getSql()` (lazy Neon client). Query with
+  tagged templates (`await getSql()\`SELECT ... ${id}\``) and call the SQL
+  functions directly (`SELECT * FROM toggle_like(${id}, ${ipHash})`). Always
+  guard with `hasDb()` (`lib/env.ts`) and fall back to demo data when absent.
+- **Likes** (`/api/foods/[id]/like` + `LikeButton`): no login. The hard
+  "one like per IP" guarantee is the DB UNIQUE on `food_likes (food_id,
+  ip_hash)` via the `toggle_like` function; the client also keeps a localStorage
+  flag for instant UX. Raw IPs are never stored — only `sha256(ip +
+  IP_HASH_SALT)` (`lib/ip.ts`); IP comes from `cf-connecting-ip`/`x-real-ip`.
+- **Search collection** (`/api/search/log`): `SearchView` fire-and-forgets the
+  settled query → `log_search` → `search_events`. Shown at `/admin/analytics`.
+- **Abuse defenses** on all write APIs: same-origin guard (`lib/request-guard`,
+  blocks other sites' JS), per-IP rate limit (`lib/rate-limit`, Upstash REST if
+  configured else in-memory), UUID validation, generic errors. No-op in demo.
+- **Admin is private**: login = `ADMIN_PASSWORD` (or `ADMIN_PASSWORD_HASH`) →
+  signed cookie (`SESSION_SECRET`). Gated in middleware + admin layout + server
+  actions (`isAdmin()` in `lib/auth.ts`); plus `noindex`, robots `Disallow`,
+  `Cache-Control: no-store`. See `DEPLOY.md`.
+- **Images**: admin upload → `lib/storage.ts` (R2); DB stores only the URL.
+- Schema lives in `db/schema.sql` (+ `db/seed.sql`). `Food` has `like_count`;
+  keep it set in `demo-data.ts` and any new fixtures.
 
 ## Design system — IMPORTANT
 

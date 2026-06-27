@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLocale, useTranslations } from "next-intl";
-import { Eye } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 
 import type { Food } from "@/lib/types";
 import { formatViewCount } from "@/lib/utils";
@@ -94,9 +94,15 @@ export function FoodCard({
             ) : (
               <span />
             )}
-            <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-              <Eye className="size-3.5" />
-              {formatViewCount(food.view_count)}
+            <span className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Heart className="size-3.5" />
+                {formatViewCount(food.like_count)}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <Eye className="size-3.5" />
+                {formatViewCount(food.view_count)}
+              </span>
             </span>
           </div>
 

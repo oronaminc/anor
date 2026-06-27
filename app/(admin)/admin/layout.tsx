@@ -1,29 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-import { createClient } from "@/lib/supabase/server";
+import { isAdmin } from "@/lib/auth";
 import { logout } from "@/app/(admin)/admin/actions";
 import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
+
+// Never let the admin area be indexed by search engines.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Resilient: on a zero-config sample deploy (no Supabase) this would throw,
-  // so fall back to "no user" and render the bare login screen.
-  let user = null;
-  try {
-    const supabase = createClient();
-    user = (await supabase.auth.getUser()).data.user;
-  } catch {
-    user = null;
-  }
-
-  // Unauthenticated requests only reach here on /admin/login
-  // (middleware redirects all other /admin/* paths). Render bare.
-  if (!user) {
+  // Only a signed-in admin sees the dashboard chrome; everyone else gets the
+  // bare login screen. Middleware already redirects non-admins away from
+  // protected paths, so this is defense in depth.
+  if (!(await isAdmin())) {
     return <>{children}</>;
   }
 
@@ -36,6 +33,18 @@ export default async function AdminLayout({
             <span>관리자</span>
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              href="/admin"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              음식
+            </Link>
+            <Link
+              href="/admin/analytics"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              통계
+            </Link>
             <Link
               href="/"
               className="text-sm text-muted-foreground hover:text-foreground"

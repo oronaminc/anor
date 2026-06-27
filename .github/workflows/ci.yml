@@ -6,11 +6,10 @@ on:
   pull_request:
     branches: ["**"]
 
-# Placeholder env so `next build` and Playwright can run without real secrets.
-# Real values are injected in Vercel / repository secrets for deployments.
+# No DATABASE_URL in CI → the app runs in demo mode (built-in sample dataset),
+# so build / unit / e2e all pass without any real secrets. Real values are
+# injected in Vercel / repository secrets for deployments.
 env:
-  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '' }}
 
 jobs:
