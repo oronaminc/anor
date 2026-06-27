@@ -32,6 +32,73 @@ export type FoodInput = Omit<
 
 export type SortKey = "popular" | "latest";
 
+// ---------------------------------------------------------------------
+// Shop / menu model (가게 + 음식들) — the new primary model.
+// A shop is the unit of engagement; it has one map point + one youtube link
+// and many menu foods.
+// ---------------------------------------------------------------------
+
+/** A menu food belonging to a shop (photo is user-provided). */
+export type ShopFood = {
+  id: string;
+  shop_id: string;
+  name_ko: string;
+  name_en: string | null;
+  name_ja: string | null;
+  name_es: string | null;
+  description: string | null;
+  translations: FoodTranslations | null;
+  image_url: string | null;
+  price_range: string | null;
+  sort_order: number;
+  created_at: string;
+};
+
+export type Shop = {
+  id: string;
+  name_ko: string;
+  name_en: string | null;
+  name_ja: string | null;
+  name_es: string | null;
+  description: string | null;
+  translations: FoodTranslations | null;
+  lat: number | null;
+  lng: number | null;
+  address: string | null;
+  youtube_shorts_url: string | null;
+  thumbnail_url: string | null;
+  hashtags: string[] | null;
+  price_range: string | null;
+  view_count: number;
+  like_count: number;
+  weekly_view_count: number;
+  weekly_like_count: number;
+  week_start: string;
+  growth_weight: number;
+  is_trending: boolean;
+  created_at: string;
+};
+
+/** A shop with its menu foods attached — the card / detail shape. */
+export type ShopWithFoods = Shop & { foods: ShopFood[] };
+
+export type ShopFoodInput = Omit<
+  ShopFood,
+  "id" | "shop_id" | "created_at"
+>;
+
+export type ShopInput = Omit<
+  Shop,
+  | "id"
+  | "view_count"
+  | "like_count"
+  | "weekly_view_count"
+  | "weekly_like_count"
+  | "week_start"
+  | "growth_weight"
+  | "created_at"
+>;
+
 /** One like per anonymized IP per food (sha256(ip + salt)). */
 export type FoodLike = {
   food_id: string;

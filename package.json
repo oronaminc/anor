@@ -12,6 +12,8 @@
     "db:push": "node scripts/db-push.mjs",
     "db:seed": "node scripts/db-seed.mjs",
     "db:seed:clear": "node scripts/db-seed.mjs --clear",
+    "db:seed:shops": "node scripts/db-seed-shops.mjs",
+    "db:seed:shops:clear": "node scripts/db-seed-shops.mjs --clear",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test"
