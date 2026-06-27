@@ -24,6 +24,8 @@ import {
   CODE_TTL_SECONDS,
 } from "@/lib/login-challenge";
 import { uploadToR2, r2Configured } from "@/lib/storage";
+import { applyBoost, type BoostKind } from "@/lib/boost";
+import { clampSpeed } from "@/lib/growth";
 import type { ShopInput, ShopFoodInput, FoodTranslations } from "@/lib/types";
 
 type Sql = ReturnType<typeof getSql>;
@@ -390,6 +392,30 @@ export async function toggleTrending(id: string, next: boolean) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
   await getSql()`UPDATE shops SET is_trending = ${next} WHERE id = ${id}`;
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
+/** Manually bump a shop's weekly + all-time views/likes by +1,000. */
+export async function boostShop(id: string, kind: BoostKind) {
+  if (!(await isAdmin())) return;
+  if (!hasDb()) return;
+  await applyBoost(getSql(), id, kind);
+  revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath(`/shop/${id}`);
+}
+
+/** Set the global organic-growth speed (0–5). */
+export async function setGrowthSpeed(speed: number) {
+  if (!(await isAdmin())) return;
+  if (!hasDb()) return;
+  const value = String(clampSpeed(speed));
+  await getSql()`
+    INSERT INTO settings (key, value, updated_at)
+    VALUES ('growth_speed', ${value}, now())
+    ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = now()
+  `;
   revalidatePath("/admin");
   revalidatePath("/");
 }
