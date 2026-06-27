@@ -7,6 +7,8 @@
  */
 
 export const ADMIN_COOKIE = "anor_admin";
+/** Binds the in-progress login-code (2FA) step to the browser that started it. */
+export const LOGIN_CHALLENGE_COOKIE = "anor_login";
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
 export function sessionSecret(): string {

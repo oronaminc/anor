@@ -77,6 +77,25 @@ create index if not exists search_events_created_idx    on public.search_events 
 create index if not exists search_events_normalized_idx on public.search_events (normalized);
 
 -- ---------------------------------------------------------------------
+-- login_challenges — short-lived admin one-time-code (Telegram 2FA) store.
+-- After a correct password we issue a 6-digit code, store only its hash here
+-- (never the plaintext code), and require it before granting a session. The
+-- row is single-use (deleted on success) and capped at a few attempts, so the
+-- code can't be brute-forced even by someone who already knows the password.
+-- ---------------------------------------------------------------------
+create table if not exists public.login_challenges (
+  id          uuid primary key default gen_random_uuid(),
+  code_hash   text not null,
+  redirect_to text,
+  ip_hash     text,
+  attempts    int  not null default 0,
+  expires_at  timestamptz not null,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists login_challenges_expires_idx on public.login_challenges (expires_at);
+
+-- ---------------------------------------------------------------------
 -- increment_view_count(food_id) -> new count
 -- ---------------------------------------------------------------------
 create or replace function public.increment_view_count(food_id uuid)
