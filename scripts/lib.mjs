@@ -43,29 +43,56 @@ export function databaseUrl() {
 }
 
 /**
- * Split a .sql file into individual statements: strip whole-line `--` comments,
- * then split on `;` while ignoring semicolons inside `$$ ... $$` (plpgsql
- * function bodies).
+ * Split a .sql file into individual statements. A small tokenizer so a `;`
+ * only terminates a statement when it is truly at top level — never inside a
+ * single-quoted string (with `''` escapes), a `$$ ... $$` body, or a `--` /
+ * `/* *\/` comment. (Our seed data has Spanish text containing semicolons.)
  */
 export function splitStatements(sql) {
-  const src = sql.replace(/^\s*--.*$/gm, "");
   const statements = [];
   let current = "";
-  let inDollar = false;
-  for (let i = 0; i < src.length; i++) {
-    if (src[i] === "$" && src[i + 1] === "$") {
-      inDollar = !inDollar;
-      current += "$$";
-      i++;
+  let state = "normal"; // normal | single | dollar | line | block
+  let i = 0;
+  while (i < sql.length) {
+    const ch = sql[i];
+    const two = sql.slice(i, i + 2);
+
+    if (state === "normal") {
+      if (two === "--") { state = "line"; i += 2; continue; }
+      if (two === "/*") { state = "block"; i += 2; continue; }
+      if (two === "$$") { state = "dollar"; current += two; i += 2; continue; }
+      if (ch === "'") { state = "single"; current += ch; i += 1; continue; }
+      if (ch === ";") {
+        if (current.trim()) statements.push(current.trim());
+        current = "";
+        i += 1;
+        continue;
+      }
+      current += ch;
+      i += 1;
       continue;
     }
-    const ch = src[i];
-    if (ch === ";" && !inDollar) {
-      if (current.trim()) statements.push(current.trim());
-      current = "";
+    if (state === "line") {
+      if (ch === "\n") { state = "normal"; current += "\n"; }
+      i += 1;
       continue;
     }
+    if (state === "block") {
+      if (two === "*/") { state = "normal"; i += 2; continue; }
+      i += 1;
+      continue;
+    }
+    if (state === "dollar") {
+      if (two === "$$") { state = "normal"; current += two; i += 2; continue; }
+      current += ch;
+      i += 1;
+      continue;
+    }
+    // state === "single"
+    if (two === "''") { current += two; i += 2; continue; } // escaped quote
+    if (ch === "'") { state = "normal"; current += ch; i += 1; continue; }
     current += ch;
+    i += 1;
   }
   if (current.trim()) statements.push(current.trim());
   return statements;
