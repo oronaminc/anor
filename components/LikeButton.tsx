@@ -73,7 +73,9 @@ export function LikeButton({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "failed");
-      if (data && typeof data.like_count === "number") setCount(data.like_count);
+      // Keep the clean optimistic ±1 — do NOT reconcile to the server's
+      // organic-inflated weekly count (that made the number drift, e.g.
+      // 3208 → 3210 → 3209). Only sync the liked state.
       if (data && typeof data.liked === "boolean") {
         setLiked(data.liked);
         persist(data.liked);

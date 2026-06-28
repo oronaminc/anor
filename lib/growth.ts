@@ -22,9 +22,9 @@ const MINUTE_MS = 60 * 1000;
 // Kept gentle so the seeded base + each shop's growth_weight keep numbers
 // varied and believable; the live ticker still shows them climbing. Speed 0
 // disables organic growth entirely.
-const VIEW_RATE_PER_MIN = 0.5;
-// Trending shops grow somewhat faster than the rest.
-const TREND_MULTIPLIER = 1.8;
+const VIEW_RATE_PER_MIN = 1.5;
+// Trending shops grow noticeably faster than the rest.
+const TREND_MULTIPLIER = 2.0;
 // Per-shop organic like ratio range (so like/view ratios differ between shops).
 const MIN_LIKE_RATIO = 0.07;
 const MAX_LIKE_RATIO = 0.2;
