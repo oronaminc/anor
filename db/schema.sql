@@ -145,7 +145,7 @@ create table if not exists public.settings (
   value      text not null,
   updated_at timestamptz not null default now()
 );
-insert into public.settings (key, value) values ('growth_speed', '2')
+insert into public.settings (key, value) values ('growth_speed', '0')
   on conflict (key) do nothing;
 
 -- Monday-00:00 KST week start; weekly counters reset when a row's week_start

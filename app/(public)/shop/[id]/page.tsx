@@ -13,9 +13,8 @@ import {
 } from "@/lib/i18n-food";
 import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
-import { ViewTracker } from "@/components/ViewTracker";
+import { ShopViewCount } from "@/components/ShopViewCount";
 import { LikeButton } from "@/components/LikeButton";
-import { LiveCount } from "@/components/LiveCount";
 import GoogleMap from "@/components/GoogleMap";
 
 export const dynamic = "force-dynamic";
@@ -38,8 +37,6 @@ export default async function ShopDetailPage({
 
   return (
     <div className="pb-10">
-      <ViewTracker shopId={shop.id} />
-
       {/* Hero image */}
       <div className="relative aspect-[4/3] w-full bg-muted">
         {shop.thumbnail_url ? (
@@ -103,10 +100,7 @@ export default async function ShopDetailPage({
           )}
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">
             <Eye className="size-4" />
-            <LiveCount
-              initial={shop.view_count}
-              perMinute={shop.view_rate_per_min}
-            />
+            <ShopViewCount shopId={shop.id} initial={shop.view_count} />
           </div>
           <div className="pt-1">
             <LikeButton shopId={shop.id} initialCount={shop.like_count} />

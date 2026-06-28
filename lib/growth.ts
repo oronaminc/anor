@@ -12,7 +12,7 @@
 
 export const MIN_SPEED = 0;
 export const MAX_SPEED = 5;
-export const DEFAULT_GROWTH_SPEED = 2;
+export const DEFAULT_GROWTH_SPEED = 0;
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 const HOUR_MS = 60 * 60 * 1000;
