@@ -30,6 +30,12 @@ const r2Host = (() => {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Don't keep dynamic pages in the client router cache — counts change on real
+  // views/likes, so every navigation should re-fetch fresh (keeps the home feed
+  // and a shop's detail showing the same, current number).
+  experimental: {
+    staleTimes: { dynamic: 0, static: 0 },
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.r2.dev" },
