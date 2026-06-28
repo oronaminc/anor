@@ -7,7 +7,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Eye, Heart } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { LiveCount } from "@/components/LiveCount";
 import { localizedName, secondaryName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 
@@ -106,19 +105,13 @@ export function ShopCard({
               <span />
             )}
             <span className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 tabular-nums">
                 <Heart className="size-3.5" />
-                <LiveCount
-                  initial={shop.like_count}
-                  perMinute={shop.like_rate_per_min}
-                />
+                {shop.like_count.toLocaleString()}
               </span>
               <span className="inline-flex items-center gap-1 tabular-nums">
                 <Eye className="size-3.5" />
-                <LiveCount
-                  initial={shop.view_count}
-                  perMinute={shop.view_rate_per_min}
-                />
+                {shop.view_count.toLocaleString()}
               </span>
             </span>
           </div>
