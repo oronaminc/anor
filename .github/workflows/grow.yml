@@ -17,5 +17,18 @@ jobs:
           SITE_URL: ${{ vars.SITE_URL || 'https://anor-sable.vercel.app' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
-          curl -fsS -X POST "$SITE_URL/api/cron/grow" \
-            -H "x-cron-secret: $CRON_SECRET"
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::error::CRON_SECRET is empty. Add it under repo Settings →"
+            echo "::error::Secrets and variables → Actions → *Secrets* tab (not Variables),"
+            echo "::error::name CRON_SECRET, value matching Vercel's CRON_SECRET env."
+            exit 1
+          fi
+          code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+            -X POST "$SITE_URL/api/cron/grow" -H "x-cron-secret: $CRON_SECRET")
+          echo "POST $SITE_URL/api/cron/grow → HTTP $code"
+          cat /tmp/resp.json 2>/dev/null; echo
+          if [ "$code" != "200" ]; then
+            echo "::error::Growth endpoint returned $code (401 = the GitHub CRON_SECRET"
+            echo "::error::does not match Vercel's CRON_SECRET env). Re-set the secret to match."
+            exit 1
+          fi
