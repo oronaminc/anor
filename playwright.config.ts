@@ -30,6 +30,7 @@ export default defineConfig({
     command: "npm run build && npm run start",
     url: baseURL,
     reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
+    // Generous so a slow local `next build` still comes up; CI builds fast.
+    timeout: 600_000,
   },
 });

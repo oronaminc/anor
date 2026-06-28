@@ -21,6 +21,6 @@ test.describe("admin login", () => {
     await page.getByLabel("비밀번호").fill(PASSWORD!);
     await page.getByRole("button", { name: "로그인" }).click();
     await page.waitForURL("**/admin", { timeout: 8000 });
-    await expect(page.getByRole("heading", { name: "음식 관리" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "가게 관리" })).toBeVisible();
   });
 });
