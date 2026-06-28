@@ -112,6 +112,26 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
 
 ## Engagement, analytics & admin security
 
+- **Shop counts (real + synthetic) — IMPORTANT**: the displayed view/like count
+  is **`view_count + synthetic_view_count`** (and like equivalent), two **stored**
+  integers summed in `lib/counts.ts` (`totalViews`/`totalLikes`); `queries.ts`
+  overwrites `shop.view_count`/`like_count` with the totals. **No compute-on-read
+  growth, no live ticker** — the number only moves when the DB moves, so home,
+  cards and detail always agree. *Real* = `view_count` (`increment_shop_view`) +
+  `like_count` (`toggle_shop_like`, one-per-IP via `shop_likes`). *Synthetic* =
+  admin "+1K", Telegram `/boost`, and the 5-min growth cron (`/api/cron/grow`,
+  `applyGrowthTick`, GitHub Actions `grow.yml`, `CRON_SECRET`). **Invariant:**
+  total views are ALWAYS > total likes — enforced atomically in `applyBoost`
+  /`applyGrowthTick` SQL and mirrored + fuzz-tested in `lib/counts.ts`
+  (`cappedLikeInc`/`likeBoostViewLift`, `tests/unit/counts.test.ts`).
+  *Bugs fixed, don't reintroduce:* (1) compute-on-read organic growth →
+  home≠detail / like drift — deleted `lib/growth.ts`+ticker, persist everything;
+  (2) stale client/router cache showed an old detail count on home→detail — pages
+  are `force-dynamic`, `staleTimes {dynamic:0,static:0}`, shop links
+  `prefetch={false}`, and detail counts **reconcile to a fresh fetch on mount**
+  (`ShopViewCount` via `POST /view`, `LikeButton` via `GET …/like`). Consistency
+  guarded by `tests/e2e/counts.spec.ts`; capacity by `npm run stress`
+  (`scripts/stress.mjs`, ~100 concurrent reads at 100%/p95≈1s). See `SKILL.md` §6.
 - **Data access**: `lib/db.ts` exposes `getSql()` (lazy Neon client). Query with
   tagged templates (`await getSql()\`SELECT ... ${id}\``) and call the SQL
   functions directly (`SELECT * FROM toggle_like(${id}, ${ipHash})`). Always

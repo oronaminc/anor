@@ -42,8 +42,19 @@ export async function POST(
 
   try {
     const sql = getSql();
-    const rows = await sql`SELECT * FROM increment_shop_view(${id})`;
-    return NextResponse.json({ ok: true, view_count: rows[0]?.view_count ?? null });
+    await sql`SELECT increment_shop_view(${id})`;
+    // Return the fresh DISPLAY totals (real + synthetic) so the client can
+    // reconcile away any stale server-rendered/cached number on mount.
+    const rows = await sql`
+      SELECT (view_count + synthetic_view_count) AS view_count,
+             (like_count + synthetic_like_count) AS like_count
+        FROM shops WHERE id = ${id}
+    `;
+    return NextResponse.json({
+      ok: true,
+      view_count: rows[0]?.view_count ?? null,
+      like_count: rows[0]?.like_count ?? null,
+    });
   } catch (err) {
     console.error("view route exception:", (err as Error).message);
     return NextResponse.json(

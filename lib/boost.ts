@@ -25,7 +25,9 @@ export async function applyBoost(
     `;
   } else {
     // Add synthetic likes, lifting synthetic views if needed so the displayed
-    // total views stay strictly above the total likes.
+    // total views stay strictly above the total likes. (Atomic — the cap is
+    // computed from the live row, so it's race-free. lib/counts.likeBoostViewLift
+    // mirrors this math and is unit-tested.)
     await sql`
       UPDATE shops SET
         synthetic_like_count = synthetic_like_count + ${amount},
@@ -37,4 +39,31 @@ export async function applyBoost(
       WHERE id = ${shopId}
     `;
   }
+}
+
+/**
+ * One automated growth tick (the 5-min cron): add `viewInc` synthetic views and
+ * up to `likeInc` synthetic likes, capped atomically so the displayed total
+ * views always stay strictly above total likes. lib/counts.cappedLikeInc mirrors
+ * this cap and is unit-tested; the SQL here is the race-free source of truth.
+ */
+export async function applyGrowthTick(
+  sql: Sql,
+  shopId: string,
+  viewInc: number,
+  likeInc: number,
+): Promise<void> {
+  await sql`
+    UPDATE shops SET
+      synthetic_view_count = synthetic_view_count + ${viewInc},
+      synthetic_like_count = synthetic_like_count + least(
+        ${likeInc},
+        greatest(
+          0,
+          (view_count + synthetic_view_count + ${viewInc})
+            - (like_count + synthetic_like_count) - 1
+        )
+      )
+    WHERE id = ${shopId}
+  `;
 }

@@ -32,6 +32,7 @@ export async function RankingSection({ shops }: { shops: ShopWithFoods[] }) {
         {ranking.map(({ rank, shop }) => (
           <li key={shop.id}>
             <Link
+              prefetch={false}
               href={`/shop/${shop.id}`}
               className="flex items-center gap-3 p-3 transition-colors hover:bg-primary/5"
             >

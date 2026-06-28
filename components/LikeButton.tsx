@@ -38,6 +38,21 @@ export function LikeButton({
     } catch {
       /* private mode — ignore */
     }
+    // Reconcile to the fresh DB total + server-known liked state on mount, so a
+    // stale client/router-cached render self-corrects to the live value.
+    fetch(`/api/shops/${shopId}/like`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && typeof data.like_count === "number") setCount(data.like_count);
+        if (data && typeof data.liked === "boolean") {
+          setLiked(data.liked);
+          persist(data.liked);
+        }
+      })
+      .catch(() => {
+        /* best-effort */
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shopId]);
 
   function persist(value: boolean) {

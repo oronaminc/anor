@@ -14,7 +14,8 @@
     "db:seed:clear": "node scripts/db-seed-shops.mjs --clear",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "stress": "node scripts/stress.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

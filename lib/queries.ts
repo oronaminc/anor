@@ -3,15 +3,9 @@ import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
 import type { Shop, ShopFood, ShopWithFoods } from "@/lib/types";
 import { DEMO_SHOPS, isDemoMode } from "@/lib/demo-data";
+import { totalViews, totalLikes } from "@/lib/counts";
 
-/** The displayed counts are real + synthetic (both stored), so they're stable
- *  and identical on every surface. */
-export function totalViews(s: Pick<Shop, "view_count" | "synthetic_view_count">) {
-  return (s.view_count ?? 0) + (s.synthetic_view_count ?? 0);
-}
-export function totalLikes(s: Pick<Shop, "like_count" | "synthetic_like_count">) {
-  return (s.like_count ?? 0) + (s.synthetic_like_count ?? 0);
-}
+export { totalViews, totalLikes };
 
 /** Overwrite view_count/like_count with the displayed totals (real + synthetic)
  *  so every consumer just reads shop.view_count / shop.like_count. */

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
+import { applyGrowthTick } from "@/lib/boost";
 
 export const dynamic = "force-dynamic";
 
@@ -41,19 +42,7 @@ export async function POST(request: Request) {
       const viewInc = Math.max(1, Math.round((5 + Math.random() * 22) * weight * trend));
       const likeInc = Math.round(viewInc * (0.05 + Math.random() * 0.12));
 
-      await sql`
-        UPDATE shops SET
-          synthetic_view_count = synthetic_view_count + ${viewInc},
-          synthetic_like_count = synthetic_like_count + least(
-            ${likeInc},
-            greatest(
-              0,
-              (view_count + synthetic_view_count + ${viewInc})
-                - (like_count + synthetic_like_count) - 1
-            )
-          )
-        WHERE id = ${s.id}
-      `;
+      await applyGrowthTick(sql, s.id, viewInc, likeInc);
       grown += 1;
     }
     return NextResponse.json({ ok: true, grown });

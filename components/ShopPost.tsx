@@ -27,6 +27,7 @@ export function ShopPost({
 
   return (
     <Link
+      prefetch={false}
       href={`/shop/${shop.id}`}
       className="group flex gap-3 py-4 transition-opacity active:opacity-60"
     >
@@ -79,11 +80,17 @@ export function ShopPost({
             </span>
           )}
           <span className="ml-auto inline-flex shrink-0 items-center gap-2.5">
-            <span className="inline-flex items-center gap-1 tabular-nums">
+            <span
+              data-testid="card-like"
+              className="inline-flex items-center gap-1 tabular-nums"
+            >
               <Heart className="size-3.5" />
               {shop.like_count.toLocaleString()}
             </span>
-            <span className="inline-flex items-center gap-1 tabular-nums">
+            <span
+              data-testid="card-view"
+              className="inline-flex items-center gap-1 tabular-nums"
+            >
               <Eye className="size-3.5" />
               {shop.view_count.toLocaleString()}
             </span>

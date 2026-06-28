@@ -44,6 +44,7 @@ export function ShopCard({
       transition={{ type: "spring", stiffness: 400, damping: 24 }}
     >
       <Link
+        prefetch={false}
         href={`/shop/${shop.id}`}
         className="group relative block overflow-hidden rounded-3xl bg-card neon-border shadow-lg transition-shadow hover:glow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >

@@ -9,6 +9,44 @@ import { clientIpHash } from "@/lib/ip";
 export const dynamic = "force-dynamic";
 
 /**
+ * Read the fresh like total + whether THIS visitor (by IP) already liked. Used
+ * by LikeButton on mount to reconcile away any stale server-rendered/cached
+ * number and sync the heart state. Read-only; safe to call on every detail open.
+ */
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } },
+) {
+  const { id } = params;
+  if (!isUuid(id)) {
+    return NextResponse.json({ ok: false, error: "invalid id" }, { status: 400 });
+  }
+  if (!hasDb()) {
+    return NextResponse.json({ ok: true, like_count: null, liked: null });
+  }
+  try {
+    const sql = getSql();
+    const ipHash = clientIpHash(request.headers);
+    const rows = await sql`
+      SELECT (s.like_count + s.synthetic_like_count) AS like_count,
+             EXISTS (
+               SELECT 1 FROM shop_likes l
+                WHERE l.shop_id = s.id AND l.ip_hash = ${ipHash}
+             ) AS liked
+        FROM shops s WHERE s.id = ${id}
+    `;
+    return NextResponse.json({
+      ok: true,
+      like_count: rows[0]?.like_count ?? null,
+      liked: rows[0]?.liked ?? false,
+    });
+  } catch (err) {
+    console.error("like GET exception:", (err as Error).message);
+    return NextResponse.json({ ok: false, error: "request failed" }, { status: 500 });
+  }
+}
+
+/**
  * Toggle an anonymous "like" for a shop. No login.
  *  1. Same-origin guard — only our own pages may call this.
  *  2. Per-IP rate limit — blocks bursts.
