@@ -25,7 +25,6 @@ import {
 } from "@/lib/login-challenge";
 import { uploadToR2, r2Configured } from "@/lib/storage";
 import { applyBoost, type BoostKind } from "@/lib/boost";
-import { clampSpeed } from "@/lib/growth";
 import type { ShopInput, ShopFoodInput, FoodTranslations } from "@/lib/types";
 
 type Sql = ReturnType<typeof getSql>;
@@ -406,16 +405,3 @@ export async function boostShop(id: string, kind: BoostKind) {
   revalidatePath(`/shop/${id}`);
 }
 
-/** Set the global organic-growth speed (0–5). */
-export async function setGrowthSpeed(speed: number) {
-  if (!(await isAdmin())) return;
-  if (!hasDb()) return;
-  const value = String(clampSpeed(speed));
-  await getSql()`
-    INSERT INTO settings (key, value, updated_at)
-    VALUES ('growth_speed', ${value}, now())
-    ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = now()
-  `;
-  revalidatePath("/admin");
-  revalidatePath("/");
-}

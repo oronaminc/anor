@@ -8,12 +8,10 @@ import { hasDb } from "@/lib/env";
 import type { Shop } from "@/lib/types";
 import { localizedName } from "@/lib/i18n-food";
 import { formatViewCount } from "@/lib/utils";
-import { getGrowthSpeed, DEFAULT_GROWTH_SPEED } from "@/lib/growth";
 import { Button } from "@/components/ui/button";
 import { TrendingToggle } from "@/components/admin/TrendingToggle";
 import { DeleteShopButton } from "@/components/admin/DeleteShopButton";
 import { BoostButtons } from "@/components/admin/BoostButtons";
-import { SpeedControl } from "@/components/admin/SpeedControl";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +30,6 @@ export default async function AdminDashboard() {
   const configured = hasDb();
   const locale = await getLocale();
   const shops = await getAllShops();
-  const speed = configured
-    ? await getGrowthSpeed(getSql())
-    : DEFAULT_GROWTH_SPEED;
 
   return (
     <div className="space-y-6">
@@ -52,15 +47,6 @@ export default async function AdminDashboard() {
           </Link>
         </Button>
       </div>
-
-      {configured && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card p-3">
-          <SpeedControl initial={speed} />
-          <p className="text-xs text-muted-foreground">
-            0 = 자동 증가 없음 · 5 = 빠름 (트렌딩은 더 빠르게)
-          </p>
-        </div>
-      )}
 
       {!configured ? (
         <div className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">

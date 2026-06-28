@@ -2,10 +2,8 @@ import type { NeonQueryFunction } from "@neondatabase/serverless";
 
 /**
  * Manual engagement boosts (admin "+1K" buttons and the Telegram bot). Adds to
- * BOTH the all-time and this-week counters, with the same lazy Monday-00:00-KST
- * weekly reset the SQL functions use, and keeps views ≥ likes at the raw level
- * (organic growth in computeDisplay keeps the displayed views strictly above
- * likes). Shared by the server action and the Telegram webhook.
+ * the stored view_count / like_count (and keeps the weekly counters in step),
+ * keeping view_count ≥ like_count. Shared by the server action and the webhook.
  */
 export const BOOST_AMOUNT = 1000;
 

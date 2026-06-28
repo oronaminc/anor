@@ -4,7 +4,6 @@ import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
 import { sendTelegramMessage } from "@/lib/telegram";
 import { applyBoost, type BoostKind } from "@/lib/boost";
-import { clampSpeed } from "@/lib/growth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +27,6 @@ const HELP = [
   "/list — 가게 목록",
   "/boost <가게> like|view [개수] — 좋아요/조회 +개수(기본 1000)",
   "/trend <가게> on|off — 트렌딩 토글",
-  "/speed <0-5> — 자동 성장 속도",
 ].join("\n");
 
 function ok() {
@@ -110,17 +108,6 @@ export async function POST(request: Request) {
             .join("\n")
         : "등록된 가게가 없습니다.";
       await sendTelegramMessage(`📋 가게 목록 (이번 주)\n${body}`);
-      return ok();
-    }
-
-    if (cmd === "/speed") {
-      const n = clampSpeed(parseInt(args[0] ?? "", 10));
-      await sql`
-        INSERT INTO settings (key, value, updated_at)
-        VALUES ('growth_speed', ${String(n)}, now())
-        ON CONFLICT (key) DO UPDATE SET value = excluded.value, updated_at = now()
-      `;
-      await sendTelegramMessage(`⚙️ 자동 성장 속도 → ${n}`);
       return ok();
     }
 

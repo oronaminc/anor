@@ -8,8 +8,8 @@ import { clientIpHash } from "@/lib/ip";
 
 export const dynamic = "force-dynamic";
 
-/** Increment a shop's view count (all-time + this-week) when its detail page
- *  mounts. Same-origin + per-IP rate limit; never stores a raw IP. */
+/** Increment a shop's view count by one when its detail page is opened.
+ *  Same-origin + per-IP rate limit; returns the new stored view_count. */
 export async function POST(
   request: Request,
   { params }: { params: { id: string } },
@@ -43,12 +43,7 @@ export async function POST(
   try {
     const sql = getSql();
     const rows = await sql`SELECT * FROM increment_shop_view(${id})`;
-    const row = rows[0];
-    return NextResponse.json({
-      ok: true,
-      view_count: row?.view_count ?? null,
-      weekly_view_count: row?.weekly_view_count ?? null,
-    });
+    return NextResponse.json({ ok: true, view_count: rows[0]?.view_count ?? null });
   } catch (err) {
     console.error("view route exception:", (err as Error).message);
     return NextResponse.json(

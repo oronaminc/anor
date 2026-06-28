@@ -10,11 +10,11 @@ import { cn } from "@/lib/utils";
 const storageKey = (id: string) => `anor:liked:${id}`;
 
 /**
- * Anonymous "like" toggle. No login. The reaction is the heart: tapping fills
- * it red with a pop, so a human press is unmistakable even though the big
- * weekly count barely moves by one. Optimistic, reconciles with the server,
- * localStorage remembers this device's liked state; the real one-like-per-IP
- * guarantee lives in the DB (UNIQUE on shop_likes).
+ * Anonymous "like" toggle. No login.
+ *  - Tap → optimistic +1/-1 and a red heart with a pop, then reconcile to the
+ *    server's stored like_count (stable — no organic growth, so no drift/cancel).
+ *  - localStorage remembers this device's liked state; the real one-like-per-IP
+ *    guarantee is the DB UNIQUE on shop_likes.
  */
 export function LikeButton({
   shopId,
@@ -73,9 +73,7 @@ export function LikeButton({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "failed");
-      // Keep the clean optimistic ±1 — do NOT reconcile to the server's
-      // organic-inflated weekly count (that made the number drift, e.g.
-      // 3208 → 3210 → 3209). Only sync the liked state.
+      if (data && typeof data.like_count === "number") setCount(data.like_count);
       if (data && typeof data.liked === "boolean") {
         setLiked(data.liked);
         persist(data.liked);

@@ -3,7 +3,6 @@ import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
 import type { Shop, ShopFood, ShopWithFoods } from "@/lib/types";
 import { DEMO_SHOPS, isDemoMode } from "@/lib/demo-data";
-import { computeDisplay, getGrowthSpeed, organicRatePerMin } from "@/lib/growth";
 
 /** Group menu foods (already globally ordered) under their shop. */
 function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
@@ -17,28 +16,10 @@ function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
 }
 
 /**
- * Public view/like numbers are THIS WEEK's count + time-based organic growth.
- * We overwrite view_count/like_count with the displayed values so every public
- * component shows the weekly figure (admin/analytics read the raw columns
- * directly, not through here).
- */
-function withDisplay(shop: Shop, speed: number, now: number): Shop {
-  const { views, likes } = computeDisplay(shop, speed, now);
-  const rate = organicRatePerMin(shop, speed);
-  return {
-    ...shop,
-    view_count: views,
-    like_count: likes,
-    view_rate_per_min: rate.views,
-    like_rate_per_min: rate.likes,
-  };
-}
-
-/**
- * Fetch all shops with their menu foods. Resilient by design: when no database
- * is configured (DATABASE_URL absent) OR demo mode is forced, returns the
- * built-in demo dataset so the app shows content with zero setup. With Neon
- * configured it always uses the real database.
+ * Fetch all shops with their menu foods. The counts shown are exactly the
+ * stored view_count / like_count — no computation, so every surface (home,
+ * cards, detail) shows the same number, and it only moves on a real view/like.
+ * Falls back to the demo dataset when there is no database.
  */
 export async function getShops(): Promise<ShopWithFoods[]> {
   if (isDemoMode() || !hasDb()) return DEMO_SHOPS;
@@ -48,12 +29,7 @@ export async function getShops(): Promise<ShopWithFoods[]> {
     const foods = (await sql`
       SELECT * FROM shop_foods ORDER BY shop_id, sort_order
     `) as ShopFood[];
-    const speed = await getGrowthSpeed(sql);
-    const now = Date.now();
-    return attachFoods(
-      shops.map((s) => withDisplay(s, speed, now)),
-      foods,
-    );
+    return attachFoods(shops, foods);
   } catch (err) {
     console.error("getShops error:", err);
     return [];
@@ -72,8 +48,7 @@ export async function getShopById(id: string): Promise<ShopWithFoods | null> {
     const foods = (await sql`
       SELECT * FROM shop_foods WHERE shop_id = ${id} ORDER BY sort_order
     `) as ShopFood[];
-    const speed = await getGrowthSpeed(sql);
-    return { ...withDisplay(shop, speed, Date.now()), foods };
+    return { ...shop, foods };
   } catch (err) {
     console.error("getShopById error:", err);
     return null;
