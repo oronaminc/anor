@@ -71,6 +71,10 @@ export type Shop = {
   price_range: string | null;
   view_count: number;
   like_count: number;
+  /** Admin/automated engagement, separate from the real counts; the displayed
+   *  number is (view_count + synthetic_view_count) etc. */
+  synthetic_view_count: number;
+  synthetic_like_count: number;
   weekly_view_count: number;
   weekly_like_count: number;
   week_start: string;
@@ -92,6 +96,8 @@ export type ShopInput = Omit<
   | "id"
   | "view_count"
   | "like_count"
+  | "synthetic_view_count"
+  | "synthetic_like_count"
   | "weekly_view_count"
   | "weekly_like_count"
   | "week_start"

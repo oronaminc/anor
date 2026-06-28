@@ -97,7 +97,15 @@ const FOODS: Record<string, FoodDef> = {
   },
 };
 
-type ShopDef = Omit<ShopWithFoods, "foods" | "weekly_view_count" | "weekly_like_count" | "week_start"> & {
+type ShopDef = Omit<
+  ShopWithFoods,
+  | "foods"
+  | "weekly_view_count"
+  | "weekly_like_count"
+  | "week_start"
+  | "synthetic_view_count"
+  | "synthetic_like_count"
+> & {
   foodKeys: string[];
 };
 
@@ -213,6 +221,8 @@ function buildFoods(shopId: string, keys: string[]): ShopFood[] {
 export const DEMO_SHOPS: ShopWithFoods[] = SHOP_DEFS.map(
   ({ foodKeys, ...shop }) => ({
     ...shop,
+    synthetic_view_count: 0,
+    synthetic_like_count: 0,
     weekly_view_count: Math.round(shop.view_count * 0.28),
     weekly_like_count: Math.round(shop.like_count * 0.28),
     week_start: WEEK_START,

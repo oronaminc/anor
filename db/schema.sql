@@ -111,6 +111,12 @@ create index if not exists shops_view_count_idx  on public.shops (view_count des
 create index if not exists shops_trending_idx     on public.shops (is_trending);
 create index if not exists shops_created_idx      on public.shops (created_at desc);
 
+-- Admin/automated ("synthetic") engagement, kept separate from real
+-- view_count/like_count so real human likes (shop_likes) stay pristine. The
+-- displayed number is real + synthetic; both are stored, so it's stable.
+alter table public.shops add column if not exists synthetic_view_count int not null default 0;
+alter table public.shops add column if not exists synthetic_like_count int not null default 0;
+
 -- Menu foods belonging to a shop (1 shop -> many foods).
 create table if not exists public.shop_foods (
   id           uuid primary key default gen_random_uuid(),

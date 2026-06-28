@@ -1,0 +1,21 @@
+name: grow
+
+# Every ~5 minutes, nudge each shop's synthetic counts up by a small random
+# amount (persisted in the DB). GitHub may delay short-interval crons under
+# load — that's fine, the numbers just grow a bit less often.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  grow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger growth endpoint
+        env:
+          SITE_URL: ${{ vars.SITE_URL || 'https://anor-sable.vercel.app' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS -X POST "$SITE_URL/api/cron/grow" \
+            -H "x-cron-secret: $CRON_SECRET"

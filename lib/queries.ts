@@ -4,6 +4,21 @@ import { hasDb } from "@/lib/env";
 import type { Shop, ShopFood, ShopWithFoods } from "@/lib/types";
 import { DEMO_SHOPS, isDemoMode } from "@/lib/demo-data";
 
+/** The displayed counts are real + synthetic (both stored), so they're stable
+ *  and identical on every surface. */
+export function totalViews(s: Pick<Shop, "view_count" | "synthetic_view_count">) {
+  return (s.view_count ?? 0) + (s.synthetic_view_count ?? 0);
+}
+export function totalLikes(s: Pick<Shop, "like_count" | "synthetic_like_count">) {
+  return (s.like_count ?? 0) + (s.synthetic_like_count ?? 0);
+}
+
+/** Overwrite view_count/like_count with the displayed totals (real + synthetic)
+ *  so every consumer just reads shop.view_count / shop.like_count. */
+function withTotals(shop: Shop): Shop {
+  return { ...shop, view_count: totalViews(shop), like_count: totalLikes(shop) };
+}
+
 /** Group menu foods (already globally ordered) under their shop. */
 function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
   const byShop = new Map<string, ShopFood[]>();
@@ -12,7 +27,7 @@ function attachFoods(shops: Shop[], foods: ShopFood[]): ShopWithFoods[] {
     if (arr) arr.push(f);
     else byShop.set(f.shop_id, [f]);
   }
-  return shops.map((s) => ({ ...s, foods: byShop.get(s.id) ?? [] }));
+  return shops.map((s) => ({ ...withTotals(s), foods: byShop.get(s.id) ?? [] }));
 }
 
 /**
@@ -48,7 +63,7 @@ export async function getShopById(id: string): Promise<ShopWithFoods | null> {
     const foods = (await sql`
       SELECT * FROM shop_foods WHERE shop_id = ${id} ORDER BY sort_order
     `) as ShopFood[];
-    return { ...shop, foods };
+    return { ...withTotals(shop), foods };
   } catch (err) {
     console.error("getShopById error:", err);
     return null;

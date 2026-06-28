@@ -39,6 +39,8 @@ function makeShop(over: Partial<ShopWithFoods>): ShopWithFoods {
     price_range: null,
     view_count: 0,
     like_count: 0,
+    synthetic_view_count: 0,
+    synthetic_like_count: 0,
     weekly_view_count: 0,
     weekly_like_count: 0,
     week_start: "2026-06-22",

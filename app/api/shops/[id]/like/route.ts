@@ -46,11 +46,15 @@ export async function POST(
   try {
     const sql = getSql();
     const rows = await sql`SELECT * FROM toggle_shop_like(${id}, ${ipHash})`;
-    const row = rows[0];
+    const liked = rows[0]?.liked ?? null;
+    // Return the DISPLAYED total (real + synthetic) so the button reconciles
+    // to the same number every surface shows.
+    const totals =
+      await sql`SELECT (like_count + synthetic_like_count) AS total FROM shops WHERE id = ${id}`;
     return NextResponse.json({
       ok: true,
-      liked: row?.liked ?? null,
-      like_count: row?.like_count ?? null,
+      liked,
+      like_count: totals[0]?.total ?? null,
     });
   } catch (err) {
     console.error("like route exception:", (err as Error).message);

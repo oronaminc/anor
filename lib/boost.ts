@@ -19,24 +19,21 @@ export async function applyBoost(
 ): Promise<void> {
   if (kind === "view") {
     await sql`
-      UPDATE shops SET
-        view_count        = view_count + ${amount},
-        weekly_view_count = (case when week_start < kst_week_start() then 0 else weekly_view_count end) + ${amount},
-        weekly_like_count = (case when week_start < kst_week_start() then 0 else weekly_like_count end),
-        week_start        = kst_week_start()
-      WHERE id = ${shopId}
+      UPDATE shops
+         SET synthetic_view_count = synthetic_view_count + ${amount}
+       WHERE id = ${shopId}
     `;
   } else {
+    // Add synthetic likes, lifting synthetic views if needed so the displayed
+    // total views stay strictly above the total likes.
     await sql`
       UPDATE shops SET
-        like_count        = like_count + ${amount},
-        weekly_like_count = (case when week_start < kst_week_start() then 0 else weekly_like_count end) + ${amount},
-        weekly_view_count = greatest(
-          (case when week_start < kst_week_start() then 0 else weekly_view_count end),
-          (case when week_start < kst_week_start() then 0 else weekly_like_count end) + ${amount}
-        ),
-        view_count        = greatest(view_count, like_count + ${amount}),
-        week_start        = kst_week_start()
+        synthetic_like_count = synthetic_like_count + ${amount},
+        synthetic_view_count = synthetic_view_count + greatest(
+          0,
+          (like_count + synthetic_like_count + ${amount})
+            - (view_count + synthetic_view_count) + 1
+        )
       WHERE id = ${shopId}
     `;
   }

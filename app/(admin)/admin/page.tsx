@@ -5,6 +5,7 @@ import { Plus, Pencil, Eye, Heart } from "lucide-react";
 
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
+import { totalViews, totalLikes } from "@/lib/queries";
 import type { Shop } from "@/lib/types";
 import { localizedName } from "@/lib/i18n-food";
 import { formatViewCount } from "@/lib/utils";
@@ -19,8 +20,13 @@ async function getAllShops(): Promise<Shop[]> {
   if (!hasDb()) return [];
   try {
     const sql = getSql();
-    const rows = await sql`SELECT * FROM shops ORDER BY created_at DESC`;
-    return rows as Shop[];
+    const rows = (await sql`SELECT * FROM shops ORDER BY created_at DESC`) as Shop[];
+    // Show the same total (real + synthetic) the public sees.
+    return rows.map((s) => ({
+      ...s,
+      view_count: totalViews(s),
+      like_count: totalLikes(s),
+    }));
   } catch {
     return [];
   }
