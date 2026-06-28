@@ -84,9 +84,11 @@ describe("computeDisplay", () => {
     expect(hot.views).toBeGreaterThan(plain.views);
   });
 
-  it("treats a stale week as reset to 0 (plus organic)", () => {
-    const stale = { ...base, week_start: "2020-01-06" };
-    expect(computeDisplay(stale, 0, NOW)).toEqual({ views: 0, likes: 0 });
+  it("shows the stored weekly counts at speed 0 regardless of week_start", () => {
+    // Staleness is handled by the SQL reset on writes, not here, so a stored
+    // value is always shown (this is the bug fix — it used to zero everything).
+    const odd = { ...base, week_start: "2020-01-06" };
+    expect(computeDisplay(odd, 0, NOW)).toEqual({ views: 100, likes: 10 });
   });
 
   it("is monotonic over time", () => {

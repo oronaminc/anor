@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Heart } from "lucide-react";
 import { motion, useAnimationControls } from "framer-motion";
@@ -26,6 +27,7 @@ export function LikeButton({
   className?: string;
 }) {
   const t = useTranslations("detail");
+  const router = useRouter();
   const [liked, setLiked] = useState(false);
   const [count, setCount] = useState(initialCount);
   const [pending, setPending] = useState(false);
@@ -80,6 +82,7 @@ export function LikeButton({
         setLiked(data.liked);
         persist(data.liked);
       }
+      router.refresh(); // reflect the new count elsewhere (e.g. home feed)
     } catch {
       setLiked(prevLiked);
       setCount(prevCount);

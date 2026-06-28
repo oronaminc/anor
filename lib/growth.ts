@@ -53,13 +53,6 @@ export function kstWeekStartMs(now: number): number {
   return midnightUtc - dow * 24 * HOUR_MS - KST_OFFSET_MS;
 }
 
-/** Parse a stored `week_start` (a YYYY-MM-DD date) as KST-midnight epoch ms. */
-function storedWeekMs(weekStart: string | null | undefined): number {
-  if (!weekStart) return NaN;
-  const t = Date.parse(`${weekStart}T00:00:00+09:00`);
-  return Number.isFinite(t) ? t : NaN;
-}
-
 export function clampSpeed(speed: number): number {
   if (!Number.isFinite(speed)) return DEFAULT_GROWTH_SPEED;
   return Math.min(MAX_SPEED, Math.max(MIN_SPEED, Math.round(speed)));
@@ -80,12 +73,14 @@ export function computeDisplay(
   speed: number,
   now: number,
 ): { views: number; likes: number } {
+  // Use the stored this-week counts directly. The weekly Monday-00:00-KST reset
+  // is handled atomically by the SQL functions (increment_shop_view /
+  // toggle_shop_like) on writes — we don't re-derive staleness here (parsing a
+  // Postgres `date`/timestamp back to a KST week is timezone-fragile and was
+  // wrongly zeroing every shop).
   const weekStartMs = kstWeekStartMs(now);
-  const stored = storedWeekMs(shop.week_start);
-  const stale = !Number.isFinite(stored) || stored < weekStartMs;
-
-  const baseViews = stale ? 0 : Math.max(0, shop.weekly_view_count ?? 0);
-  const baseLikes = stale ? 0 : Math.max(0, shop.weekly_like_count ?? 0);
+  const baseViews = Math.max(0, shop.weekly_view_count ?? 0);
+  const baseLikes = Math.max(0, shop.weekly_like_count ?? 0);
 
   const s = clampSpeed(speed);
   const elapsedMinutes = Math.max(0, (now - weekStartMs) / MINUTE_MS);
