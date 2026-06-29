@@ -21,9 +21,13 @@ test.describe("count consistency (home ↔ detail)", () => {
     await page.locator('a[href^="/shop/"]').first().click();
     await page.waitForURL("**/shop/**");
 
+    // These testids appear only once the live count has loaded (the components
+    // never render the cached/SSR value), so reading them waits for the real
+    // number rather than a placeholder.
     await expect(page.getByTestId("view-count")).toBeVisible();
+    await expect(page.getByTestId("like-count")).toBeVisible();
     const detailView = num(await page.getByTestId("view-count").innerText());
-    const detailLike = num(await page.getByTestId("like-button").innerText());
+    const detailLike = num(await page.getByTestId("like-count").innerText());
 
     // The detail must reflect the same shop, not a stale cached render.
     // Views: opening counts +1, so detail ∈ [card, card + small].
