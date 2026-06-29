@@ -48,7 +48,7 @@ export default async function ShopDetailPage({
             priority
             sizes="(max-width: 480px) 100vw, 480px"
             unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
-            className="object-cover"
+            className="object-cover animate-photo"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-6xl">
@@ -153,7 +153,7 @@ export default async function ShopDetailPage({
                           fill
                           sizes="80px"
                           unoptimized={(food.image_url.startsWith("/demo/") || food.image_url.toLowerCase().endsWith(".svg"))}
-                          className="object-cover"
+                          className="object-cover animate-photo"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-3xl">

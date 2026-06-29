@@ -248,6 +248,21 @@
   will-change: transform, filter;
 }
 
+/* Uploaded photos gently move (slow Ken-Burns zoom + a touch of rotation) so
+   the feed feels alive. Applied to raster food/shop images; the container clips
+   it (overflow-hidden), and the scale keeps the rotation from showing corners. */
+@keyframes photo-motion {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.07) rotate(1.2deg); }
+}
+.animate-photo {
+  animation: photo-motion 8s ease-in-out infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-photo { animation: none; }
+}
+
 /* Realistic trending fire — a live, always-burning flame. Trending is the one
    place color is intentionally allowed (the rest of the UI is monochrome). The
    flame "dances" (outer + inner core out of phase) and the whole icon pulses a

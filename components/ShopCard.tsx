@@ -68,7 +68,7 @@ export function ShopCard({
               fill
               sizes="(max-width: 480px) 50vw, 240px"
               unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.08]"
+              className="object-cover animate-photo"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-5xl">

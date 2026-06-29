@@ -79,7 +79,7 @@ export default async function AdminDashboard() {
                       fill
                       sizes="56px"
                       unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
-                      className="object-cover"
+                      className="object-cover animate-photo"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
