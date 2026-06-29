@@ -280,9 +280,9 @@ export function ShopForm({ shop }: { shop?: ShopWithFoods }) {
         <Input
           id="thumbnail_url"
           name="thumbnail_url"
-          type="url"
+          type="text"
           defaultValue={shop?.thumbnail_url ?? ""}
-          placeholder="https://..."
+          placeholder="https://... 또는 /demo/lobster.svg"
         />
       </Field>
 
