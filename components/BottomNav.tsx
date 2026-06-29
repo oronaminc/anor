@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Home, Map, Flame, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { TrendingFlame } from "@/components/TrendingFlame";
 
 const ITEMS = [
   { href: "/", key: "home", icon: Home },
@@ -54,7 +55,11 @@ export function BottomNav() {
                       : "text-muted-foreground",
                   )}
                 >
-                  <Icon className="size-5" />
+                  {item.key === "trending" ? (
+                    <TrendingFlame interactive={false} className="size-5" />
+                  ) : (
+                    <Icon className="size-5" />
+                  )}
                 </span>
                 <span
                   className={cn(

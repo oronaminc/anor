@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Flame } from "lucide-react";
+import { TrendingFlame } from "@/components/TrendingFlame";
 
 import type { ShopWithFoods } from "@/lib/types";
 import { sortShops } from "@/lib/sort";
@@ -17,7 +17,7 @@ export async function TrendingSection({ shops }: { shops: ShopWithFoods[] }) {
     <section className="space-y-3">
       <h2 className="flex items-center gap-2.5 font-display text-base font-extrabold uppercase tracking-wide">
         <span className="h-5 w-1 rounded-full bg-primary glow-sm" />
-        <Flame className="size-5 text-primary animate-pulse-glow" />
+        <TrendingFlame interactive={false} className="size-5" />
         {t("trendingTitle")}
       </h2>
 

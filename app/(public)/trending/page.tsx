@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { Flame } from "lucide-react";
-
 import { getShops } from "@/lib/queries";
+import { TrendingFlame } from "@/components/TrendingFlame";
 import { TrendingSection } from "@/components/TrendingSection";
 import { RankingSection } from "@/components/RankingSection";
 
@@ -15,7 +14,7 @@ export default async function TrendingPage() {
     <div className="space-y-7 px-4 pt-4">
       <header className="space-y-1.5">
         <h1 className="flex items-center gap-2.5 font-display text-xl font-extrabold uppercase tracking-tight gradient-text text-glow">
-          <Flame className="size-6 text-primary animate-pulse-glow" />
+          <TrendingFlame interactive={false} className="size-6" />
           {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>

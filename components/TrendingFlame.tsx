@@ -33,7 +33,7 @@ export function TrendingFlame({
       key={taps}
       viewBox="0 0 24 24"
       aria-hidden="true"
-      className={cn("flame-fire size-4", taps > 0 && "flame-burst", className)}
+      className={cn("flame-fire", taps > 0 && "flame-burst", className || "size-4")}
     >
       <defs>
         <linearGradient id={`${id}-o`} x1="0" y1="1" x2="0" y2="0">

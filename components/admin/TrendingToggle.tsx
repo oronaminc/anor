@@ -5,6 +5,7 @@ import { Flame } from "lucide-react";
 
 import { toggleTrending } from "@/app/(admin)/admin/actions";
 import { cn } from "@/lib/utils";
+import { TrendingFlame } from "@/components/TrendingFlame";
 
 export function TrendingToggle({
   shopId,
@@ -32,7 +33,11 @@ export function TrendingToggle({
           : "bg-background text-muted-foreground hover:bg-muted",
       )}
     >
-      <Flame className="size-3.5" />
+      {isTrending ? (
+        <TrendingFlame interactive={false} className="size-3.5" />
+      ) : (
+        <Flame className="size-3.5" />
+      )}
       {isTrending ? "급상승 ON" : "급상승 OFF"}
     </button>
   );
