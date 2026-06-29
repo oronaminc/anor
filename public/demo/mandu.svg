@@ -7,5 +7,5 @@
   </defs>
   <rect width="800" height="600" fill="url(#g)"/>
   <text x="400" y="300" font-size="220" text-anchor="middle" dominant-baseline="central">🥟<animateTransform attributeName="transform" type="rotate" additive="sum" values="-18 400 300;18 400 300;-18 400 300" dur="1.05s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" additive="sum" values="0 0;0 -62;0 0;0 31;0 0" keyTimes="0;0.28;0.5;0.74;1" dur="1.05s" repeatCount="indefinite"/></text>
-  <text x="400" y="500" font-size="64" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">왕만두</text>
+  <text x="400" y="500" font-size="64" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">王マンドゥ</text>
 </svg>
