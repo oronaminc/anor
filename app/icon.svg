@@ -2,7 +2,7 @@
   <defs>
     <clipPath id="ring"><circle cx="256" cy="256" r="248"/></clipPath>
     <style>
-      .cjk{font-family:'Apple SD Gothic Neo','Hiragino Maru Gothic ProN','Noto Sans CJK KR','Noto Sans CJK JP',system-ui,sans-serif;font-weight:800}
+      .cjk{font-family:'Apple SD Gothic Neo','Hiragino Maru Gothic ProN','Noto Sans CJK JP','Noto Sans CJK KR',system-ui,sans-serif;font-weight:800}
       .lat{font-family:system-ui,'Helvetica Neue',Arial,sans-serif;font-weight:800}
     </style>
   </defs>
@@ -10,21 +10,22 @@
   <!-- white face -->
   <circle cx="256" cy="256" r="250" fill="#ffffff"/>
 
-  <!-- blue middle band (clipped to the circle) -->
+  <!-- blue middle band (taller, clipped to the circle) -->
   <g clip-path="url(#ring)">
-    <rect x="0" y="198" width="512" height="142" fill="#29b6f6"/>
+    <rect x="0" y="168" width="512" height="176" fill="#29b6f6"/>
   </g>
 
   <!-- outer blue ring (covers the band edges) -->
   <circle cx="256" cy="256" r="229" fill="none" stroke="#29b6f6" stroke-width="38"/>
 
   <!-- station number -->
-  <circle cx="256" cy="126" r="58" fill="#29b6f6"/>
-  <text x="256" y="130" text-anchor="middle" dominant-baseline="middle" class="lat" font-size="60" fill="#ffffff">424</text>
+  <circle cx="256" cy="110" r="48" fill="#29b6f6"/>
+  <text x="256" y="113" text-anchor="middle" dominant-baseline="middle" class="lat" font-size="50" fill="#ffffff">424</text>
 
-  <!-- station name (Japanese) on the blue band -->
-  <text x="256" y="273" text-anchor="middle" dominant-baseline="middle" class="cjk" font-size="118" fill="#ffffff">明洞駅</text>
+  <!-- station name (Japanese) — as large as fits the band -->
+  <text x="256" y="258" text-anchor="middle" dominant-baseline="middle" class="cjk" font-size="146" fill="#ffffff">明洞駅</text>
 
-  <!-- romanized -->
-  <text x="256" y="398" text-anchor="middle" dominant-baseline="middle" class="lat" font-size="39" fill="#1a1a1a">Myeong-dong Station</text>
+  <!-- romanized, two lines -->
+  <text x="256" y="388" text-anchor="middle" dominant-baseline="middle" class="lat" font-size="40" fill="#1a1a1a">Myeong-dong</text>
+  <text x="256" y="432" text-anchor="middle" dominant-baseline="middle" class="lat" font-size="40" fill="#1a1a1a">Station</text>
 </svg>
