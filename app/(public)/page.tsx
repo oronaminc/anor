@@ -4,7 +4,7 @@ import { Search, MapPin, ArrowRight } from "lucide-react";
 
 import { getShops } from "@/lib/queries";
 import { ShopExplorer } from "@/components/ShopExplorer";
-import GoogleMap from "@/components/GoogleMap";
+import LazyGoogleMap from "@/components/LazyGoogleMap";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +60,7 @@ export default async function HomePage() {
                   <ArrowRight className="size-4" />
                 </Link>
               </div>
-              <GoogleMap
+              <LazyGoogleMap
                 shops={shops}
                 height="200px"
                 linkToDetail

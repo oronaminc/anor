@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
 import { ShopViewCount } from "@/components/ShopViewCount";
 import { LikeButton } from "@/components/LikeButton";
-import GoogleMap from "@/components/GoogleMap";
+import { MapEmbed } from "@/components/MapEmbed";
 
 export const dynamic = "force-dynamic";
 
@@ -200,8 +200,10 @@ export default async function ShopDetailPage({
             {shop.address && (
               <p className="text-sm text-muted-foreground">{shop.address}</p>
             )}
-            <GoogleMap
-              shops={[shop]}
+            <MapEmbed
+              lat={shop.lat}
+              lng={shop.lng}
+              title={shop.name_ko}
               height="220px"
               className="overflow-hidden rounded-2xl neon-border"
             />
