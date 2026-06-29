@@ -18,6 +18,7 @@
     "stress": "node scripts/stress.mjs",
     "data:export": "node scripts/data-export.mjs",
     "data:sync": "node scripts/data-sync.mjs",
+    "data:image": "node scripts/register-image.mjs",
     "r2:test": "node scripts/r2-test.mjs"
   },
   "dependencies": {
