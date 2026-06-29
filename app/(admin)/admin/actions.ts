@@ -243,6 +243,8 @@ function readShopForm(formData: FormData): {
       youtube_shorts_url: str("youtube_shorts_url") || null,
       thumbnail_url: str("thumbnail_url") || null,
       price_range: str("price_range") || null,
+      district: str("district") || null,
+      line_pay: formData.get("line_pay") === "on",
       is_trending: formData.get("is_trending") === "on",
     },
     hashtags: parseHashtags(str("hashtags")),
@@ -313,14 +315,14 @@ export async function createShop(
       INSERT INTO shops
         (name_ko, name_en, name_ja, name_es, description, translations,
          lat, lng, address, youtube_shorts_url, thumbnail_url,
-         price_range, is_trending, hashtags)
+         price_range, is_trending, hashtags, district, line_pay)
       VALUES
         (${fields.name_ko}, ${fields.name_en}, ${fields.name_ja},
          ${fields.name_es}, ${fields.description},
          ${JSON.stringify(fields.translations)}::jsonb,
          ${fields.lat}, ${fields.lng}, ${fields.address},
          ${fields.youtube_shorts_url}, ${thumbnail}, ${fields.price_range},
-         ${fields.is_trending}, ${hashtags})
+         ${fields.is_trending}, ${hashtags}, ${fields.district}, ${fields.line_pay})
       RETURNING id
     `;
     const shopId = String(rows[0].id);
@@ -363,7 +365,9 @@ export async function updateShop(
         thumbnail_url = ${thumbnail},
         price_range = ${fields.price_range},
         is_trending = ${fields.is_trending},
-        hashtags = ${hashtags}
+        hashtags = ${hashtags},
+        district = ${fields.district},
+        line_pay = ${fields.line_pay}
       WHERE id = ${id}
     `;
     await sql`DELETE FROM shop_foods WHERE shop_id = ${id}`;

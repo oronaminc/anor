@@ -117,6 +117,11 @@ create index if not exists shops_created_idx      on public.shops (created_at de
 alter table public.shops add column if not exists synthetic_view_count int not null default 0;
 alter table public.shops add column if not exists synthetic_like_count int not null default 0;
 
+-- District/area label + whether the shop accepts LINE Pay (popular with Japanese
+-- visitors). Managed via the admin form / the CSV sync.
+alter table public.shops add column if not exists district text;
+alter table public.shops add column if not exists line_pay boolean not null default false;
+
 -- Menu foods belonging to a shop (1 shop -> many foods).
 create table if not exists public.shop_foods (
   id           uuid primary key default gen_random_uuid(),

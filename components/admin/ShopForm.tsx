@@ -233,6 +233,26 @@ export function ShopForm({ shop }: { shop?: ShopWithFoods }) {
         />
       </Field>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="구역 (지역)" htmlFor="district">
+          <Input
+            id="district"
+            name="district"
+            defaultValue={shop?.district ?? ""}
+            placeholder="명동거리"
+          />
+        </Field>
+        <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            name="line_pay"
+            defaultChecked={shop?.line_pay ?? false}
+            className="size-4 rounded border-border accent-[#06C755]"
+          />
+          LINE Pay 가능
+        </label>
+      </div>
+
       <Field label="유튜브 쇼츠 URL" htmlFor="youtube_shorts_url">
         <Input
           id="youtube_shorts_url"

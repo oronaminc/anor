@@ -16,6 +16,7 @@ import { TrendingBadge } from "@/components/ShopCard";
 import { ShopViewCount } from "@/components/ShopViewCount";
 import { LikeButton } from "@/components/LikeButton";
 import { MapEmbed } from "@/components/MapEmbed";
+import { LinePayBadge } from "@/components/LinePayBadge";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,17 @@ export default async function ShopDetailPage({
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="size-4" />
               {shop.address}
+            </div>
+          )}
+          {(shop.district || shop.line_pay) && (
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
+              {shop.district && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <MapPin className="size-3.5" />
+                  {shop.district}
+                </span>
+              )}
+              {shop.line_pay && <LinePayBadge className="px-2 py-1 text-[11px]" />}
             </div>
           )}
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">

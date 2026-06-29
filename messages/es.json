@@ -62,7 +62,8 @@
     "title": "Mapa gastronómico de Myeongdong",
     "subtitle": "Toca un marcador para ver los detalles",
     "missingKey": "La clave de la API de Google Maps no está configurada.",
-    "failed": "No se pudo cargar el mapa."
+    "failed": "No se pudo cargar el mapa.",
+    "all": "Todo"
   },
   "appearance": {
     "title": "Apariencia",

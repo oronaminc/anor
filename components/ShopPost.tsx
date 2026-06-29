@@ -3,12 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { Eye, Heart } from "lucide-react";
+import { Eye, Heart, MapPin } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
 import { localizedName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
+import { LinePayBadge } from "@/components/LinePayBadge";
 
 /** Threads-style feed row: small thumbnail + text, hairline-separated. */
 export function ShopPost({
@@ -54,7 +55,15 @@ export function ShopPost({
             <HighlightText text={name} query={query} />
           </h3>
           {shop.is_trending && <TrendingFlame />}
+          {shop.line_pay && <LinePayBadge className="ml-0.5" />}
         </div>
+
+        {shop.district && (
+          <p className="mt-0.5 inline-flex items-center gap-0.5 text-[12px] text-muted-foreground">
+            <MapPin className="size-3 shrink-0" />
+            {shop.district}
+          </p>
+        )}
 
         {menuLine && (
           <p className="truncate text-[13px] text-muted-foreground">

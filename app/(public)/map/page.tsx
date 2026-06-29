@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { MapPin } from "lucide-react";
 
 import { getShops } from "@/lib/queries";
-import GoogleMap from "@/components/GoogleMap";
+import { MapExplorer } from "@/components/MapExplorer";
 
 export const dynamic = "force-dynamic";
 
@@ -20,12 +20,7 @@ export default async function MapPage() {
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </header>
 
-      <GoogleMap
-        shops={shops}
-        height="calc(100dvh - 14rem)"
-        linkToDetail
-        className="overflow-hidden rounded-3xl neon-border"
-      />
+      <MapExplorer shops={shops} />
     </div>
   );
 }

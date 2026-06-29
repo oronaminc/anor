@@ -62,7 +62,8 @@
     "title": "明洞フードマップ",
     "subtitle": "マーカーをタップして料理情報を確認",
     "missingKey": "Google Maps APIキーが設定されていません。",
-    "failed": "マップを読み込めませんでした。"
+    "failed": "マップを読み込めませんでした。",
+    "all": "すべて"
   },
   "appearance": {
     "title": "表示設定",

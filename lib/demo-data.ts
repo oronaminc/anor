@@ -105,9 +105,20 @@ type ShopDef = Omit<
   | "week_start"
   | "synthetic_view_count"
   | "synthetic_like_count"
+  | "district"
+  | "line_pay"
 > & {
   foodKeys: string[];
 };
+
+const DEMO_DISTRICTS = [
+  "명동거리",
+  "명동성당 인근",
+  "눈스퀘어 옆",
+  "명동8길",
+  "중앙로",
+  "명동길",
+];
 
 const SHOP_DEFS: ShopDef[] = [
   {
@@ -219,8 +230,10 @@ function buildFoods(shopId: string, keys: string[]): ShopFood[] {
 }
 
 export const DEMO_SHOPS: ShopWithFoods[] = SHOP_DEFS.map(
-  ({ foodKeys, ...shop }) => ({
+  ({ foodKeys, ...shop }, i) => ({
     ...shop,
+    district: DEMO_DISTRICTS[i % DEMO_DISTRICTS.length],
+    line_pay: i % 2 === 0,
     synthetic_view_count: 0,
     synthetic_like_count: 0,
     weekly_view_count: Math.round(shop.view_count * 0.28),

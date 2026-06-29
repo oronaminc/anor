@@ -69,6 +69,10 @@ export type Shop = {
   thumbnail_url: string | null;
   hashtags: string[] | null;
   price_range: string | null;
+  /** Area/district label, e.g. "명동거리". Free text, managed by admin/CSV. */
+  district: string | null;
+  /** Whether the shop accepts LINE Pay (popular with Japanese visitors). */
+  line_pay: boolean;
   view_count: number;
   like_count: number;
   /** Admin/automated engagement, separate from the real counts; the displayed

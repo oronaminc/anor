@@ -38,6 +38,8 @@ function makeShop(over: Partial<ShopWithFoods>): ShopWithFoods {
     thumbnail_url: null,
     hashtags: [],
     price_range: null,
+    district: null,
+    line_pay: false,
     view_count: 0,
     like_count: 0,
     synthetic_view_count: 0,

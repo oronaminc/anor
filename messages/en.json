@@ -62,7 +62,8 @@
     "title": "Myeongdong food map",
     "subtitle": "Tap a marker to see food details",
     "missingKey": "Google Maps API key is not configured.",
-    "failed": "Could not load the map."
+    "failed": "Could not load the map.",
+    "all": "All"
   },
   "appearance": {
     "title": "Appearance",

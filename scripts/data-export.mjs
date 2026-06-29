@@ -28,7 +28,8 @@ const SHOP_COLS = [
   "id", "name_ko", "name_en", "name_ja", "name_es",
   "description", "desc_en", "desc_ja", "desc_es",
   "lat", "lng", "address", "youtube_shorts_url",
-  "hashtags", "price_range", "is_trending", "growth_weight", "image",
+  "hashtags", "price_range", "district", "line_pay",
+  "is_trending", "growth_weight", "image",
 ];
 const FOOD_COLS = [
   "id", "shop_id", "name_ko", "name_en", "name_ja", "name_es",
@@ -50,6 +51,7 @@ const shopRows = shops.map((s) => {
     desc_es: t.es ?? "",
     hashtags: (s.hashtags ?? []).join("|"),
     is_trending: s.is_trending ? "true" : "false",
+    line_pay: s.line_pay ? "true" : "false",
     image: s.thumbnail_url ?? "",
   };
 });
