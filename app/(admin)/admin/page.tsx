@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
                       alt={shop.name_ko}
                       fill
                       sizes="56px"
-                      unoptimized={shop.thumbnail_url.startsWith("/demo/")}
+                      unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
                       className="object-cover"
                     />
                   ) : (

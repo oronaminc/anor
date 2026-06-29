@@ -213,3 +213,11 @@ begin
   where s.id = p_shop_id
   returning s.like_count, s.weekly_like_count, v_liked;
 end; $$;
+
+-- District registry: each area has a fixed lat/lng. A shop only needs its
+-- `district` set — the sync fills the shop's lat/lng from here.
+create table if not exists public.districts (
+  name text primary key,
+  lat  double precision,
+  lng  double precision
+);

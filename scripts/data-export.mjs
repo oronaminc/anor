@@ -70,6 +70,11 @@ const foodRows = foods.map((f) => {
 });
 writeFileSync("data/foods.csv", toCsv(foodRows, FOOD_COLS));
 
+// District registry (each area's fixed lat/lng). Put just the district name on a
+// shop and the sync fills its coordinates from here.
+const districts = await sql`SELECT name, lat, lng FROM districts ORDER BY name`;
+writeFileSync("data/districts.csv", toCsv(districts, ["name", "lat", "lng"]));
+
 console.log(
   `[export] wrote data/shops.csv (${shopRows.length} shops) + ` +
     `data/foods.csv (${foodRows.length} foods). Edit them, then: npm run data:sync`,

@@ -67,7 +67,7 @@ export function ShopCard({
               alt={name}
               fill
               sizes="(max-width: 480px) 50vw, 240px"
-              unoptimized={shop.thumbnail_url.startsWith("/demo/")}
+              unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
               className="object-cover transition-transform duration-500 group-hover:scale-[1.08]"
             />
           ) : (

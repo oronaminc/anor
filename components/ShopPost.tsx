@@ -39,7 +39,7 @@ export function ShopPost({
             alt={name}
             fill
             sizes="56px"
-            unoptimized={shop.thumbnail_url.startsWith("/demo/")}
+            unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
             className="object-cover"
           />
         ) : (

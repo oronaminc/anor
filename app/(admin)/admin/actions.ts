@@ -298,6 +298,18 @@ async function insertShopFoods(
   }
 }
 
+/** A district's fixed coordinates (the area is the location master). */
+async function coordsForDistrict(
+  sql: ReturnType<typeof getSql>,
+  district: string | null,
+): Promise<{ lat: number | null; lng: number | null } | null> {
+  if (!district) return null;
+  const rows = await sql`SELECT lat, lng FROM districts WHERE name = ${district}`;
+  return rows[0]
+    ? { lat: rows[0].lat as number, lng: rows[0].lng as number }
+    : null;
+}
+
 export async function createShop(
   _prev: ActionState,
   formData: FormData,
@@ -308,6 +320,12 @@ export async function createShop(
   const sql = getSql();
   const { fields, hashtags, foods } = readShopForm(formData);
   if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
+  // District is the location master — fill the shop's coordinates from it.
+  const dc = await coordsForDistrict(sql, fields.district);
+  if (dc) {
+    fields.lat = dc.lat;
+    fields.lng = dc.lng;
+  }
 
   try {
     const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);
@@ -347,6 +365,12 @@ export async function updateShop(
   const sql = getSql();
   const { fields, hashtags, foods } = readShopForm(formData);
   if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
+  // District is the location master — fill the shop's coordinates from it.
+  const dc = await coordsForDistrict(sql, fields.district);
+  if (dc) {
+    fields.lat = dc.lat;
+    fields.lng = dc.lng;
+  }
 
   try {
     const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);

@@ -71,6 +71,27 @@ async function resolveImage(val) {
   return publicUrl;
 }
 
+// ------------------------------------------------------------- districts
+// The district registry is the location master: name -> fixed lat/lng. A shop
+// with a district gets that area's coordinates automatically (below).
+const districtCoords = {};
+if (existsSync("data/districts.csv")) {
+  const districts = parseCsv(readFileSync("data/districts.csv", "utf8"));
+  for (const d of districts) {
+    const name = sOrNull(d.name);
+    if (!name) continue;
+    const lat = numOrNull(d.lat);
+    const lng = numOrNull(d.lng);
+    await sql.query(
+      `insert into public.districts (name, lat, lng) values ($1,$2,$3)
+       on conflict (name) do update set lat=excluded.lat, lng=excluded.lng`,
+      [name, lat, lng],
+    );
+    districtCoords[name] = { lat, lng };
+  }
+  console.log(`[sync] ${districts.length} districts`);
+}
+
 // ---------------------------------------------------------------- shops
 const shops = parseCsv(readFileSync("data/shops.csv", "utf8"));
 const shopCols = shops.length ? Object.keys(shops[0]) : [];
@@ -83,6 +104,15 @@ for (const r of shops) {
     .split("|")
     .map((x) => x.trim())
     .filter(Boolean);
+  // District wins as the location source; else any explicit lat/lng on the row.
+  let lat = numOrNull(r.lat);
+  let lng = numOrNull(r.lng);
+  const dist = sOrNull(r.district);
+  if (dist && districtCoords[dist]) {
+    ({ lat, lng } = districtCoords[dist]);
+    r.lat = lat;
+    r.lng = lng; // persist resolved coords back into the CSV
+  }
   await sql.query(
     `insert into public.shops
        (id, name_ko, name_en, name_ja, name_es, description, translations,
@@ -101,7 +131,7 @@ for (const r of shops) {
     [
       id, r.name_ko, sOrNull(r.name_en), sOrNull(r.name_ja), sOrNull(r.name_es),
       sOrNull(r.description), JSON.stringify(transOf(r)),
-      numOrNull(r.lat), numOrNull(r.lng), sOrNull(r.address),
+      lat, lng, sOrNull(r.address),
       sOrNull(r.youtube_shorts_url), image, hashtags,
       sOrNull(r.price_range), truthy(r.is_trending), numOrNull(r.growth_weight) ?? 1,
       sOrNull(r.district), truthy(r.line_pay),
