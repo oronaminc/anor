@@ -11,7 +11,6 @@
  */
 import { existsSync, readFileSync } from "node:fs";
 import { extname } from "node:path";
-import { randomUUID } from "node:crypto";
 
 import { loadEnvLocal, databaseUrl, neon } from "./lib.mjs";
 import { r2Configured, uploadToR2, contentTypeForExt } from "./r2.mjs";
@@ -39,20 +38,26 @@ if (!url) {
 const sql = neon(url);
 const norm = (s) => String(s ?? "").replace(/\s/g, "");
 
-const ext = extname(file).slice(1) || "jpg";
-const r2url = await uploadToR2(
-  readFileSync(file),
-  `uploads/${randomUUID()}.${ext}`,
-  contentTypeForExt(ext),
-);
-console.log("⬆️  uploaded →", r2url);
+// Which menu foods match this name? Use any English name for a clean R2 key.
+const matches = (
+  await sql`SELECT id, name_ko, name_en FROM shop_foods`
+).filter((f) => norm(f.name_ko) === norm(name));
+const slugSrc = matches.find((f) => f.name_en)?.name_en || name;
+const slug =
+  slugSrc.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") ||
+  "food";
+
+const ext = extname(file).slice(1).toLowerCase() || "jpg";
+// Stable, human-readable key so the bucket is browsable in the R2 dashboard and
+// re-registering the same food overwrites in place (URL stays valid, no orphans).
+const key = `foods/${slug}.${ext}`;
+const r2url = await uploadToR2(readFileSync(file), key, contentTypeForExt(ext));
+console.log(`⬆️  uploaded → ${r2url}  (R2 key: ${key})`);
 
 let foodCount = 0;
-for (const f of await sql`SELECT id, name_ko FROM shop_foods`) {
-  if (norm(f.name_ko) === norm(name)) {
-    await sql`UPDATE shop_foods SET image_url = ${r2url} WHERE id = ${f.id}`;
-    foodCount += 1;
-  }
+for (const f of matches) {
+  await sql`UPDATE shop_foods SET image_url = ${r2url} WHERE id = ${f.id}`;
+  foodCount += 1;
 }
 
 let shopCount = 0;
