@@ -15,7 +15,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "stress": "node scripts/stress.mjs"
+    "stress": "node scripts/stress.mjs",
+    "data:export": "node scripts/data-export.mjs",
+    "data:sync": "node scripts/data-sync.mjs",
+    "r2:test": "node scripts/r2-test.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

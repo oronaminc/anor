@@ -33,6 +33,10 @@ yarn-error.log*
 # local seed / test data (your private test rows — not committed)
 db/*.local.sql
 
+# CSV data-management workspace (your editable source of truth + local images)
+# Holds real content; managed via npm run data:export / data:sync. NEVER pushed.
+/data/
+
 # vercel
 .vercel
 
