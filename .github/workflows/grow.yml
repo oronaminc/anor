@@ -1,34 +1,46 @@
 name: grow
 
-# Every ~5 minutes, nudge each shop's synthetic counts up by a small random
-# amount (persisted in the DB). GitHub may delay short-interval crons under
-# load — that's fine, the numbers just grow a bit less often.
+# GitHub heavily throttles short-interval scheduled workflows, so a "*/5" cron
+# actually fires only ~once an hour. To still grow every 5 minutes, ONE run
+# loops internally: it calls the endpoint, sleeps 5 min, and repeats for ~an
+# hour — so whenever GitHub does fire it, the gap is covered. (Public repo →
+# Actions minutes are free. If you make the repo private, drop TICKS or switch
+# to an external cron like cron-job.org so you don't burn the free minutes.)
 on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
+# Never run two loops at once; a new trigger waits for the current one.
+concurrency:
+  group: grow
+  cancel-in-progress: false
+
 jobs:
   grow:
     runs-on: ubuntu-latest
+    timeout-minutes: 70
     steps:
-      - name: Trigger growth endpoint
+      - name: Grow every 5 min for ~1 hour
         env:
           SITE_URL: ${{ vars.SITE_URL || 'https://anor-sable.vercel.app' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          TICKS: "12" # 12 ticks × 5 min ≈ covers the hour until the next trigger
         run: |
           if [ -z "$CRON_SECRET" ]; then
-            echo "::error::CRON_SECRET is empty. Add it under repo Settings →"
-            echo "::error::Secrets and variables → Actions → *Secrets* tab (not Variables),"
+            echo "::error::CRON_SECRET is empty. Add it as a *Repository* secret"
+            echo "::error::(Settings → Secrets and variables → Actions → Secrets tab),"
             echo "::error::name CRON_SECRET, value matching Vercel's CRON_SECRET env."
             exit 1
           fi
-          code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
-            -X POST "$SITE_URL/api/cron/grow" -H "x-cron-secret: $CRON_SECRET")
-          echo "POST $SITE_URL/api/cron/grow → HTTP $code"
-          cat /tmp/resp.json 2>/dev/null; echo
-          if [ "$code" != "200" ]; then
-            echo "::error::Growth endpoint returned $code (401 = the GitHub CRON_SECRET"
-            echo "::error::does not match Vercel's CRON_SECRET env). Re-set the secret to match."
-            exit 1
-          fi
+          for i in $(seq 1 "$TICKS"); do
+            code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+              -X POST "$SITE_URL/api/cron/grow" -H "x-cron-secret: $CRON_SECRET")
+            echo "tick $i/$TICKS → HTTP $code  $(cat /tmp/resp.json 2>/dev/null)"
+            if [ "$code" != "200" ]; then
+              echo "::error::Growth endpoint returned $code (401 = the GitHub CRON_SECRET"
+              echo "::error::does not match Vercel's CRON_SECRET env). Re-set the secret to match."
+              exit 1
+            fi
+            if [ "$i" -lt "$TICKS" ]; then sleep 300; fi
+          done
