@@ -132,6 +132,20 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
   (`ShopViewCount` via `POST /view`, `LikeButton` via `GET …/like`). Consistency
   guarded by `tests/e2e/counts.spec.ts`; capacity by `npm run stress`
   (`scripts/stress.mjs`, ~100 concurrent reads at 100%/p95≈1s). See `SKILL.md` §6.
+- **Content / media via CSV + R2 (see `SKILL.md` §7)**: shops/foods/photos are
+  managed from gitignored CSVs (`npm run data:export` / `data:sync`, `scripts/
+  csv.mjs` writes a UTF-8 BOM so Excel keeps Korean/JA) + Cloudflare R2. The
+  `districts` table (`data/districts.csv`, `name,lat,lng`) is the **location
+  master**: a shop just stores a `district` code (e.g. `52-A`, free text) and the
+  sync/admin fill its lat/lng from it. Photos upload to a stable R2 key
+  `foods/<slug>.<ext>` (`npm run data:image`), so replacing a file in the R2
+  dashboard updates the app with no DB change; DB stores only the URL. A sync
+  never touches counts. Per-shop `district` + `line_pay` (LINE Pay badge,
+  `components/LinePayBadge`) columns. `/map` filters by food **client-side** (no
+  extra Maps loads); to control Maps cost the home map is lazy (`LazyGoogleMap`),
+  detail uses the free **Maps Embed API** (`MapEmbed`), only `/map` is the billed
+  Dynamic map. Raster photos animate via `.animate-photo` (CSS Ken-Burns);
+  animated webp/SVG keep their own motion (served `unoptimized`).
 - **Data access**: `lib/db.ts` exposes `getSql()` (lazy Neon client). Query with
   tagged templates (`await getSql()\`SELECT ... ${id}\``) and call the SQL
   functions directly (`SELECT * FROM toggle_like(${id}, ${ipHash})`). Always

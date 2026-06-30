@@ -252,11 +252,11 @@
    the feed feels alive. Applied to raster food/shop images; the container clips
    it (overflow-hidden), and the scale keeps the rotation from showing corners. */
 @keyframes photo-motion {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.07) rotate(1.2deg); }
+  0%, 100% { transform: scale(1.04) rotate(-0.6deg); }
+  50% { transform: scale(1.18) rotate(0.8deg); }
 }
 .animate-photo {
-  animation: photo-motion 8s ease-in-out infinite;
+  animation: photo-motion 5.5s ease-in-out infinite;
   will-change: transform;
 }
 @media (prefers-reduced-motion: reduce) {

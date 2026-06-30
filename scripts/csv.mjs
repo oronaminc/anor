@@ -7,11 +7,12 @@ function escapeField(v) {
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-/** rows: array of objects; columns: ordered header keys. Returns CSV text. */
+/** rows: array of objects; columns: ordered header keys. Returns CSV text with a
+ *  UTF-8 BOM so Excel reads Korean/Japanese correctly (parseCsv strips it). */
 export function toCsv(rows, columns) {
   const head = columns.join(",");
   const body = rows.map((r) => columns.map((c) => escapeField(r[c])).join(","));
-  return [head, ...body].join("\n") + "\n";
+  return "﻿" + [head, ...body].join("\n") + "\n";
 }
 
 /** Parse CSV text into an array of objects keyed by the header row. */

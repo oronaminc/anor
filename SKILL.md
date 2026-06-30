@@ -166,3 +166,37 @@ every card keeps views > likes), and `npm run stress` (`scripts/stress.mjs`,
 read-only load test — ramps concurrency, reports success%/latency and the
 healthy concurrency ceiling). Baseline: ~100 concurrent reads at 100% success,
 p95 ≈ 1 s (Vercel auto-scales; Neon connections are the real ceiling).
+
+## 7. Content management — CSV + R2 (`data/` is gitignored, never pushed)
+
+Manage shops/foods/photos from human-editable CSVs + Cloudflare R2, not the DB
+by hand:
+
+```bash
+npm run data:export   # DB -> data/{shops,foods,districts}.csv (+ data/images/)
+# edit the CSVs in Excel/Sheets — they carry a UTF-8 BOM (scripts/csv.mjs toCsv)
+# so Korean/Japanese don't garble; save back as "CSV UTF-8".
+npm run data:sync     # CSVs (+ data/images/*) -> DB (+ R2 image upload). Idempotent.
+npm run data:image -- "계란빵" data/images/gyeranppang.jpg  # one photo -> R2 + DB
+npm run r2:test       # R2 smoke test (upload / public GET / delete)
+```
+
+- **`districts.csv` is the location master** (`name,lat,lng`). Put just a
+  `district` code (e.g. `52-A`) on a shop in `shops.csv` and the sync — and the
+  admin save (`coordsForDistrict`) — fill the shop's lat/lng from the district.
+  `district` is free text, so codes or names both work; the registry lives in the
+  `districts` table.
+- **Photos live in R2**; the DB stores only the URL. `data:image`/`data:sync`
+  upload to a stable, readable key **`foods/<slug>.<ext>`** so the bucket's
+  `foods/` folder is browsable in the Cloudflare R2 dashboard and **replacing a
+  photo in place (same key) updates the app with no DB/CSV change**. `data/images/`
+  is just upload staging (deletable after). A sync **never touches counts**.
+- Images: animated webp / SVG keep animating (served `unoptimized` when the URL
+  is `/demo/*` or ends `.svg`); raster photos get a CSS Ken-Burns zoom
+  (`.animate-photo` in `app/globals.css`, honors reduced-motion). The demo SVGs
+  show Japanese food names.
+- Per-shop `district` + `line_pay` (bool, LINE Pay badge) columns flow through
+  types, demo data, CSV and the admin form. The `/map` page filters shops by food
+  client-side (no extra Maps API loads). Maps cost: home map is lazy-loaded
+  (`LazyGoogleMap`, IntersectionObserver), shop detail uses the free **Maps Embed
+  API** (`MapEmbed`), only `/map` uses the billed Dynamic JS map.
