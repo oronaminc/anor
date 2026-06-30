@@ -104,15 +104,9 @@ for (const r of shops) {
     .split("|")
     .map((x) => x.trim())
     .filter(Boolean);
-  // District wins as the location source; else any explicit lat/lng on the row.
-  let lat = numOrNull(r.lat);
-  let lng = numOrNull(r.lng);
-  const dist = sOrNull(r.district);
-  if (dist && districtCoords[dist]) {
-    ({ lat, lng } = districtCoords[dist]);
-    r.lat = lat;
-    r.lng = lng; // persist resolved coords back into the CSV
-  }
+  // A shop stores NO coordinates — its location is its `district` (zone), and
+  // queries resolve lat/lng from the districts table by JOIN. So change a zone's
+  // coords once (districts.csv) and every shop in it moves.
   await sql.query(
     `insert into public.shops
        (id, name_ko, name_en, name_ja, name_es, description, translations,
@@ -131,7 +125,7 @@ for (const r of shops) {
     [
       id, r.name_ko, sOrNull(r.name_en), sOrNull(r.name_ja), sOrNull(r.name_es),
       sOrNull(r.description), JSON.stringify(transOf(r)),
-      lat, lng, sOrNull(r.address),
+      null, null, sOrNull(r.address),
       sOrNull(r.youtube_shorts_url), image, hashtags,
       sOrNull(r.price_range), truthy(r.is_trending), numOrNull(r.growth_weight) ?? 1,
       sOrNull(r.district), truthy(r.line_pay),

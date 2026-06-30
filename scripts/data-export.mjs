@@ -27,10 +27,12 @@ const sql = neon(url);
 const SHOP_COLS = [
   "id", "name_ko", "name_en", "name_ja", "name_es",
   "description", "desc_en", "desc_ja", "desc_es",
-  "lat", "lng", "address", "youtube_shorts_url",
+  "address", "youtube_shorts_url",
   "hashtags", "price_range", "district", "line_pay",
   "is_trending", "growth_weight", "image",
 ];
+// NOTE: no lat/lng here — a shop's location is its `district` (the zone). The
+// coordinates live in data/districts.csv and are resolved by JOIN at read time.
 const FOOD_COLS = [
   "id", "shop_id", "name_ko", "name_en", "name_ja", "name_es",
   "description", "desc_en", "desc_ja", "desc_es",
