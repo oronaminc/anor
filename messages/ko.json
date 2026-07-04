@@ -42,7 +42,8 @@
   },
   "badge": {
     "hot": "HOT",
-    "rising": "급상승"
+    "rising": "급상승",
+    "certified": "인증"
   },
   "detail": {
     "views": "조회수 {count}",

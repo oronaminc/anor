@@ -42,7 +42,8 @@
   },
   "badge": {
     "hot": "HOT",
-    "rising": "急上昇"
+    "rising": "急上昇",
+    "certified": "認証"
   },
   "detail": {
     "views": "閲覧数 {count}",

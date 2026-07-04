@@ -40,7 +40,7 @@ export default async function ShopDetailPage({
   return (
     <div className="pb-10">
       {/* Hero image */}
-      <div className="relative aspect-[4/3] w-full bg-muted">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
         {shop.thumbnail_url ? (
           <Image
             src={shop.thumbnail_url}
