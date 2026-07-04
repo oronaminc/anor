@@ -16,6 +16,7 @@ export function MapEmbed({
   height = "220px",
   zoom = 16,
   className,
+  language = "ja",
 }: {
   lat: number | null;
   lng: number | null;
@@ -23,6 +24,8 @@ export function MapEmbed({
   height?: string;
   zoom?: number;
   className?: string;
+  /** Google map label language (app locale) — "ja" | "ko". */
+  language?: string;
 }) {
   const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const hasCoords = typeof lat === "number" && typeof lng === "number";
@@ -43,7 +46,7 @@ export function MapEmbed({
 
   const src =
     `https://www.google.com/maps/embed/v1/place?key=${key}` +
-    `&q=${lat},${lng}&zoom=${zoom}&language=ko`;
+    `&q=${lat},${lng}&zoom=${zoom}&language=${language}`;
 
   return (
     <iframe

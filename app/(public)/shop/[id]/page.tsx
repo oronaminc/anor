@@ -217,8 +217,9 @@ export default async function ShopDetailPage({
             <MapEmbed
               lat={shop.lat}
               lng={shop.lng}
-              title={shop.name_ko}
+              title={name}
               height="220px"
+              language={locale}
               className="overflow-hidden rounded-2xl neon-border"
             />
             <Button asChild className="w-full" size="lg">

@@ -58,9 +58,14 @@ export default function GoogleMap({
     return MYEONGDONG_CENTER;
   }, [points]);
 
+  // Render Google's own labels/place names in the active app language. The
+  // loader bakes ?language into the script URL; a locale switch does a full page
+  // reload (LanguageSwitcher), so the map re-loads in the new language.
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: apiKey,
+    language: locale,
+    region: locale === "ja" ? "JP" : "KR",
   });
 
   const onLoad = useCallback(
