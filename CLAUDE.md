@@ -194,12 +194,27 @@ neon "K-Demon-Hunters × cyberpunk" theme). Keep new UI consistent with this:
   neon — keep that if you add more.
 - Typography is intentionally restrained (hero ~20px; section headers `text-base`).
 
-## i18n
+## i18n — IMPORTANT
 
-Every user-facing string goes through next-intl. Server components use
-`getTranslations(ns)`; client components use `useTranslations(ns)`. Add keys to
-**all four** `messages/*.json`. Food names/descriptions are localized via
-`lib/i18n-food.ts` (`localizedName`, `secondaryName`, `localizedDescription`).
+The app ships **Japanese (default) + Korean only** (`i18n/config.ts`,
+`defaultLocale: "ja"`). There is no English/Spanish UI (`messages/en.json` and
+`es.json` were removed). Locale is a `NEXT_LOCALE` cookie (no URL routing); the
+`LanguageSwitcher` does a full `window.location.reload()` after setting it so the
+new locale reliably applies.
+
+**Every user-facing string goes through next-intl** — no hardcoded labels (that
+was the certified-badge bug: it hardcoded Korean "인증"). Server components use
+`getTranslations(ns)`, client components `useTranslations(ns)`; a small
+label-only component that renders inside a server page can be `"use client"` to
+use the hook. Add every key to **both** `messages/ja.json` AND `messages/ko.json`.
+
+**Write PROPER, natural translations for BOTH languages — never a literal /
+machine translation.** Verify the term is actually idiomatic in each language.
+(e.g. official vendor certification is Japanese `認定`/`公認`, NOT `認証`, which
+means technical/login authentication.) When the owner asks for a new/changed
+string, produce the natural ja + ko wording, not a direct gloss. Food
+names/descriptions are localized via `lib/i18n-food.ts` (`localizedName`,
+`secondaryName` show the ja↔ko pair, `localizedDescription`).
 
 ## Git / pushing
 

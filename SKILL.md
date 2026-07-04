@@ -200,3 +200,19 @@ npm run r2:test       # R2 smoke test (upload / public GET / delete)
   client-side (no extra Maps API loads). Maps cost: home map is lazy-loaded
   (`LazyGoogleMap`, IntersectionObserver), shop detail uses the free **Maps Embed
   API** (`MapEmbed`), only `/map` uses the billed Dynamic JS map.
+
+## 8. Localization — Japanese (default) + Korean, done properly
+
+The UI ships **ja (default) + ko only** (`i18n/config.ts`). When adding or
+changing any user-facing string:
+
+- Put the key in **both** `messages/ja.json` AND `messages/ko.json` — a missing
+  key breaks that language. Never hardcode a label in a component; use
+  `getTranslations` / `useTranslations` (a label-only component can be
+  `"use client"` just for the hook, e.g. `components/CertifiedBadge.tsx`).
+- Write **natural, idiomatic** wording for BOTH languages — not a literal /
+  machine translation, and not the same word for both. Verify the term is what
+  people actually say in that language. Example that was wrong: official vendor
+  certification → JA `認定`/`公認`, **not** `認証` (which means login/technical
+  authentication). Brand names (LINE Pay) stay untranslated.
+- Locale is a `NEXT_LOCALE` cookie; the picker reloads the page to apply it.
