@@ -4,7 +4,7 @@ import { ArrowLeft, Search, Eye, Heart, SearchX } from "lucide-react";
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
 import type { SearchEvent } from "@/lib/types";
-import { formatViewCount } from "@/lib/utils";
+import { formatViewCount, cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,9 @@ type ShopStat = {
   id: string;
   name_ko: string;
   view_count: number;
+  synthetic_view_count: number;
   like_count: number;
+  synthetic_like_count: number;
 };
 
 type TermStat = { term: string; sample: string; count: number; zero: number };
@@ -25,16 +27,15 @@ async function loadAnalytics() {
       configured: false,
       total: 0,
       events: [] as SearchEvent[],
-      topShops: [] as ShopStat[],
-      likedShops: [] as ShopStat[],
+      shops: [] as ShopStat[],
     };
   }
 
   const sql = getSql();
-  const [events, topShops, likedShops, totalRows] = await Promise.all([
+  const [events, shops, totalRows] = await Promise.all([
     sql`SELECT * FROM search_events ORDER BY created_at DESC LIMIT ${RECENT_WINDOW}`,
-    sql`SELECT id, name_ko, view_count, like_count FROM shops ORDER BY view_count DESC LIMIT 10`,
-    sql`SELECT id, name_ko, view_count, like_count FROM shops ORDER BY like_count DESC LIMIT 10`,
+    sql`SELECT id, name_ko, view_count, synthetic_view_count,
+               like_count, synthetic_like_count FROM shops`,
     sql`SELECT count(*)::int AS count FROM search_events`,
   ]);
 
@@ -42,8 +43,7 @@ async function loadAnalytics() {
     configured: true,
     total: (totalRows[0]?.count as number) ?? events.length,
     events: events as SearchEvent[],
-    topShops: topShops as ShopStat[],
-    likedShops: likedShops as ShopStat[],
+    shops: shops as ShopStat[],
   };
 }
 
@@ -78,10 +78,37 @@ function timeAgo(iso: string): string {
   return `${Math.floor(h / 24)}일 전`;
 }
 
-export default async function AdminAnalyticsPage() {
-  const { configured, total, events, topShops, likedShops } =
-    await loadAnalytics();
+export default async function AdminAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: { mode?: string };
+}) {
+  // "real" = only real human views/likes; "total" = incl. admin/cron boosts.
+  const mode: "real" | "total" =
+    searchParams?.mode === "total" ? "total" : "real";
+  const { configured, total, events, shops } = await loadAnalytics();
   const { top, zero } = aggregate(events);
+
+  const viewsOf = (s: ShopStat) =>
+    mode === "real" ? s.view_count : s.view_count + s.synthetic_view_count;
+  const likesOf = (s: ShopStat) =>
+    mode === "real" ? s.like_count : s.like_count + s.synthetic_like_count;
+  const topShops = [...shops]
+    .sort((a, b) => viewsOf(b) - viewsOf(a))
+    .slice(0, 10)
+    .map((s) => ({ id: s.id, name_ko: s.name_ko, value: viewsOf(s) }));
+  const likedShops = [...shops]
+    .sort((a, b) => likesOf(b) - likesOf(a))
+    .slice(0, 10)
+    .map((s) => ({ id: s.id, name_ko: s.name_ko, value: likesOf(s) }));
+
+  const realViews = shops.reduce((s, f) => s + f.view_count, 0);
+  const synthViews = shops.reduce((s, f) => s + f.synthetic_view_count, 0);
+  const realLikes = shops.reduce((s, f) => s + f.like_count, 0);
+  const synthLikes = shops.reduce((s, f) => s + f.synthetic_like_count, 0);
+  const shownViews = mode === "real" ? realViews : realViews + synthViews;
+  const shownLikes = mode === "real" ? realLikes : realLikes + synthLikes;
+  const suffix = mode === "real" ? " (실제)" : " (전체)";
 
   return (
     <div className="space-y-6">
@@ -106,6 +133,7 @@ export default async function AdminAnalyticsPage() {
         </div>
       ) : (
         <>
+          <ModeToggle mode={mode} />
           <div className="grid grid-cols-3 gap-3">
             <StatCard
               icon={<Search className="size-4" />}
@@ -114,19 +142,23 @@ export default async function AdminAnalyticsPage() {
             />
             <StatCard
               icon={<Eye className="size-4" />}
-              label="총 조회"
-              value={formatViewCount(
-                topShops.reduce((s, f) => s + f.view_count, 0),
-              )}
-              hint="상위 10개 합계"
+              label={"조회" + suffix}
+              value={formatViewCount(shownViews)}
+              hint={
+                mode === "real"
+                  ? `부스트 ${formatViewCount(synthViews)} 제외`
+                  : `실제 ${formatViewCount(realViews)} + 부스트 ${formatViewCount(synthViews)}`
+              }
             />
             <StatCard
               icon={<Heart className="size-4" />}
-              label="총 좋아요"
-              value={formatViewCount(
-                likedShops.reduce((s, f) => s + f.like_count, 0),
-              )}
-              hint="상위 10개 합계"
+              label={"좋아요" + suffix}
+              value={formatViewCount(shownLikes)}
+              hint={
+                mode === "real"
+                  ? `부스트 ${formatViewCount(synthLikes)} 제외`
+                  : `실제 ${formatViewCount(realLikes)} + 부스트 ${formatViewCount(synthLikes)}`
+              }
             />
           </div>
 
@@ -184,12 +216,12 @@ export default async function AdminAnalyticsPage() {
               )}
             </Panel>
 
-            <Panel title="조회 TOP 10" icon={<Eye className="size-4" />}>
-              <ShopRanking shops={topShops} metric="view" />
+            <Panel title={"조회 TOP 10" + suffix} icon={<Eye className="size-4" />}>
+              <ShopRanking rows={topShops} metric="view" />
             </Panel>
 
-            <Panel title="좋아요 TOP 10" icon={<Heart className="size-4" />}>
-              <ShopRanking shops={likedShops} metric="like" />
+            <Panel title={"좋아요 TOP 10" + suffix} icon={<Heart className="size-4" />}>
+              <ShopRanking rows={likedShops} metric="like" />
             </Panel>
           </div>
 
@@ -271,17 +303,47 @@ function Panel({
   );
 }
 
+function ModeToggle({ mode }: { mode: "real" | "total" }) {
+  const base =
+    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
+  const on = "bg-primary text-primary-foreground";
+  const off = "text-muted-foreground hover:text-foreground";
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="inline-flex w-fit rounded-lg border bg-card p-0.5">
+        <Link
+          href="/admin/analytics?mode=real"
+          className={cn(base, mode === "real" ? on : off)}
+        >
+          실제 (사람)
+        </Link>
+        <Link
+          href="/admin/analytics?mode=total"
+          className={cn(base, mode === "total" ? on : off)}
+        >
+          전체 (부스트 포함)
+        </Link>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {mode === "real"
+          ? "실제 사용자가 직접 조회·좋아요한 수치만 (관리자·자동 부스트 제외)."
+          : "실제 + 관리자/자동(GitHub Action) 부스트를 합친 공개 노출 수치."}
+      </p>
+    </div>
+  );
+}
+
 function ShopRanking({
-  shops,
+  rows,
   metric,
 }: {
-  shops: ShopStat[];
+  rows: { id: string; name_ko: string; value: number }[];
   metric: "view" | "like";
 }) {
-  if (shops.length === 0) return <Empty>데이터가 없습니다.</Empty>;
+  if (rows.length === 0) return <Empty>데이터가 없습니다.</Empty>;
   return (
     <ol className="divide-y">
-      {shops.map((s, i) => (
+      {rows.map((s, i) => (
         <li key={s.id} className="flex items-center gap-3 py-2.5 text-sm">
           <span className="w-5 shrink-0 text-right font-bold tabular-nums text-muted-foreground">
             {i + 1}
@@ -298,7 +360,7 @@ function ShopRanking({
             ) : (
               <Heart className="size-3.5" />
             )}
-            {formatViewCount(metric === "view" ? s.view_count : s.like_count)}
+            {formatViewCount(s.value)}
           </span>
         </li>
       ))}

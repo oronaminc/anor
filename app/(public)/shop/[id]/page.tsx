@@ -74,11 +74,16 @@ export default async function ShopDetailPage({
       <div className="space-y-6 px-4 pt-5">
         {/* Title block */}
         <div className="space-y-2">
-          {shop.price_range && (
+          {(shop.certified || shop.price_range) && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-bold text-primary">
-                {shop.price_range}
-              </span>
+              {shop.certified && (
+                <CertifiedBadge className="px-2.5 py-1 text-[11px]" />
+              )}
+              {shop.price_range && (
+                <span className="text-sm font-bold text-primary">
+                  {shop.price_range}
+                </span>
+              )}
             </div>
           )}
           <h1 className="font-display text-xl font-extrabold uppercase tracking-tight gradient-text">
@@ -100,7 +105,7 @@ export default async function ShopDetailPage({
               {shop.address}
             </div>
           )}
-          {(shop.district || shop.line_pay || shop.certified) && (
+          {(shop.district || shop.line_pay) && (
             <div className="flex flex-wrap items-center gap-2 pt-0.5">
               {shop.district && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
@@ -108,7 +113,6 @@ export default async function ShopDetailPage({
                   {shop.district}
                 </span>
               )}
-              {shop.certified && <CertifiedBadge className="px-2 py-1 text-[11px]" />}
               {shop.line_pay && <LinePayBadge className="px-2 py-1 text-[11px]" />}
             </div>
           )}

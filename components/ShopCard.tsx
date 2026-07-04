@@ -11,23 +11,18 @@ import { localizedName, secondaryName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 
-export function TrendingBadge({ rank }: { rank?: number }) {
+// One admin flag (is_trending, "급상승") → ONE badge everywhere. The flame is the
+// app's trending motif; the `rank` prop is accepted for call-site compatibility
+// but no longer changes the badge (it used to split into HOT vs 급상승).
+export function TrendingBadge(_props: { rank?: number } = {}) {
   const t = useTranslations("badge");
-  const hot = typeof rank === "number" ? rank <= 2 : true;
-  if (hot) {
-    return (
-      <span
-        className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(255,90,0,0.45)]"
-        style={{ background: "linear-gradient(135deg, #ff2d00 0%, #ff8a00 100%)" }}
-      >
-        <TrendingFlame interactive={false} className="size-3.5" />
-        {t("hot")}
-      </span>
-    );
-  }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-holo px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-primary-foreground glow-sm">
-      {`⬆ ${t("rising")}`}
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-[0_0_12px_rgba(255,90,0,0.45)]"
+      style={{ background: "linear-gradient(135deg, #ff2d00 0%, #ff8a00 100%)" }}
+    >
+      <TrendingFlame interactive={false} className="size-3.5" />
+      {t("hot")}
     </span>
   );
 }
