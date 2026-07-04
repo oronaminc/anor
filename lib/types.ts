@@ -73,6 +73,8 @@ export type Shop = {
   district: string | null;
   /** Whether the shop accepts LINE Pay (popular with Japanese visitors). */
   line_pay: boolean;
+  /** Officially certified street vendor (구청/서울시 인증) → verified badge. */
+  certified: boolean;
   view_count: number;
   like_count: number;
   /** Admin/automated engagement, separate from the real counts; the displayed

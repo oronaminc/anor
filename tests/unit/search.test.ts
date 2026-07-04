@@ -40,6 +40,7 @@ function makeShop(over: Partial<ShopWithFoods>): ShopWithFoods {
     price_range: null,
     district: null,
     line_pay: false,
+    certified: false,
     view_count: 0,
     like_count: 0,
     synthetic_view_count: 0,

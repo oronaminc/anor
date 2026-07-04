@@ -121,6 +121,8 @@ alter table public.shops add column if not exists synthetic_like_count int not n
 -- visitors). Managed via the admin form / the CSV sync.
 alter table public.shops add column if not exists district text;
 alter table public.shops add column if not exists line_pay boolean not null default false;
+-- Officially certified street vendor (구청/서울시 정식 노점포 인증) → verified badge.
+alter table public.shops add column if not exists certified boolean not null default false;
 
 -- Menu foods belonging to a shop (1 shop -> many foods).
 create table if not exists public.shop_foods (

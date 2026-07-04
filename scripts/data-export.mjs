@@ -28,7 +28,7 @@ const SHOP_COLS = [
   "id", "name_ko", "name_en", "name_ja", "name_es",
   "description", "desc_en", "desc_ja", "desc_es",
   "address", "youtube_shorts_url",
-  "hashtags", "price_range", "district", "line_pay",
+  "hashtags", "price_range", "district", "line_pay", "certified",
   "is_trending", "growth_weight", "image",
 ];
 // NOTE: no lat/lng here — a shop's location is its `district` (the zone). The
@@ -54,6 +54,7 @@ const shopRows = shops.map((s) => {
     hashtags: (s.hashtags ?? []).join("|"),
     is_trending: s.is_trending ? "true" : "false",
     line_pay: s.line_pay ? "true" : "false",
+    certified: s.certified ? "true" : "false",
     image: s.thumbnail_url ?? "",
   };
 });

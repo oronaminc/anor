@@ -10,6 +10,7 @@ import { localizedName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 import { LinePayBadge } from "@/components/LinePayBadge";
+import { CertifiedBadge } from "@/components/CertifiedBadge";
 
 /** Threads-style feed row: small thumbnail + text, hairline-separated. */
 export function ShopPost({
@@ -55,6 +56,7 @@ export function ShopPost({
             <HighlightText text={name} query={query} />
           </h3>
           {shop.is_trending && <TrendingFlame />}
+          {shop.certified && <CertifiedBadge className="ml-0.5" />}
           {shop.line_pay && <LinePayBadge className="ml-0.5" />}
         </div>
 

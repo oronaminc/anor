@@ -251,6 +251,15 @@ export function ShopForm({ shop }: { shop?: ShopWithFoods }) {
           />
           LINE Pay 가능
         </label>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            name="certified"
+            defaultChecked={shop?.certified ?? false}
+            className="size-4 rounded border-border accent-[#2563eb]"
+          />
+          정식 인증 노점포
+        </label>
       </div>
 
       <Field label="유튜브 쇼츠 URL" htmlFor="youtube_shorts_url">

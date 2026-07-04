@@ -107,6 +107,7 @@ type ShopDef = Omit<
   | "synthetic_like_count"
   | "district"
   | "line_pay"
+  | "certified"
 > & {
   foodKeys: string[];
 };
@@ -234,6 +235,7 @@ export const DEMO_SHOPS: ShopWithFoods[] = SHOP_DEFS.map(
     ...shop,
     district: DEMO_DISTRICTS[i % DEMO_DISTRICTS.length],
     line_pay: i % 2 === 0,
+    certified: i % 3 === 0,
     synthetic_view_count: 0,
     synthetic_like_count: 0,
     weekly_view_count: Math.round(shop.view_count * 0.28),
