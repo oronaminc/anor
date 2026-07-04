@@ -192,6 +192,13 @@ npm run r2:test       # R2 smoke test (upload / public GET / delete)
   `foods/` folder is browsable in the Cloudflare R2 dashboard and **replacing a
   photo in place (same key) updates the app with no DB/CSV change**. `data/images/`
   is just upload staging (deletable after). A sync **never touches counts**.
+- **One image per item — old ones are cleaned up.** The admin upload
+  (`lib/storage.ts`) uses a random key, so replacing a shop's photo — or deleting
+  a shop — removes the previous R2 object once nothing else points at it
+  (`deleteFromR2` + `deleteImageIfUnused` in the admin actions; `data:image`
+  cleans up its replaced image too). Shared images and non-R2 URLs (`/demo/*`) are
+  never touched. To sweep already-orphaned objects across the whole bucket:
+  `npm run r2:prune` (dry run — lists them), then `npm run r2:prune -- --yes`.
 - Images: animated webp / SVG keep animating (served `unoptimized` when the URL
   is `/demo/*` or ends `.svg`); raster photos get a CSS Ken-Burns zoom
   (`.animate-photo` in `app/globals.css`, honors reduced-motion). The demo SVGs

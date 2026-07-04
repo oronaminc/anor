@@ -19,6 +19,22 @@ export function r2Configured(): boolean {
   );
 }
 
+/** Shared R2 client + URL helpers (only call when r2Configured()). */
+function r2() {
+  const accountId = process.env.R2_ACCOUNT_ID!;
+  const bucket = process.env.R2_BUCKET!;
+  const publicBase = process.env.R2_PUBLIC_BASE_URL!.replace(/\/$/, "");
+  const client = new AwsClient({
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    service: "s3",
+    region: "auto",
+  });
+  const endpoint = (key: string) =>
+    `https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`;
+  return { client, publicBase, endpoint };
+}
+
 export async function uploadToR2(file: File): Promise<string> {
   if (!r2Configured()) {
     throw new Error(
@@ -26,25 +42,14 @@ export async function uploadToR2(file: File): Promise<string> {
     );
   }
 
-  const accountId = process.env.R2_ACCOUNT_ID!;
-  const bucket = process.env.R2_BUCKET!;
-  const publicBase = process.env.R2_PUBLIC_BASE_URL!.replace(/\/$/, "");
-
-  const client = new AwsClient({
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-    service: "s3",
-    region: "auto",
-  });
-
+  const { client, publicBase, endpoint } = r2();
   const ext =
     (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") ||
     "jpg";
   const key = `foods/${crypto.randomUUID()}.${ext}`;
-  const endpoint = `https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`;
   const body = new Uint8Array(await file.arrayBuffer());
 
-  const res = await client.fetch(endpoint, {
+  const res = await client.fetch(endpoint(key), {
     method: "PUT",
     body,
     headers: { "content-type": file.type || "application/octet-stream" },
@@ -54,4 +59,23 @@ export async function uploadToR2(file: File): Promise<string> {
   }
 
   return `${publicBase}/${key}`;
+}
+
+/**
+ * Delete an image we previously stored in R2, addressed by its public URL, so a
+ * replaced/removed image doesn't linger in the bucket. Safely no-ops for URLs
+ * that aren't ours (external links, `/demo/*.svg`) or when R2 isn't configured —
+ * so it can only ever delete objects under our own R2 public base.
+ */
+export async function deleteFromR2(url: string | null | undefined): Promise<void> {
+  if (!url || !r2Configured()) return;
+  const { client, publicBase, endpoint } = r2();
+  if (!url.startsWith(publicBase + "/")) return; // only our own objects
+  const key = url.slice(publicBase.length + 1);
+  if (!key) return;
+
+  const res = await client.fetch(endpoint(key), { method: "DELETE" });
+  if (!res.ok && res.status !== 404) {
+    throw new Error(`R2 삭제 실패 (HTTP ${res.status})`);
+  }
 }

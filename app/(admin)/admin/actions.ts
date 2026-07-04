@@ -23,7 +23,7 @@ import {
   generateCode,
   CODE_TTL_SECONDS,
 } from "@/lib/login-challenge";
-import { uploadToR2, r2Configured } from "@/lib/storage";
+import { uploadToR2, r2Configured, deleteFromR2 } from "@/lib/storage";
 import { applyBoost, type BoostKind } from "@/lib/boost";
 import type { ShopInput, ShopFoodInput, FoodTranslations } from "@/lib/types";
 
@@ -271,6 +271,26 @@ async function resolveThumbnail(
   return fallbackUrl;
 }
 
+/**
+ * Remove an image from R2 once nothing in the DB points at it anymore, so a
+ * replaced or deleted shop image doesn't pile up in the bucket (one image per
+ * item). Shared images — still used by another shop's thumbnail or ANY menu-food
+ * photo — and non-R2 URLs (external, /demo/*) are left untouched. Best-effort:
+ * a cleanup failure never blocks the save.
+ */
+async function deleteImageIfUnused(sql: Sql, url: string | null): Promise<void> {
+  if (!url) return;
+  const asThumb = await sql`SELECT 1 FROM shops WHERE thumbnail_url = ${url} LIMIT 1`;
+  if (asThumb.length) return;
+  const asFood = await sql`SELECT 1 FROM shop_foods WHERE image_url = ${url} LIMIT 1`;
+  if (asFood.length) return;
+  try {
+    await deleteFromR2(url);
+  } catch (err) {
+    console.error("R2 cleanup failed:", err);
+  }
+}
+
 // ---------------------------------------------------------------------
 // CRUD (Neon SQL)
 //
@@ -351,6 +371,8 @@ export async function updateShop(
   if (!fields.name_ko) return { error: "한글 이름은 필수입니다." };
 
   try {
+    const prev = await sql`SELECT thumbnail_url FROM shops WHERE id = ${id}`;
+    const oldThumb = (prev[0]?.thumbnail_url as string | null) ?? null;
     const thumbnail = await resolveThumbnail(formData, fields.thumbnail_url);
     await sql`
       UPDATE shops SET
@@ -375,6 +397,9 @@ export async function updateShop(
     `;
     await sql`DELETE FROM shop_foods WHERE shop_id = ${id}`;
     await insertShopFoods(sql, id, foods);
+    // The old thumbnail is now unreferenced by this shop → drop it from R2 if
+    // nothing else uses it, so only the current image remains.
+    if (oldThumb && oldThumb !== thumbnail) await deleteImageIfUnused(sql, oldThumb);
   } catch (err) {
     return { error: (err as Error).message };
   }
@@ -388,8 +413,18 @@ export async function updateShop(
 export async function deleteShop(id: string) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
+  const sql = getSql();
+  // Collect this shop's images before the cascade removes the rows, so we can
+  // clean any now-orphaned R2 objects afterwards.
+  const shop = await sql`SELECT thumbnail_url FROM shops WHERE id = ${id}`;
+  const foodRows = await sql`SELECT image_url FROM shop_foods WHERE shop_id = ${id}`;
+  const urls = [
+    shop[0]?.thumbnail_url as string | null,
+    ...foodRows.map((f) => f.image_url as string | null),
+  ];
   // Cascade (shop_foods, shop_likes) is handled by ON DELETE CASCADE.
-  await getSql()`DELETE FROM shops WHERE id = ${id}`;
+  await sql`DELETE FROM shops WHERE id = ${id}`;
+  for (const url of urls) await deleteImageIfUnused(sql, url);
   revalidatePath("/admin");
   revalidatePath("/");
 }
