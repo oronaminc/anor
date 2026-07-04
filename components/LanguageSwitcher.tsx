@@ -2,7 +2,6 @@
 
 import { useTransition } from "react";
 import { useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
 
 import { setUserLocale } from "@/i18n/locale";
 import { locales, localeNames, localeFlags, type Locale } from "@/i18n/config";
@@ -10,14 +9,15 @@ import { cn } from "@/lib/utils";
 
 export function LanguageSwitcher() {
   const active = useLocale();
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
 
   function select(locale: Locale) {
     if (locale === active) return;
     startTransition(async () => {
       await setUserLocale(locale);
-      router.refresh();
+      // Full reload so the new locale cookie is applied everywhere reliably
+      // (a soft router.refresh() didn't always re-render with the new locale).
+      window.location.reload();
     });
   }
 
