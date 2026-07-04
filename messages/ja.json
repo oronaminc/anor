@@ -1,7 +1,7 @@
 {
   "common": {
     "appName": "明洞ストリートフード",
-    "tagline": "明洞ストリートフードガイド",
+    "tagline": "明洞の食べ歩きガイド",
     "open": "開く",
     "back": "戻る",
     "viewSite": "サイトを見る",
@@ -15,17 +15,17 @@
   },
   "home": {
     "heroEyebrow": "ソウル · 明洞",
-    "heroTitle": "明洞のストリートフードを\n数タップでチェック",
-    "heroSubtitle": "話題のグルメから場所、道案内まで。明洞を一番おいしく楽しむ方法。",
-    "trendingTitle": "今話題のストリートフード",
-    "rankingTitle": "週間ランキング",
-    "rankingSubtitle": "閲覧数 TOP5",
+    "heroTitle": "明洞の食べ歩き、\n気になるお店をひと目でチェック",
+    "heroSubtitle": "いま話題のグルメから、場所や行き方まで。韓国語がわからなくても、はじめての明洞をいちばんおいしく楽しめます。",
+    "trendingTitle": "いま話題の食べ歩きグルメ",
+    "rankingTitle": "今週の人気ランキング",
+    "rankingSubtitle": "注目のTOP5",
     "mapTitle": "マップで見る",
-    "mapHint": "マーカーをタップすると詳細が開きます。",
+    "mapHint": "マーカーをタップすると、お店の詳細が見られます。",
     "allMenu": "すべてのメニュー",
     "count": "{count}件",
     "seeAll": "すべて見る",
-    "empty": "まだお店が登録されていません。"
+    "empty": "まだお店が登録されていません。もう少しだけお待ちくださいね。"
   },
   "sort": {
     "label": "並び替え",
@@ -34,11 +34,11 @@
   },
   "search": {
     "title": "検索",
-    "placeholder": "店名・料理・ハッシュタグで検索",
-    "results": "{count}件の結果",
-    "empty": "検索結果がありません",
-    "emptyHint": "別のキーワードでお試しください",
-    "prompt": "食べたい料理を検索してみましょう"
+    "placeholder": "料理名・お店・ハッシュタグで検索",
+    "results": "{count}件見つかりました",
+    "empty": "見つかりませんでした",
+    "emptyHint": "別のキーワードで探してみてくださいね",
+    "prompt": "気になる料理を検索してみましょう"
   },
   "badge": {
     "hot": "HOT",
@@ -46,22 +46,22 @@
     "certified": "認定"
   },
   "detail": {
-    "views": "閲覧数 {count}",
-    "directions": "ルート案内",
+    "views": "{count}回見られています",
+    "directions": "行き方を見る",
     "youtube": "YouTubeショートで見る",
     "location": "場所",
-    "about": "紹介",
+    "about": "このお店について",
     "like": "いいね",
     "menu": "メニュー"
   },
   "trending": {
     "title": "トレンド",
-    "subtitle": "今、明洞で最も人気のストリートフードの店",
+    "subtitle": "いま明洞でいちばん人気の食べ歩きグルメ",
     "thisWeek": "今週"
   },
   "map": {
-    "title": "明洞フードマップ",
-    "subtitle": "マーカーをタップして料理情報を確認",
+    "title": "明洞グルメマップ",
+    "subtitle": "マーカーをタップして、気になるお店をチェック",
     "missingKey": "Google Maps APIキーが設定されていません。",
     "failed": "マップを読み込めませんでした。",
     "all": "すべて"
@@ -84,10 +84,10 @@
   },
   "notFound": {
     "title": "ページが見つかりません",
-    "desc": "お探しのページは見つかりませんでした。",
+    "desc": "お探しの料理やページは見つかりませんでした。",
     "home": "ホームに戻る"
   },
   "footer": {
-    "disclaimer": "情報は参考用であり、実際の営業情報と異なる場合があります。"
+    "disclaimer": "掲載情報は参考用です。実際の営業情報と異なる場合がありますので、ご了承くださいね。"
   }
 }
