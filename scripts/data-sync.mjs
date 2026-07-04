@@ -104,9 +104,9 @@ for (const r of shops) {
     .split("|")
     .map((x) => x.trim())
     .filter(Boolean);
-  // A shop stores NO coordinates — its location is its `district` (zone), and
-  // queries resolve lat/lng from the districts table by JOIN. So change a zone's
-  // coords once (districts.csv) and every shop in it moves.
+  // Location: if the shop has a `district` in the registry, queries resolve its
+  // coords from there (change the zone → all its shops move). Otherwise the
+  // shop's own lat/lng below is used (exact per-shop points, e.g. real stalls).
   await sql.query(
     `insert into public.shops
        (id, name_ko, name_en, name_ja, name_es, description, translations,
@@ -125,7 +125,7 @@ for (const r of shops) {
     [
       id, r.name_ko, sOrNull(r.name_en), sOrNull(r.name_ja), sOrNull(r.name_es),
       sOrNull(r.description), JSON.stringify(transOf(r)),
-      null, null, sOrNull(r.address),
+      numOrNull(r.lat), numOrNull(r.lng), sOrNull(r.address),
       sOrNull(r.youtube_shorts_url), image, hashtags,
       sOrNull(r.price_range), truthy(r.is_trending), numOrNull(r.growth_weight) ?? 1,
       sOrNull(r.district), truthy(r.line_pay), truthy(r.certified),
