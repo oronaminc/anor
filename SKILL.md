@@ -182,10 +182,11 @@ npm run r2:test       # R2 smoke test (upload / public GET / delete)
 ```
 
 - **`districts.csv` is the location master** (`name,lat,lng`). Put just a
-  `district` code (e.g. `52-A`) on a shop in `shops.csv` and the sync — and the
-  admin save (`coordsForDistrict`) — fill the shop's lat/lng from the district.
-  `district` is free text, so codes or names both work; the registry lives in the
-  `districts` table.
+  `district` code (e.g. `52-A`) on a shop in `shops.csv`; the shop stores **no**
+  coordinates — `getShops`/`getShopById` resolve lat/lng from the `districts`
+  table by **JOIN at read time** (`COALESCE` to the shop's own lat/lng only as a
+  fallback). So change a zone's coords once and every shop in it moves.
+  `district` is free text, so codes or names both work.
 - **Photos live in R2**; the DB stores only the URL. `data:image`/`data:sync`
   upload to a stable, readable key **`foods/<slug>.<ext>`** so the bucket's
   `foods/` folder is browsable in the Cloudflare R2 dashboard and **replacing a

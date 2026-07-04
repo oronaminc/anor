@@ -36,7 +36,7 @@ const FOODS: Record<string, FoodDef> = {
     image_url: "/demo/hotteok.svg", price_range: "₩2,000~3,000",
   },
   gyeranppang: {
-    name_ko: "계란빵", name_en: "Gyeranppang", name_ja: "ケランパン", name_es: "Gyeranppang",
+    name_ko: "계란빵", name_en: "Gyeranppang", name_ja: "ケランパン（たまごパン）", name_es: "Gyeranppang",
     description: "폭신한 빵 위에 통계란.",
     translations: {
       en: "Fluffy bread baked with a whole egg.",
@@ -66,7 +66,7 @@ const FOODS: Record<string, FoodDef> = {
     image_url: "/demo/potato.svg", price_range: "₩4,000~5,000",
   },
   dakkkochi: {
-    name_ko: "닭꼬치", name_en: "Dak-kkochi", name_ja: "タッコチ", name_es: "Brocheta de Pollo",
+    name_ko: "닭꼬치", name_en: "Dak-kkochi", name_ja: "タッコチ（鶏串）", name_es: "Brocheta de Pollo",
     description: "숯불에 구운 매콤달콤 닭꼬치.",
     translations: {
       en: "Charcoal-grilled sweet-spicy chicken skewer.",
@@ -86,7 +86,7 @@ const FOODS: Record<string, FoodDef> = {
     image_url: "/demo/lobster.svg", price_range: "₩15,000~20,000",
   },
   bungeoppang: {
-    name_ko: "붕어빵", name_en: "Bungeoppang", name_ja: "たい焼き", name_es: "Bungeoppang",
+    name_ko: "붕어빵", name_en: "Bungeoppang", name_ja: "プンオパン（たい焼き）", name_es: "Bungeoppang",
     description: "팥 가득 따끈한 붕어빵.",
     translations: {
       en: "Warm fish-shaped pastry with red bean.",
@@ -140,7 +140,7 @@ const SHOP_DEFS: ShopDef[] = [
   },
   {
     id: "10000000-0000-4000-8000-000000000002",
-    name_ko: "명동분식", name_en: "Myeongdong Bunsik", name_ja: "明洞粉食", name_es: "Myeongdong Bunsik",
+    name_ko: "명동분식", name_en: "Myeongdong Bunsik", name_ja: "明洞ブンシク", name_es: "Myeongdong Bunsik",
     description: "명동 한복판의 대표 분식집. 떡볶이와 만두가 일품.",
     translations: {
       en: "A beloved snack shop in the heart of Myeongdong.",
@@ -188,7 +188,7 @@ const SHOP_DEFS: ShopDef[] = [
   },
   {
     id: "10000000-0000-4000-8000-000000000005",
-    name_ko: "종로꼬치", name_en: "Jongno Skewers", name_ja: "鍾路串", name_es: "Brochetas Jongno",
+    name_ko: "종로꼬치", name_en: "Jongno Skewers", name_ja: "鍾路串焼き", name_es: "Brochetas Jongno",
     description: "숯불 향 가득한 꼬치 전문 노점.",
     translations: {
       en: "A skewer stall full of charcoal aroma.",
