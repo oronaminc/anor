@@ -108,6 +108,10 @@ for (const r of shops) {
     .split("|")
     .map((x) => x.trim())
     .filter(Boolean);
+  const hashtags_ja = String(r.hashtags_ja ?? "")
+    .split("|")
+    .map((x) => x.trim())
+    .filter(Boolean);
   // Location: if the shop has a `district` in the registry, queries resolve its
   // coords from there (change the zone → all its shops move). Otherwise the
   // shop's own lat/lng below is used (exact per-shop points, e.g. real stalls).
@@ -116,8 +120,8 @@ for (const r of shops) {
        (id, name_ko, name_en, name_ja, name_es, description, translations,
         lat, lng, address, youtube_shorts_url, thumbnail_url, hashtags,
         price_range, is_trending, growth_weight, district, line_pay, certified,
-        categories)
-     values ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+        categories, hashtags_ja)
+     values ($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
      on conflict (id) do update set
        name_ko=excluded.name_ko, name_en=excluded.name_en, name_ja=excluded.name_ja,
        name_es=excluded.name_es, description=excluded.description,
@@ -127,7 +131,7 @@ for (const r of shops) {
        price_range=excluded.price_range, is_trending=excluded.is_trending,
        growth_weight=excluded.growth_weight, district=excluded.district,
        line_pay=excluded.line_pay, certified=excluded.certified,
-       categories=excluded.categories`,
+       categories=excluded.categories, hashtags_ja=excluded.hashtags_ja`,
     [
       id, r.name_ko, sOrNull(r.name_en), sOrNull(r.name_ja), sOrNull(r.name_es),
       sOrNull(r.description), JSON.stringify(transOf(r)),
@@ -135,7 +139,7 @@ for (const r of shops) {
       sOrNull(r.youtube_shorts_url), image, hashtags,
       sOrNull(r.price_range), truthy(r.is_trending), numOrNull(r.growth_weight) ?? 1,
       sOrNull(r.district), truthy(r.line_pay), truthy(r.certified),
-      categories,
+      categories, hashtags_ja,
     ],
   );
   console.log(`✓ shop: ${r.name_ko}`);

@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Eye, Heart } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { localizedName } from "@/lib/i18n-food";
+import { localizedName, localizedHashtags } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 
@@ -110,9 +110,9 @@ export function ShopCard({
             </div>
           </div>
 
-          {shop.hashtags && shop.hashtags.length > 0 && (
+          {localizedHashtags(shop, locale).length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {shop.hashtags.slice(0, 3).map((tag) => (
+              {localizedHashtags(shop, locale).slice(0, 3).map((tag) => (
                 <span
                   key={tag}
                   className="rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-foreground/80"

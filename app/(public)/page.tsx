@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Search, MapPin, ArrowRight } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { getShops } from "@/lib/queries";
 import { ShopExplorer } from "@/components/ShopExplorer";
-import LazyGoogleMap from "@/components/LazyGoogleMap";
 
 export const dynamic = "force-dynamic";
 
@@ -42,32 +41,7 @@ export default async function HomePage() {
             {t("empty")}
           </div>
         ) : (
-          <>
-            <ShopExplorer shops={shops} />
-
-            {/* Map preview */}
-            <section className="mt-8 space-y-3 border-t border-border pt-6">
-              <div className="flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-sm font-bold">
-                  <MapPin className="size-4" />
-                  {t("mapTitle")}
-                </h2>
-                <Link
-                  href="/map"
-                  className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {t("seeAll")}
-                  <ArrowRight className="size-4" />
-                </Link>
-              </div>
-              <LazyGoogleMap
-                shops={shops}
-                height="200px"
-                linkToDetail
-                className="overflow-hidden rounded-2xl border border-border"
-              />
-            </section>
-          </>
+          <ShopExplorer shops={shops} />
         )}
       </div>
     </div>

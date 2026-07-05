@@ -126,6 +126,8 @@ alter table public.shops add column if not exists certified boolean not null def
 -- Broad food categories for map/feed filtering (a shop has 1+), kept small and
 -- separate from the specific menu foods. Codes defined in lib/categories.ts.
 alter table public.shops add column if not exists categories text[] not null default '{}';
+-- Japanese hashtags; `hashtags` holds the Korean ones, shown per active locale.
+alter table public.shops add column if not exists hashtags_ja text[] not null default '{}';
 
 -- Menu foods belonging to a shop (1 shop -> many foods).
 create table if not exists public.shop_foods (

@@ -36,6 +36,7 @@ function makeShop(over: Partial<ShopWithFoods>): ShopWithFoods {
     youtube_shorts_url: null,
     thumbnail_url: null,
     hashtags: [],
+    hashtags_ja: null,
     price_range: null,
     district: null,
     line_pay: false,

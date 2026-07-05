@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, MapPin, ArrowRight } from "lucide-react";
 
 import type { ShopWithFoods, SortKey } from "@/lib/types";
 import { sortShops } from "@/lib/sort";
 import { cn } from "@/lib/utils";
 import { ShopPost } from "@/components/ShopPost";
+import LazyGoogleMap from "@/components/LazyGoogleMap";
 import { CATEGORIES, categoryLabel } from "@/lib/categories";
 
 const PAGE = 24;
@@ -43,6 +45,7 @@ export function ShopExplorer({ shops }: { shops: ShopWithFoods[] }) {
   const remaining = filtered.length - visible.length;
 
   return (
+    <>
     <section id="explore" aria-label={t("allMenu")}>
       <h2 className="sr-only">{t("allMenu")}</h2>
 
@@ -98,9 +101,33 @@ export function ShopExplorer({ shops }: { shops: ShopWithFoods[] }) {
           </button>
         </div>
       )}
+    </section>
+
+      {/* Map preview — follows the same category filter as the feed. */}
+      <section className="mt-8 space-y-3 border-t border-border pt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-bold">
+            <MapPin className="size-4" />
+            {t("mapTitle")}
+          </h2>
+          <Link
+            href="/map"
+            className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("seeAll")}
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+        <LazyGoogleMap
+          shops={filtered}
+          height="220px"
+          linkToDetail
+          className="overflow-hidden rounded-2xl border border-border"
+        />
+      </section>
 
       <BackToTop />
-    </section>
+    </>
   );
 }
 

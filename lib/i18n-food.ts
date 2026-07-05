@@ -64,3 +64,15 @@ export function localizedDistrict(
   if (locale === "ja") return DISTRICT_JA[district] ?? district;
   return district;
 }
+
+/** Hashtags in the active locale — Korean base (`hashtags`) + Japanese variant
+ *  (`hashtags_ja`), each falling back to the other when empty. */
+export function localizedHashtags(
+  shop: { hashtags: string[] | null; hashtags_ja: string[] | null },
+  locale: string,
+): string[] {
+  const ko = shop.hashtags ?? [];
+  const ja = shop.hashtags_ja ?? [];
+  if (locale === "ja") return ja.length ? ja : ko;
+  return ko.length ? ko : ja;
+}

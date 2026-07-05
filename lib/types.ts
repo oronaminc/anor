@@ -67,7 +67,9 @@ export type Shop = {
   address: string | null;
   youtube_shorts_url: string | null;
   thumbnail_url: string | null;
+  /** Korean hashtags (the base); Japanese ones live in hashtags_ja. */
   hashtags: string[] | null;
+  hashtags_ja: string[] | null;
   price_range: string | null;
   /** Area/district label, e.g. "명동거리". Free text, managed by admin/CSV. */
   district: string | null;
@@ -102,6 +104,7 @@ export type ShopFoodInput = Omit<
 export type ShopInput = Omit<
   Shop,
   | "id"
+  | "hashtags_ja"
   | "view_count"
   | "like_count"
   | "synthetic_view_count"

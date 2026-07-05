@@ -10,6 +10,7 @@ import {
   localizedName,
   localizedDescription,
   localizedDistrict,
+  localizedHashtags,
 } from "@/lib/i18n-food";
 import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
@@ -126,9 +127,9 @@ export default async function ShopDetailPage({
           </div>
         </div>
 
-        {shop.hashtags && shop.hashtags.length > 0 && (
+        {localizedHashtags(shop, locale).length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {shop.hashtags.map((tag) => (
+            {localizedHashtags(shop, locale).map((tag) => (
               <span
                 key={tag}
                 className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
