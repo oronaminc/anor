@@ -47,7 +47,7 @@ export function ShopExplorer({ shops }: { shops: ShopWithFoods[] }) {
       <h2 className="sr-only">{t("allMenu")}</h2>
 
       {cats.length > 0 && (
-        <div className="-mx-4 mb-2 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
+        <div className="-mx-5 mb-4 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar">
           <CatChip active={cat === null} onClick={() => setCat(null)}>
             {t("all")}
           </CatChip>
@@ -63,8 +63,8 @@ export function ShopExplorer({ shops }: { shops: ShopWithFoods[] }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between gap-2 border-b border-border pb-2">
-        <div role="tablist" aria-label={ts("label")} className="flex gap-5">
+      <div className="flex items-center justify-between gap-2 border-b border-border pb-3">
+        <div role="tablist" aria-label={ts("label")} className="flex gap-6">
           <SortTab
             active={sort === "popular"}
             onClick={() => setSort("popular")}

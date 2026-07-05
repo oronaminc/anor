@@ -31,7 +31,7 @@ export function ShopPost({
     <Link
       prefetch={false}
       href={`/shop/${shop.id}`}
-      className="group flex gap-3 py-4 transition-opacity active:opacity-60"
+      className="group flex gap-4 py-5 transition-opacity active:opacity-60"
     >
       <div className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-muted">
         {shop.thumbnail_url ? (

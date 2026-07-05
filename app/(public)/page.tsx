@@ -36,7 +36,7 @@ export default async function HomePage() {
         </Link>
       </section>
 
-      <div className="px-4">
+      <div className="px-5 pt-4">
         {shops.length === 0 ? (
           <div className="mt-6 rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
             {t("empty")}
