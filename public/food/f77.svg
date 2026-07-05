@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
   <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2c2c32"/><stop offset="1" stop-color="#121215"/></linearGradient></defs>
   <rect width="800" height="600" fill="url(#g)"/>
-  <text x="400" y="290" font-size="210" text-anchor="middle" dominant-baseline="central">🦪<animateTransform attributeName="transform" type="rotate" additive="sum" values="-11 400 290;11 400 290;-11 400 290" dur="1.7s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" additive="sum" values="0 0;0 -38;0 0;0 20;0 0" keyTimes="0;0.28;0.5;0.74;1" dur="1.7s" repeatCount="indefinite"/></text>
-  <text x="400" y="500" font-size="56" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">海鮮焼き</text>
+  <text x="400" y="300" font-size="300" text-anchor="middle" dominant-baseline="central">🦪<animateTransform attributeName="transform" type="rotate" additive="sum" values="-9 400 300;9 400 300;-9 400 300" dur="1.9s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="translate" additive="sum" values="0 0;0 -34;0 0;0 18;0 0" keyTimes="0;0.28;0.5;0.74;1" dur="1.9s" repeatCount="indefinite"/></text>
 </svg>

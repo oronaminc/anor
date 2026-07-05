@@ -18,7 +18,11 @@ export function localizedName(
   return food.name_ko;
 }
 
-/** The other language's name, shown small under the primary (ja↔ko). */
+/**
+ * Subtitle under the primary name. Only the Japanese-default UI shows the
+ * Korean original as a subtitle (a nice reference for JP users); the Korean UI
+ * stays purely Korean — no Japanese subtitle.
+ */
 export function secondaryName(
   food: Pick<Food, "name_ko" | "name_ja">,
   locale: string,
@@ -26,7 +30,7 @@ export function secondaryName(
   if (locale === "ja") {
     return food.name_ko && food.name_ko !== food.name_ja ? food.name_ko : null;
   }
-  return food.name_ja && food.name_ja !== food.name_ko ? food.name_ja : null;
+  return null;
 }
 
 export function localizedDescription(

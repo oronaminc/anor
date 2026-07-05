@@ -104,24 +104,22 @@ export function ShopCard({
             </p>
           )}
 
-          <div className="flex items-center justify-between gap-2">
-            {shop.price_range ? (
-              <span className="font-display text-xs font-bold tracking-wide text-primary">
+          <div className="space-y-1.5">
+            {shop.price_range && (
+              <span className="block font-display text-xs font-bold tracking-wide text-primary">
                 {shop.price_range}
               </span>
-            ) : (
-              <span />
             )}
-            <span className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1 tabular-nums">
-                <Heart className="size-3.5" />
+            <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5 tabular-nums">
+                <Heart className="size-3.5 shrink-0" />
                 {shop.like_count.toLocaleString()}
               </span>
-              <span className="inline-flex items-center gap-1 tabular-nums">
-                <Eye className="size-3.5" />
+              <span className="inline-flex items-center gap-1.5 tabular-nums">
+                <Eye className="size-3.5 shrink-0" />
                 {shop.view_count.toLocaleString()}
               </span>
-            </span>
+            </div>
           </div>
 
           {shop.hashtags && shop.hashtags.length > 0 && (
