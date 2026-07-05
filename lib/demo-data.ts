@@ -108,8 +108,21 @@ type ShopDef = Omit<
   | "district"
   | "line_pay"
   | "certified"
+  | "categories"
 > & {
   foodKeys: string[];
+};
+
+/** Which broad category each demo food belongs to (see lib/categories.ts). */
+const FOOD_CAT: Record<string, string[]> = {
+  tteokbokki: ["bunsik"],
+  hotteok: ["bread"],
+  gyeranppang: ["bread"],
+  mandu: ["bunsik"],
+  potato: ["fried"],
+  dakkkochi: ["skewer"],
+  lobster: ["seafood"],
+  bungeoppang: ["bread"],
 };
 
 const DEMO_DISTRICTS = [
@@ -236,6 +249,7 @@ export const DEMO_SHOPS: ShopWithFoods[] = SHOP_DEFS.map(
     district: DEMO_DISTRICTS[i % DEMO_DISTRICTS.length],
     line_pay: i % 2 === 0,
     certified: i % 3 === 0,
+    categories: Array.from(new Set(foodKeys.flatMap((k) => FOOD_CAT[k] ?? []))),
     synthetic_view_count: 0,
     synthetic_like_count: 0,
     weekly_view_count: Math.round(shop.view_count * 0.28),

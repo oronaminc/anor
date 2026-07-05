@@ -5,6 +5,7 @@ import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
 
 import type { ShopWithFoods } from "@/lib/types";
+import { CATEGORIES } from "@/lib/categories";
 import {
   createShop,
   updateShop,
@@ -260,6 +261,29 @@ export function ShopForm({ shop }: { shop?: ShopWithFoods }) {
           />
           정식 인증 노점포
         </label>
+      </div>
+
+      <div className="space-y-1.5">
+        <span className="text-sm font-medium">
+          카테고리 <span className="text-muted-foreground">(지도·필터용, 복수 선택)</span>
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => (
+            <label
+              key={c.code}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-sm transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-foreground"
+            >
+              <input
+                type="checkbox"
+                name="categories"
+                value={c.code}
+                defaultChecked={shop?.categories?.includes(c.code) ?? false}
+                className="sr-only"
+              />
+              {c.emoji} {c.ko}
+            </label>
+          ))}
+        </div>
       </div>
 
       <Field label="유튜브 쇼츠 URL" htmlFor="youtube_shorts_url">

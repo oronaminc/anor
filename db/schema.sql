@@ -123,6 +123,9 @@ alter table public.shops add column if not exists district text;
 alter table public.shops add column if not exists line_pay boolean not null default false;
 -- Officially certified street vendor (구청/서울시 정식 노점포 인증) → verified badge.
 alter table public.shops add column if not exists certified boolean not null default false;
+-- Broad food categories for map/feed filtering (a shop has 1+), kept small and
+-- separate from the specific menu foods. Codes defined in lib/categories.ts.
+alter table public.shops add column if not exists categories text[] not null default '{}';
 
 -- Menu foods belonging to a shop (1 shop -> many foods).
 create table if not exists public.shop_foods (

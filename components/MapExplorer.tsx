@@ -4,51 +4,45 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import GoogleMap from "@/components/GoogleMap";
-import { localizedName } from "@/lib/i18n-food";
+import { CATEGORIES, categoryLabel } from "@/lib/categories";
 import { cn } from "@/lib/utils";
-import type { ShopFood, ShopWithFoods } from "@/lib/types";
+import type { ShopWithFoods } from "@/lib/types";
 
 /**
- * The /map experience: chips to filter the map by menu food, then the shops
- * serving it. Filtering is 100% client-side — the Google Map loads once and we
- * just hand it a different `shops` array, so changing the filter costs no extra
- * Maps API loads (no billing).
+ * The /map experience: chips to filter the map by broad food CATEGORY (a small,
+ * fixed set — see lib/categories.ts), then the shops in it. Filtering is 100%
+ * client-side — the Google Map loads once and we just hand it a different
+ * `shops` array, so changing the filter costs no extra Maps API loads.
  */
 export function MapExplorer({ shops }: { shops: ShopWithFoods[] }) {
   const locale = useLocale();
   const t = useTranslations("map");
-  const [foodKo, setFoodKo] = useState<string | null>(null);
+  const [cat, setCat] = useState<string | null>(null);
 
-  // One chip per distinct menu food (keyed by Korean name).
-  const foods = useMemo(() => {
-    const seen = new Map<string, ShopFood>();
-    for (const s of shops) {
-      for (const f of s.foods) if (!seen.has(f.name_ko)) seen.set(f.name_ko, f);
-    }
-    return Array.from(seen.values());
+  // Only the categories actually present among these shops, in canonical order.
+  const cats = useMemo(() => {
+    const present = new Set(shops.flatMap((s) => s.categories ?? []));
+    return CATEGORIES.filter((c) => present.has(c.code));
   }, [shops]);
 
   const filtered = useMemo(
-    () =>
-      foodKo
-        ? shops.filter((s) => s.foods.some((f) => f.name_ko === foodKo))
-        : shops,
-    [shops, foodKo],
+    () => (cat ? shops.filter((s) => (s.categories ?? []).includes(cat)) : shops),
+    [shops, cat],
   );
 
   return (
     <div className="space-y-3">
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
-        <Chip active={foodKo === null} onClick={() => setFoodKo(null)}>
+        <Chip active={cat === null} onClick={() => setCat(null)}>
           {t("all")}
         </Chip>
-        {foods.map((f) => (
+        {cats.map((c) => (
           <Chip
-            key={f.name_ko}
-            active={foodKo === f.name_ko}
-            onClick={() => setFoodKo(f.name_ko)}
+            key={c.code}
+            active={cat === c.code}
+            onClick={() => setCat(c.code)}
           >
-            {localizedName(f, locale)}
+            {c.emoji} {categoryLabel(c.code, locale)}
           </Chip>
         ))}
       </div>

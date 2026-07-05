@@ -28,7 +28,7 @@ const SHOP_COLS = [
   "id", "name_ko", "name_en", "name_ja", "name_es",
   "description", "desc_en", "desc_ja", "desc_es",
   "lat", "lng", "address", "youtube_shorts_url",
-  "hashtags", "price_range", "district", "line_pay", "certified",
+  "hashtags", "price_range", "district", "line_pay", "certified", "categories",
   "is_trending", "growth_weight", "image",
 ];
 // A shop with a `district` in the registry gets its coords from there (JOIN at
@@ -52,6 +52,7 @@ const shopRows = shops.map((s) => {
     desc_ja: t.ja ?? "",
     desc_es: t.es ?? "",
     hashtags: (s.hashtags ?? []).join("|"),
+    categories: (s.categories ?? []).join("|"),
     is_trending: s.is_trending ? "true" : "false",
     line_pay: s.line_pay ? "true" : "false",
     certified: s.certified ? "true" : "false",

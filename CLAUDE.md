@@ -141,8 +141,13 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
   `foods/<slug>.<ext>` (`npm run data:image`), so replacing a file in the R2
   dashboard updates the app with no DB change; DB stores only the URL. A sync
   never touches counts. Per-shop `district` + `line_pay` (LINE Pay badge,
-  `components/LinePayBadge`) columns. `/map` filters by food **client-side** (no
-  extra Maps loads); to control Maps cost the home map is lazy (`LazyGoogleMap`),
+  `components/LinePayBadge`) columns. **Categories** (`shops.categories text[]`,
+  12 broad codes in `lib/categories.ts`, separate from the specific menu foods)
+  drive the map + home-feed filters — a small fixed set so filtering stays easy
+  (the home feed also lazy-loads 24 at a time with a back-to-top button). Assign
+  them via the admin form checkboxes, the CSV `categories` column (`|`-joined), or
+  bulk from foods with `scripts/_categorize.mjs`. `/map` filters by category
+  **client-side** (no extra Maps loads); to control Maps cost the home map is lazy (`LazyGoogleMap`),
   detail uses the free **Maps Embed API** (`MapEmbed`), only `/map` is the billed
   Dynamic map. Raster photos animate via `.animate-photo` (CSS Ken-Burns);
   animated webp/SVG keep their own motion (served `unoptimized`).

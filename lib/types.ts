@@ -75,6 +75,8 @@ export type Shop = {
   line_pay: boolean;
   /** Officially certified street vendor (구청/서울시 인증) → verified badge. */
   certified: boolean;
+  /** Broad food category codes for map/feed filtering (see lib/categories.ts). */
+  categories: string[];
   view_count: number;
   like_count: number;
   /** Admin/automated engagement, separate from the real counts; the displayed
