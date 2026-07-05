@@ -142,8 +142,9 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
   dashboard updates the app with no DB change; DB stores only the URL. A sync
   never touches counts. Per-shop `district` + `line_pay` (LINE Pay badge,
   `components/LinePayBadge`) columns. **Categories** (`shops.categories text[]`,
-  12 broad codes in `lib/categories.ts`, separate from the specific menu foods)
-  drive the map + home-feed filters — a small fixed set so filtering stays easy
+  ≈20 fine codes in `lib/categories.ts` (each holds ≤10 shops), separate from the
+  specific menu foods) drive the map + home-feed filters — split finely so no
+  category is unwieldy on the map
   (the home feed also lazy-loads 24 at a time with a back-to-top button). Assign
   them via the admin form checkboxes, the CSV `categories` column (`|`-joined), or
   bulk from foods with `scripts/_categorize.mjs`. `/map` filters by category

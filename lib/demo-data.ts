@@ -115,14 +115,14 @@ type ShopDef = Omit<
 
 /** Which broad category each demo food belongs to (see lib/categories.ts). */
 const FOOD_CAT: Record<string, string[]> = {
-  tteokbokki: ["bunsik"],
-  hotteok: ["bread"],
-  gyeranppang: ["bread"],
-  mandu: ["bunsik"],
+  tteokbokki: ["tteok"],
+  hotteok: ["hotteok"],
+  gyeranppang: ["hotteok"],
+  mandu: ["mandu"],
   potato: ["fried"],
-  dakkkochi: ["skewer"],
-  lobster: ["seafood"],
-  bungeoppang: ["bread"],
+  dakkkochi: ["dakkochi"],
+  lobster: ["lobster"],
+  bungeoppang: ["hotteok"],
 };
 
 const DEMO_DISTRICTS = [

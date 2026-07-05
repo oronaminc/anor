@@ -7,31 +7,34 @@ import { loadEnvLocal, databaseUrl, neon } from "./lib.mjs";
 
 loadEnvLocal();
 
+// Fine categories (≈20, each holds ≤10 shops). One primary category per shop,
+// picked from its food's Korean name — order matters (first match wins).
 export function categoriesFor(text) {
   const n = String(text || "");
-  const c = new Set();
   const has = (...ks) => ks.some((k) => n.includes(k));
-  if (has("꼬치")) c.add("skewer");
-  if (has("핫도그", "핫바")) c.add("hotdog");
-  if (has("호떡", "계란빵", "붕어빵", "십원빵", "크로와상", "크록스빵", "잉어빵", "마늘빵", "빵"))
-    c.add("bread");
-  if (has("모찌", "탕후", "와플", "크레페", "크레테", "크로플", "달고나", "강정", "추러스", "펜케이크", "팬케이크", "수플레", "누텔라"))
-    c.add("sweet");
-  if (has("아이스", "하겐다즈")) c.add("ice");
-  if (has("주스", "에이드", "석류")) c.add("drink");
-  if (has("떡볶이", "김밥", "잡채", "만두", "분식", "토스트", "교자", "볶음밥", "야끼소바", "팟타이", "어묵", "타코야끼", "김말"))
-    c.add("bunsik");
-  if (has("랍스", "새우", "세우", "전복", "오징어", "문어", "가리비", "관자", "크랩", "해물", "쭈꾸미", "게튀김"))
-    c.add("seafood");
-  if (has("스테이크", "삼겹", "치킨", "바베큐", "불닭", "닭발", "오믈렛", "겹살", "소불고기", "치즈구이", "케밥"))
-    c.add("meat");
-  if (has("튀김", "프라이", "프렌치", "감자")) c.add("fried");
-  if (has("과일")) c.add("fruit");
-  if (has("군밤", "군고구마", "고구마", "옥수수", "은행", "맛탕")) c.add("roasted");
-  // 꼬치 dishes are skewers first — drop the noisier "meat" tag they also match.
-  if (c.has("skewer") && c.has("meat") && n.includes("꼬치")) c.delete("meat");
-  if (c.size === 0) c.add("bunsik");
-  return [...c];
+  let code;
+  if (has("양꼬치")) code = "yangkochi";
+  else if (has("닭꼬치", "닭 꼬치", "닭이 꼬치")) code = "dakkochi";
+  else if (has("해물꼬치", "꼬치")) code = "kochi";
+  else if (has("떡볶이", "분식", "토스트", "김말")) code = "tteok";
+  else if (has("만두", "교자", "김밥")) code = "mandu";
+  else if (has("잡채", "볶음밥", "야끼소바", "팟타이", "어묵", "타코야끼")) code = "japchae";
+  else if (has("호떡", "붕어빵", "잉어빵", "계란빵", "십원빵")) code = "hotteok";
+  else if (has("크로와상", "마늘빵", "크록스빵")) code = "bakery";
+  else if (has("모찌", "강정", "달고나")) code = "mochi";
+  else if (has("와플", "크레페", "크로플", "누텔라", "펜케이크", "팬케이크", "추러스")) code = "waffle";
+  else if (has("아이스", "마시멜로", "하겐다즈")) code = "icecream";
+  else if (has("핫도그", "핫바")) code = "hotdog";
+  else if (has("스테이크", "삼겹", "바베큐", "치즈구이")) code = "steak";
+  else if (has("치킨", "닭발", "불닭", "오믈렛", "케밥")) code = "chicken";
+  else if (has("랍스", "크랩", "새우")) code = "lobster";
+  else if (has("전복", "가리비", "관자", "오징어", "문어", "쭈꾸미")) code = "shellfish";
+  else if (has("주스", "에이드", "석류", "컵과일")) code = "drink";
+  else if (has("탕후", "과일")) code = "fruit";
+  else if (has("군밤", "군고구마", "고구마", "옥수수", "은행", "밤", "맛탕")) code = "roasted";
+  else if (has("감자", "튀김", "프라이", "프렌치")) code = "fried";
+  else code = "tteok";
+  return [code];
 }
 
 // Run only when invoked directly (allows importing categoriesFor for tests).
@@ -46,7 +49,7 @@ if (process.argv[1] && process.argv[1].endsWith("_categorize.mjs")) {
   const shops = await sql`SELECT id, name_ko FROM shops`;
   const dist = {};
   for (const s of shops) {
-    const src = [s.name_ko, ...(foodsByShop.get(s.id) || [])].join(" ");
+    const src = (foodsByShop.get(s.id) || [s.name_ko]).join(" ");
     const cats = categoriesFor(src);
     await sql`UPDATE shops SET categories = ${cats} WHERE id = ${s.id}`;
     for (const c of cats) dist[c] = (dist[c] || 0) + 1;
@@ -59,7 +62,7 @@ if (process.argv[1] && process.argv[1].endsWith("_categorize.mjs")) {
     const rows = parseCsv(readFileSync("data/shops.csv", "utf8"));
     const cols = Object.keys(rows[0]);
     const csvCats = new Map();
-    for (const s of shops) csvCats.set(s.id, categoriesFor([s.name_ko, ...(foodsByShop.get(s.id) || [])].join(" ")).join("|"));
+    for (const s of shops) csvCats.set(s.id, categoriesFor((foodsByShop.get(s.id) || [s.name_ko]).join(" ")).join("|"));
     for (const r of rows) if (csvCats.has(r.id)) r.categories = csvCats.get(r.id);
     if (!cols.includes("categories")) cols.push("categories");
     writeFileSync("data/shops.csv", toCsv(rows, cols));
