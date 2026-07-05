@@ -6,7 +6,11 @@ import { useLocale } from "next-intl";
 import { Eye, Heart, MapPin } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { localizedName, localizedDistrict } from "@/lib/i18n-food";
+import {
+  localizedName,
+  localizedDistrict,
+  localizedHashtags,
+} from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 import { LinePayBadge } from "@/components/LinePayBadge";
@@ -74,9 +78,9 @@ export function ShopPost({
           </p>
         )}
 
-        {shop.hashtags && shop.hashtags.length > 0 && (
+        {localizedHashtags(shop, locale).length > 0 && (
           <p className="mt-1 flex flex-wrap gap-x-2 text-[13px] text-muted-foreground">
-            {shop.hashtags.slice(0, 3).map((tag) => (
+            {localizedHashtags(shop, locale).slice(0, 3).map((tag) => (
               <span key={tag} className="truncate">
                 #<HighlightText text={tag} query={query} />
               </span>
