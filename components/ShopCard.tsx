@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Eye, Heart } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { localizedName, secondaryName } from "@/lib/i18n-food";
+import { localizedName } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 
@@ -38,11 +38,11 @@ export function ShopCard({
 }) {
   const locale = useLocale();
   const name = localizedName(shop, locale);
-  const secondary = secondaryName(shop, locale);
-
-  const menuNames = shop.foods.map((food) => localizedName(food, locale));
-  const shownMenu = menuNames.slice(0, 3);
-  const extraMenu = menuNames.length - shownMenu.length;
+  // Subtitle = the dish this stall sells, localized (Korean in ko, Japanese in
+  // ja) — so a creative name like "따봉 핫도그" shows its actual food underneath.
+  const dish = shop.foods[0] ? localizedName(shop.foods[0], locale) : null;
+  // Show it only when the (creative) shop name doesn't already contain the dish.
+  const secondary = dish && !name.includes(dish) ? dish : null;
 
   return (
     <motion.div
@@ -85,25 +85,13 @@ export function ShopCard({
             </h3>
             {secondary && (
               <p className="truncate font-display text-[10px] uppercase tracking-wider text-white/70">
-                {secondary}
+                <HighlightText text={secondary} query={query} />
               </p>
             )}
           </div>
         </div>
 
         <div className="space-y-2 p-3">
-          {menuNames.length > 0 && (
-            <p className="truncate text-[11px] text-muted-foreground">
-              {shownMenu.map((menuName, i) => (
-                <span key={i}>
-                  {i > 0 && " · "}
-                  <HighlightText text={menuName} query={query} />
-                </span>
-              ))}
-              {extraMenu > 0 && ` +${extraMenu}`}
-            </p>
-          )}
-
           <div className="space-y-1.5">
             {shop.price_range && (
               <span className="block font-display text-xs font-bold tracking-wide text-primary">

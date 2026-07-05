@@ -8,8 +8,8 @@ import { getShopById } from "@/lib/queries";
 import { googleDirectionsUrl } from "@/lib/maps";
 import {
   localizedName,
-  secondaryName,
   localizedDescription,
+  localizedDistrict,
 } from "@/lib/i18n-food";
 import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
@@ -32,7 +32,8 @@ export default async function ShopDetailPage({
   const locale = await getLocale();
   const t = await getTranslations("detail");
   const name = localizedName(shop, locale);
-  const secondary = secondaryName(shop, locale);
+  const dish = shop.foods[0] ? localizedName(shop.foods[0], locale) : null;
+  const secondary = dish && !name.includes(dish) ? dish : null;
   const description = localizedDescription(shop, locale);
   const hasCoords =
     typeof shop.lat === "number" && typeof shop.lng === "number";
@@ -110,7 +111,7 @@ export default async function ShopDetailPage({
               {shop.district && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
                   <MapPin className="size-3.5" />
-                  {shop.district}
+                  {localizedDistrict(shop.district, locale)}
                 </span>
               )}
               {shop.line_pay && <LinePayBadge className="px-2 py-1 text-[11px]" />}

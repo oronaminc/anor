@@ -40,3 +40,27 @@ export function localizedDescription(
   if (locale === "ko") return food.description;
   return food.translations?.[locale] || food.description;
 }
+
+/**
+ * Localized label for a shop's district/area. The value is free text (Korean);
+ * a few known area labels get a natural Japanese rendering so the location chip
+ * reads in Japanese too. Unknown values pass through unchanged.
+ */
+const DISTRICT_JA: Record<string, string> = {
+  "명동 노점거리": "明洞の屋台街",
+  "명동거리": "明洞通り",
+  "명동성당 인근": "明洞聖堂周辺",
+  "명동8길": "明洞8ギル",
+  "명동길": "明洞通り",
+  "중앙로": "中央路",
+  "눈스퀘어 옆": "ヌンスクエア横",
+};
+
+export function localizedDistrict(
+  district: string | null,
+  locale: string,
+): string | null {
+  if (!district) return null;
+  if (locale === "ja") return DISTRICT_JA[district] ?? district;
+  return district;
+}

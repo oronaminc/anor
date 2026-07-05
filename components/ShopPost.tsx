@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { Eye, Heart, MapPin } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { localizedName } from "@/lib/i18n-food";
+import { localizedName, localizedDistrict } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 import { LinePayBadge } from "@/components/LinePayBadge";
@@ -63,7 +63,7 @@ export function ShopPost({
         {shop.district && (
           <p className="mt-0.5 inline-flex items-center gap-0.5 text-[12px] text-muted-foreground">
             <MapPin className="size-3 shrink-0" />
-            {shop.district}
+            {localizedDistrict(shop.district, locale)}
           </p>
         )}
 
