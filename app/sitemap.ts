@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://myeongdong-street-food.vercel.app"
+  "https://hellomyeongdong.com"
 ).replace(/\/$/, "");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

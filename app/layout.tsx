@@ -11,7 +11,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t("appName"),
     description: t("tagline"),
-    metadataBase: new URL("https://myeongdong-street-food.vercel.app"),
+    metadataBase: new URL(
+      process.env.NEXT_PUBLIC_SITE_URL || "https://hellomyeongdong.com",
+    ),
     openGraph: {
       title: t("appName"),
       description: t("tagline"),
