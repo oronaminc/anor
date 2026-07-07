@@ -1,25 +1,20 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { defaultLocale, isLocale, locales, type Locale } from "./config";
 
 const COOKIE_NAME = "NEXT_LOCALE";
 
 /**
- * Resolve the active locale: explicit cookie first, otherwise auto-detect from
- * the browser's Accept-Language header, falling back to the default (ko).
+ * Resolve the active locale. The app targets first-time Japanese visitors, so
+ * we ALWAYS start in Japanese (defaultLocale) and ignore the browser's
+ * Accept-Language — only an explicit choice (the NEXT_LOCALE cookie set by the
+ * language switcher) overrides it.
  */
 export async function getUserLocale(): Promise<Locale> {
   const cookieLocale = cookies().get(COOKIE_NAME)?.value;
   if (cookieLocale && isLocale(cookieLocale)) return cookieLocale;
-
-  const accept = headers().get("accept-language") ?? "";
-  const preferred = accept
-    .split(",")
-    .map((part) => part.split(";")[0]?.trim().slice(0, 2).toLowerCase())
-    .find((code) => code && isLocale(code));
-
-  return (preferred as Locale) ?? defaultLocale;
+  return defaultLocale;
 }
 
 /** Persist the user's locale choice (1 year cookie). */
