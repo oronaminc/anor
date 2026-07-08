@@ -128,6 +128,17 @@ alter table public.shops add column if not exists certified boolean not null def
 alter table public.shops add column if not exists categories text[] not null default '{}';
 -- Japanese hashtags; `hashtags` holds the Korean ones, shown per active locale.
 alter table public.shops add column if not exists hashtags_ja text[] not null default '{}';
+-- Short numeric id for shareable links: hellomyeongdong.com/s/42 (UUID still works).
+create sequence if not exists public.shops_short_id_seq;
+alter table public.shops add column if not exists short_id integer;
+alter table public.shops alter column short_id set default nextval('public.shops_short_id_seq');
+-- Backfill any rows that predate the column, in creation order.
+update public.shops s set short_id = t.rn from (
+  select id, coalesce((select max(short_id) from public.shops), 0)
+           + row_number() over (order by created_at) as rn
+    from public.shops where short_id is null
+) t where s.id = t.id and s.short_id is null;
+create unique index if not exists shops_short_id_key on public.shops (short_id);
 
 -- Menu foods belonging to a shop (1 shop -> many foods).
 create table if not exists public.shop_foods (

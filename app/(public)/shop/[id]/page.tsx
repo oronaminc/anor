@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
 import { ShopViewCount } from "@/components/ShopViewCount";
 import { LikeButton } from "@/components/LikeButton";
+import { ShareButton } from "@/components/ShareButton";
 import { MapEmbed } from "@/components/MapEmbed";
 import { LinePayBadge } from "@/components/LinePayBadge";
 import { CertifiedBadge } from "@/components/CertifiedBadge";
@@ -123,8 +124,16 @@ export default async function ShopDetailPage({
             <Eye className="size-4" />
             <ShopViewCount shopId={shop.id} initial={shop.view_count} />
           </div>
-          <div className="pt-1">
+          <div className="flex items-center gap-2 pt-1">
             <LikeButton shopId={shop.id} initialCount={shop.like_count} />
+            {shop.short_id != null && (
+              <ShareButton
+                shortId={shop.short_id}
+                name={name}
+                label={t("share")}
+                copied={t("copied")}
+              />
+            )}
           </div>
         </div>
 

@@ -54,7 +54,9 @@
     "location": "場所",
     "about": "このお店について",
     "like": "いいね",
-    "menu": "メニュー"
+    "menu": "メニュー",
+    "share": "シェア",
+    "copied": "コピーしました"
   },
   "trending": {
     "title": "トレンド",

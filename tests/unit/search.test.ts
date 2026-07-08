@@ -43,6 +43,7 @@ function makeShop(over: Partial<ShopWithFoods>): ShopWithFoods {
     line_pay: false,
     certified: false,
     categories: [],
+    short_id: null,
     view_count: 0,
     like_count: 0,
     synthetic_view_count: 0,

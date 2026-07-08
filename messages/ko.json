@@ -54,7 +54,9 @@
     "location": "위치",
     "about": "소개",
     "like": "좋아요",
-    "menu": "메뉴"
+    "menu": "메뉴",
+    "share": "공유",
+    "copied": "복사됨"
   },
   "trending": {
     "title": "트렌딩",

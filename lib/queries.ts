@@ -63,6 +63,23 @@ export async function getShops(): Promise<ShopWithFoods[]> {
   }
 }
 
+/** Resolve a shop's UUID from a short numeric id (for /s/{n} share links). */
+export async function getShopIdByShortId(shortId: number): Promise<string | null> {
+  if (isDemoMode() || !hasDb()) {
+    return DEMO_SHOPS.find((s) => s.short_id === shortId)?.id ?? null;
+  }
+  try {
+    const sql = getSql();
+    const rows = (await sql`
+      SELECT id FROM shops WHERE short_id = ${shortId} LIMIT 1
+    `) as { id: string }[];
+    return rows[0]?.id ?? null;
+  } catch (err) {
+    console.error("getShopIdByShortId error:", err);
+    return null;
+  }
+}
+
 export async function getShopById(id: string): Promise<ShopWithFoods | null> {
   if (isDemoMode() || !hasDb()) {
     return DEMO_SHOPS.find((s) => s.id === id) ?? null;

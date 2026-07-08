@@ -110,6 +110,7 @@ type ShopDef = Omit<
   | "certified"
   | "categories"
   | "hashtags_ja"
+  | "short_id"
 > & {
   foodKeys: string[];
 };
@@ -252,6 +253,7 @@ export const DEMO_SHOPS: ShopWithFoods[] = SHOP_DEFS.map(
     certified: i % 3 === 0,
     categories: Array.from(new Set(foodKeys.flatMap((k) => FOOD_CAT[k] ?? []))),
     hashtags_ja: [],
+    short_id: i + 1,
     synthetic_view_count: 0,
     synthetic_like_count: 0,
     weekly_view_count: Math.round(shop.view_count * 0.28),

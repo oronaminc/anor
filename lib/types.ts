@@ -79,6 +79,8 @@ export type Shop = {
   certified: boolean;
   /** Broad food category codes for map/feed filtering (see lib/categories.ts). */
   categories: string[];
+  /** Short numeric id for shareable links (/s/{short_id}); UUID id still works. */
+  short_id: number | null;
   view_count: number;
   like_count: number;
   /** Admin/automated engagement, separate from the real counts; the displayed
@@ -104,6 +106,7 @@ export type ShopFoodInput = Omit<
 export type ShopInput = Omit<
   Shop,
   | "id"
+  | "short_id"
   | "hashtags_ja"
   | "view_count"
   | "like_count"
