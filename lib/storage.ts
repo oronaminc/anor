@@ -52,7 +52,12 @@ export async function uploadToR2(file: File): Promise<string> {
   const res = await client.fetch(endpoint(key), {
     method: "PUT",
     body,
-    headers: { "content-type": file.type || "application/octet-stream" },
+    headers: {
+      "content-type": file.type || "application/octet-stream",
+      // Immutable: the key is a fresh UUID per upload, so the URL already
+      // changes on every replace — safe to cache forever (fast, no stale image).
+      "cache-control": "public, max-age=31536000, immutable",
+    },
   });
   if (!res.ok) {
     throw new Error(`R2 업로드 실패 (HTTP ${res.status})`);
@@ -70,8 +75,9 @@ export async function uploadToR2(file: File): Promise<string> {
 export async function deleteFromR2(url: string | null | undefined): Promise<void> {
   if (!url || !r2Configured()) return;
   const { client, publicBase, endpoint } = r2();
-  if (!url.startsWith(publicBase + "/")) return; // only our own objects
-  const key = url.slice(publicBase.length + 1);
+  const clean = url.split("?")[0]; // drop any ?v=… cache-busting suffix
+  if (!clean.startsWith(publicBase + "/")) return; // only our own objects
+  const key = clean.slice(publicBase.length + 1);
   if (!key) return;
 
   const res = await client.fetch(endpoint(key), { method: "DELETE" });

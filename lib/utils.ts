@@ -16,3 +16,13 @@ export function formatViewCount(count: number): string {
   if (count < 1_000_000) return `${Math.round(count / 100) / 10}K`;
   return `${Math.round(count / 100_000) / 10}M`;
 }
+
+/**
+ * Whether an image URL should skip Next.js optimization: our demo art (`/demo/`)
+ * and any SVG keep their own animation. Query-string safe — a cache-busting
+ * `?v=…` suffix on the URL won't fool the `.svg` check.
+ */
+export function isUnoptimizedImage(url: string): boolean {
+  const path = url.split("?")[0].toLowerCase();
+  return path.startsWith("/demo/") || path.endsWith(".svg");
+}

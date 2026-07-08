@@ -2,6 +2,7 @@
 // usable from plain scripts (data sync, r2 test). Reads the same R2_* env vars.
 // The DB only ever stores the resulting public URL.
 import { AwsClient } from "aws4fetch";
+import { createHash } from "node:crypto";
 
 export function r2Configured() {
   return !!(
@@ -33,16 +34,25 @@ export function publicUrlFor(key) {
   return `${base}/${key}`;
 }
 
-/** Upload bytes to R2 under `key`; returns the public URL. */
+/**
+ * Upload bytes to R2 under `key`; returns the public URL with a `?v=<hash>`
+ * cache-busting suffix derived from the CONTENT. Combined with the immutable
+ * Cache-Control below, browsers cache the image forever (fast, cheap) but a
+ * REPLACED image gets a new URL → shows immediately, no hard refresh.
+ */
 export async function uploadToR2(bytes, key, contentType = "application/octet-stream") {
   if (!r2Configured()) throw new Error("R2 not configured (set R2_* env vars)");
   const res = await client().fetch(endpointFor(key), {
     method: "PUT",
     body: bytes,
-    headers: { "content-type": contentType },
+    headers: {
+      "content-type": contentType,
+      "cache-control": "public, max-age=31536000, immutable",
+    },
   });
   if (!res.ok) throw new Error(`R2 upload failed (HTTP ${res.status})`);
-  return publicUrlFor(key);
+  const v = createHash("sha1").update(bytes).digest("hex").slice(0, 8);
+  return `${publicUrlFor(key)}?v=${v}`;
 }
 
 /** Delete an object from R2 by key. */
@@ -51,11 +61,13 @@ export async function deleteFromR2(key) {
   return res.ok;
 }
 
-/** The object key for one of our public URLs, or null if it isn't ours. */
+/** The object key for one of our public URLs, or null if it isn't ours.
+ *  Strips any `?v=…` query suffix so cache-busted URLs still resolve. */
 export function keyFromPublicUrl(url) {
   if (!url) return null;
   const base = process.env.R2_PUBLIC_BASE_URL.replace(/\/$/, "");
-  return url.startsWith(base + "/") ? url.slice(base.length + 1) : null;
+  const clean = url.split("?")[0];
+  return clean.startsWith(base + "/") ? clean.slice(base.length + 1) : null;
 }
 
 const unxml = (s) =>

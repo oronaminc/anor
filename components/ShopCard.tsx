@@ -14,6 +14,8 @@ import { TrendingFlame } from "@/components/TrendingFlame";
 // One admin flag (is_trending, "급상승") → ONE badge everywhere. The flame is the
 // app's trending motif; the `rank` prop is accepted for call-site compatibility
 // but no longer changes the badge (it used to split into HOT vs 급상승).
+import { isUnoptimizedImage } from "@/lib/utils";
+
 export function TrendingBadge(_props: { rank?: number } = {}) {
   const t = useTranslations("badge");
   return (
@@ -62,7 +64,7 @@ export function ShopCard({
               alt={name}
               fill
               sizes="(max-width: 480px) 50vw, 240px"
-              unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
+              unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
               className="object-cover animate-photo"
             />
           ) : (

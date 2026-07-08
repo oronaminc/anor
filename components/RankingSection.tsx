@@ -5,7 +5,7 @@ import { Eye } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
 import { rankByViews } from "@/lib/sort";
-import { formatViewCount } from "@/lib/utils";
+import {formatViewCount, isUnoptimizedImage } from "@/lib/utils";
 import { localizedName } from "@/lib/i18n-food";
 
 const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
@@ -46,7 +46,7 @@ export async function RankingSection({ shops }: { shops: ShopWithFoods[] }) {
                     alt={localizedName(shop, locale)}
                     fill
                     sizes="48px"
-                    unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
+                    unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
                     className="object-cover animate-photo"
                   />
                 ) : (

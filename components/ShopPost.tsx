@@ -17,6 +17,8 @@ import { LinePayBadge } from "@/components/LinePayBadge";
 import { CertifiedBadge } from "@/components/CertifiedBadge";
 
 /** Threads-style feed row: small thumbnail + text, hairline-separated. */
+import { isUnoptimizedImage } from "@/lib/utils";
+
 export function ShopPost({
   shop,
   query,
@@ -44,7 +46,7 @@ export function ShopPost({
             alt={name}
             fill
             sizes="56px"
-            unoptimized={(shop.thumbnail_url.startsWith("/demo/") || shop.thumbnail_url.toLowerCase().endsWith(".svg"))}
+            unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
             className="object-cover animate-photo"
           />
         ) : (
