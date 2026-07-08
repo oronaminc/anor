@@ -12,6 +12,7 @@ import {
   localizedDescription,
   localizedDistrict,
   localizedHashtags,
+  localizedPrice,
 } from "@/lib/i18n-food";
 import { Button } from "@/components/ui/button";
 import { TrendingBadge } from "@/components/ShopCard";
@@ -85,7 +86,7 @@ export default async function ShopDetailPage({
               )}
               {shop.price_range && (
                 <span className="text-sm font-bold text-primary">
-                  {shop.price_range}
+                  {localizedPrice(shop.price_range, locale)}
                 </span>
               )}
             </div>
@@ -186,7 +187,7 @@ export default async function ShopDetailPage({
                         </h3>
                         {food.price_range && (
                           <span className="shrink-0 text-sm font-bold text-primary">
-                            {food.price_range}
+                            {localizedPrice(food.price_range, locale)}
                           </span>
                         )}
                       </div>

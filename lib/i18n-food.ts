@@ -65,6 +65,25 @@ export function localizedDistrict(
   return district;
 }
 
+/**
+ * Price in the active locale. Prices are stored in Korean won (e.g.
+ * "₩5,000~10,000"); the Japanese UI shows yen at 1/10 (₩ → ¥, each amount ÷10),
+ * so ₩20,000 → ¥2,000 and ₩5,000~10,000 → ¥500~1,000. No separate column to
+ * maintain — it's derived from the won price by the fixed rule.
+ */
+export function localizedPrice(
+  price: string | null,
+  locale: string,
+): string | null {
+  if (!price) return null;
+  if (locale !== "ja") return price;
+  const group = (n: number) =>
+    String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return price
+    .replace(/₩/g, "¥")
+    .replace(/[\d,]+/g, (m) => group(Math.round(Number(m.replace(/,/g, "")) / 10)));
+}
+
 /** Hashtags in the active locale — Korean base (`hashtags`) + Japanese variant
  *  (`hashtags_ja`), each falling back to the other when empty. */
 export function localizedHashtags(

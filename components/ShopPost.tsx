@@ -10,6 +10,7 @@ import {
   localizedName,
   localizedDistrict,
   localizedHashtags,
+  localizedPrice,
 } from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
@@ -93,7 +94,7 @@ export function ShopPost({
         <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
           {shop.price_range && (
             <span className="font-semibold text-foreground/80">
-              {shop.price_range}
+              {localizedPrice(shop.price_range, locale)}
             </span>
           )}
           <span className="ml-auto inline-flex shrink-0 items-center gap-2.5">

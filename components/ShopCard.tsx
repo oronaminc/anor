@@ -7,7 +7,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Eye, Heart } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
-import { localizedName, localizedHashtags } from "@/lib/i18n-food";
+import {
+  localizedName,
+  localizedHashtags,
+  localizedPrice,
+} from "@/lib/i18n-food";
 import { HighlightText } from "@/components/HighlightText";
 import { TrendingFlame } from "@/components/TrendingFlame";
 
@@ -97,7 +101,7 @@ export function ShopCard({
           <div className="space-y-1.5">
             {shop.price_range && (
               <span className="block font-display text-xs font-bold tracking-wide text-primary">
-                {shop.price_range}
+                {localizedPrice(shop.price_range, locale)}
               </span>
             )}
             <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
