@@ -6,7 +6,7 @@ import { ArrowLeft, Eye, MapPin, Youtube, Navigation } from "lucide-react";
 
 import { getShopById } from "@/lib/queries";
 import { googleDirectionsUrl } from "@/lib/maps";
-import { isUnoptimizedImage } from "@/lib/utils";
+import { isUnoptimizedImage, photoAnim } from "@/lib/utils";
 import {
   localizedName,
   localizedDescription,
@@ -54,7 +54,7 @@ export default async function ShopDetailPage({
             priority
             sizes="(max-width: 480px) 100vw, 480px"
             unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
-            className="object-cover animate-photo"
+            className={`object-cover ${photoAnim(shop.id)}`}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-6xl">
@@ -172,7 +172,7 @@ export default async function ShopDetailPage({
                           fill
                           sizes="80px"
                           unoptimized={isUnoptimizedImage(food.image_url)}
-                          className="object-cover animate-photo"
+                          className={`object-cover ${photoAnim(food.id)}`}
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-3xl">

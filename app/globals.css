@@ -251,16 +251,48 @@
 /* Uploaded photos gently move (slow Ken-Burns zoom + a touch of rotation) so
    the feed feels alive. Applied to raster food/shop images; the container clips
    it (overflow-hidden), and the scale keeps the rotation from showing corners. */
-@keyframes photo-motion {
-  0%, 100% { transform: scale(1.04) rotate(-0.6deg); }
-  50% { transform: scale(1.18) rotate(0.8deg); }
+/* Ken-Burns variants — each photo gets one (by id hash) for variety. Faster
+   than before. See photoAnim() in lib/utils.ts. */
+@keyframes photo-zoom {
+  0%, 100% { transform: scale(1.03); }
+  50% { transform: scale(1.19); }
 }
-.animate-photo {
-  animation: photo-motion 5.5s ease-in-out infinite;
-  will-change: transform;
+@keyframes photo-zoom-rot {
+  0%, 100% { transform: scale(1.04) rotate(-1deg); }
+  50% { transform: scale(1.2) rotate(1.2deg); }
 }
+@keyframes photo-rot {
+  0%, 100% { transform: scale(1.09) rotate(-1.8deg); }
+  50% { transform: scale(1.15) rotate(1.8deg); }
+}
+@keyframes photo-pan {
+  0%, 100% { transform: scale(1.13) translate(-1.6%, 1%); }
+  50% { transform: scale(1.13) translate(1.6%, -1%); }
+}
+@keyframes photo-pan-zoom {
+  0% { transform: scale(1.05) translate(-1.2%, 0.6%); }
+  50% { transform: scale(1.19) translate(1.2%, -1.4%); }
+  100% { transform: scale(1.05) translate(-1.2%, 0.6%); }
+}
+.animate-photo,
+.animate-photo-1 { animation: photo-zoom-rot 4s ease-in-out infinite; }
+.animate-photo-2 { animation: photo-zoom 3.6s ease-in-out infinite; }
+.animate-photo-3 { animation: photo-rot 4.4s ease-in-out infinite; }
+.animate-photo-4 { animation: photo-pan 4.2s ease-in-out infinite; }
+.animate-photo-5 { animation: photo-pan-zoom 3.8s ease-in-out infinite; }
+.animate-photo,
+.animate-photo-1,
+.animate-photo-2,
+.animate-photo-3,
+.animate-photo-4,
+.animate-photo-5 { will-change: transform; }
 @media (prefers-reduced-motion: reduce) {
-  .animate-photo { animation: none; }
+  .animate-photo,
+  .animate-photo-1,
+  .animate-photo-2,
+  .animate-photo-3,
+  .animate-photo-4,
+  .animate-photo-5 { animation: none; }
 }
 
 /* Realistic trending fire — a live, always-burning flame. Trending is the one

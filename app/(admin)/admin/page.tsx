@@ -8,7 +8,7 @@ import { hasDb } from "@/lib/env";
 import { totalViews, totalLikes } from "@/lib/queries";
 import type { Shop } from "@/lib/types";
 import { localizedName } from "@/lib/i18n-food";
-import { formatViewCount, isUnoptimizedImage } from "@/lib/utils";
+import { formatViewCount, isUnoptimizedImage, photoAnim } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { TrendingToggle } from "@/components/admin/TrendingToggle";
 import { DeleteShopButton } from "@/components/admin/DeleteShopButton";
@@ -79,7 +79,7 @@ export default async function AdminDashboard() {
                       fill
                       sizes="56px"
                       unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
-                      className="object-cover animate-photo"
+                      className={`object-cover ${photoAnim(shop.id)}`}
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">

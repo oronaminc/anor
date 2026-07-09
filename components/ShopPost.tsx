@@ -18,7 +18,7 @@ import { LinePayBadge } from "@/components/LinePayBadge";
 import { CertifiedBadge } from "@/components/CertifiedBadge";
 
 /** Threads-style feed row: small thumbnail + text, hairline-separated. */
-import { isUnoptimizedImage } from "@/lib/utils";
+import { isUnoptimizedImage, photoAnim } from "@/lib/utils";
 
 export function ShopPost({
   shop,
@@ -48,7 +48,7 @@ export function ShopPost({
             fill
             sizes="56px"
             unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
-            className="object-cover animate-photo"
+            className={`object-cover ${photoAnim(shop.id)}`}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-2xl">

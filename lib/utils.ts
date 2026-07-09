@@ -26,3 +26,14 @@ export function isUnoptimizedImage(url: string): boolean {
   const path = url.split("?")[0].toLowerCase();
   return path.startsWith("/demo/") || path.endsWith(".svg");
 }
+
+/**
+ * Pick one of the Ken-Burns photo animation variants (zoom / rotate / pan / …,
+ * defined in app/globals.css) from a stable seed like a shop/food id — so each
+ * photo animates differently but consistently (no flicker between renders).
+ */
+export function photoAnim(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return `animate-photo-${(h % 5) + 1}`;
+}

@@ -5,7 +5,7 @@ import { Eye } from "lucide-react";
 
 import type { ShopWithFoods } from "@/lib/types";
 import { rankByViews } from "@/lib/sort";
-import {formatViewCount, isUnoptimizedImage } from "@/lib/utils";
+import {formatViewCount, isUnoptimizedImage, photoAnim } from "@/lib/utils";
 import { localizedName } from "@/lib/i18n-food";
 
 const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
@@ -47,7 +47,7 @@ export async function RankingSection({ shops }: { shops: ShopWithFoods[] }) {
                     fill
                     sizes="48px"
                     unoptimized={isUnoptimizedImage(shop.thumbnail_url)}
-                    className="object-cover animate-photo"
+                    className={`object-cover ${photoAnim(shop.id)}`}
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center">
