@@ -106,7 +106,7 @@ type ShopDef = Omit<
   | "synthetic_view_count"
   | "synthetic_like_count"
   | "district"
-  | "line_pay"
+  | "pay_pay"
   | "certified"
   | "categories"
   | "hashtags_ja"
@@ -249,7 +249,7 @@ export const DEMO_SHOPS: ShopWithFoods[] = SHOP_DEFS.map(
   ({ foodKeys, ...shop }, i) => ({
     ...shop,
     district: DEMO_DISTRICTS[i % DEMO_DISTRICTS.length],
-    line_pay: i % 2 === 0,
+    pay_pay: true,
     certified: i % 3 === 0,
     categories: Array.from(new Set(foodKeys.flatMap((k) => FOOD_CAT[k] ?? []))),
     hashtags_ja: [],

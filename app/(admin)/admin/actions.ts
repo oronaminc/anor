@@ -244,7 +244,7 @@ function readShopForm(formData: FormData): {
       thumbnail_url: str("thumbnail_url") || null,
       price_range: str("price_range") || null,
       district: str("district") || null,
-      line_pay: formData.get("line_pay") === "on",
+      pay_pay: formData.get("pay_pay") === "on",
       certified: formData.get("certified") === "on",
       categories: formData.getAll("categories").map(String),
       is_trending: formData.get("is_trending") === "on",
@@ -337,7 +337,7 @@ export async function createShop(
       INSERT INTO shops
         (name_ko, name_en, name_ja, name_es, description, translations,
          lat, lng, address, youtube_shorts_url, thumbnail_url,
-         price_range, is_trending, hashtags, district, line_pay, certified,
+         price_range, is_trending, hashtags, district, pay_pay, certified,
          categories)
       VALUES
         (${fields.name_ko}, ${fields.name_en}, ${fields.name_ja},
@@ -345,7 +345,7 @@ export async function createShop(
          ${JSON.stringify(fields.translations)}::jsonb,
          ${fields.lat}, ${fields.lng}, ${fields.address},
          ${fields.youtube_shorts_url}, ${thumbnail}, ${fields.price_range},
-         ${fields.is_trending}, ${hashtags}, ${fields.district}, ${fields.line_pay},
+         ${fields.is_trending}, ${hashtags}, ${fields.district}, ${fields.pay_pay},
          ${fields.certified}, ${fields.categories})
       RETURNING id
     `;
@@ -393,7 +393,7 @@ export async function updateShop(
         is_trending = ${fields.is_trending},
         hashtags = ${hashtags},
         district = ${fields.district},
-        line_pay = ${fields.line_pay},
+        pay_pay = ${fields.pay_pay},
         certified = ${fields.certified},
         categories = ${fields.categories}
       WHERE id = ${id}

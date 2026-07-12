@@ -117,10 +117,18 @@ create index if not exists shops_created_idx      on public.shops (created_at de
 alter table public.shops add column if not exists synthetic_view_count int not null default 0;
 alter table public.shops add column if not exists synthetic_like_count int not null default 0;
 
--- District/area label + whether the shop accepts LINE Pay (popular with Japanese
--- visitors). Managed via the admin form / the CSV sync.
+-- District/area label + whether the shop accepts PayPay (Japan's top QR pay;
+-- LINE Pay merged into it in 2025). Managed via the admin form / the CSV sync.
 alter table public.shops add column if not exists district text;
-alter table public.shops add column if not exists line_pay boolean not null default false;
+-- Rename the legacy line_pay column to pay_pay once (guarded, idempotent).
+do $$ begin
+  if exists (select 1 from information_schema.columns
+             where table_schema='public' and table_name='shops' and column_name='line_pay')
+     and not exists (select 1 from information_schema.columns
+             where table_schema='public' and table_name='shops' and column_name='pay_pay')
+  then alter table public.shops rename column line_pay to pay_pay; end if;
+end $$;
+alter table public.shops add column if not exists pay_pay boolean not null default false;
 -- Officially certified street vendor (구청/서울시 정식 노점포 인증) → verified badge.
 alter table public.shops add column if not exists certified boolean not null default false;
 -- Broad food categories for map/feed filtering (a shop has 1+), kept small and

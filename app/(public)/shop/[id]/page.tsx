@@ -20,7 +20,7 @@ import { ShopViewCount } from "@/components/ShopViewCount";
 import { LikeButton } from "@/components/LikeButton";
 import { ShareButton } from "@/components/ShareButton";
 import { MapEmbed } from "@/components/MapEmbed";
-import { LinePayBadge } from "@/components/LinePayBadge";
+import { PayPayBadge } from "@/components/PayPayBadge";
 import { CertifiedBadge } from "@/components/CertifiedBadge";
 
 export const dynamic = "force-dynamic";
@@ -110,7 +110,7 @@ export default async function ShopDetailPage({
               {shop.address}
             </div>
           )}
-          {(shop.district || shop.line_pay) && (
+          {(shop.district || shop.pay_pay) && (
             <div className="flex flex-wrap items-center gap-2 pt-0.5">
               {shop.district && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
@@ -118,7 +118,7 @@ export default async function ShopDetailPage({
                   {localizedDistrict(shop.district, locale)}
                 </span>
               )}
-              {shop.line_pay && <LinePayBadge className="px-2 py-1 text-[11px]" />}
+              {shop.pay_pay && <PayPayBadge className="px-2 py-1 text-[11px]" />}
             </div>
           )}
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground tabular-nums">

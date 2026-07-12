@@ -73,8 +73,8 @@ export type Shop = {
   price_range: string | null;
   /** Area/district label, e.g. "명동거리". Free text, managed by admin/CSV. */
   district: string | null;
-  /** Whether the shop accepts LINE Pay (popular with Japanese visitors). */
-  line_pay: boolean;
+  /** Whether the shop accepts PayPay (Japan's top QR pay; LINE Pay merged in 2025). */
+  pay_pay: boolean;
   /** Officially certified street vendor (구청/서울시 인증) → verified badge. */
   certified: boolean;
   /** Broad food category codes for map/feed filtering (see lib/categories.ts). */

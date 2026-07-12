@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * "인증 / 認証" badge for officially certified street vendors (구청/서울시 정식
  * 노점포 인증) — a clean blue verified seal. The label is localized (認証 in
  * Japanese, 인증 in Korean). Blue is an intentional functional accent in the
- * otherwise-monochrome UI, like the trending fire and LINE Pay green.
+ * otherwise-monochrome UI, like the trending fire and PayPay red.
  */
 export function CertifiedBadge({ className }: { className?: string }) {
   const t = useTranslations("badge");

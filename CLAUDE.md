@@ -141,7 +141,7 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
   `foods/<slug>.<ext>` (`npm run data:image`), so replacing a file in the R2
   dashboard updates the app with no DB change; DB stores only the URL. A sync
   never touches counts. Per-shop `district` + `line_pay` (LINE Pay badge,
-  `components/LinePayBadge`) columns. **Categories** (`shops.categories text[]`,
+  `components/PayPayBadge`) columns. **Categories** (`shops.categories text[]`,
   ≈20 fine codes in `lib/categories.ts` (each holds ≤10 shops), separate from the
   specific menu foods) drive the map + home-feed filters — split finely so no
   category is unwieldy on the map

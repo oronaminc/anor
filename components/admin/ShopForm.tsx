@@ -246,11 +246,11 @@ export function ShopForm({ shop }: { shop?: ShopWithFoods }) {
         <label className="flex items-center gap-2 self-end pb-2 text-sm font-medium">
           <input
             type="checkbox"
-            name="line_pay"
-            defaultChecked={shop?.line_pay ?? false}
-            className="size-4 rounded border-border accent-[#06C755]"
+            name="pay_pay"
+            defaultChecked={shop?.pay_pay ?? false}
+            className="size-4 rounded border-border accent-[#ff0033]"
           />
-          LINE Pay 가능
+          PayPay 가능
         </label>
         <label className="flex items-center gap-2 text-sm font-medium">
           <input

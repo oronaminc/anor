@@ -65,7 +65,7 @@ for (const p of points) {
     description: descKo, desc_en: "", desc_ja: descJa, desc_es: "",
     lat: p.lat, lng: p.lng, address: "", youtube_shorts_url: "",
     hashtags, price_range: price, district: "명동 노점거리",
-    line_pay: "false", certified: "false", is_trending: "false", growth_weight: "1", image: img,
+    pay_pay: "true", certified: "false", is_trending: "false", growth_weight: "1", image: img,
   });
   foodRows.push({
     id: foodId, shop_id: shopId, name_ko: p.note, name_en: "", name_ja: (c && c.food_name_ja) || p.note, name_es: "",
