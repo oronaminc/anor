@@ -11,7 +11,9 @@
     "home": "ホーム",
     "map": "マップ",
     "trending": "トレンド",
-    "search": "検索"
+    "search": "検索",
+    "beauty": "オリヤン",
+    "daiso": "ダイソー"
   },
   "home": {
     "heroEyebrow": "ソウル · 明洞",
@@ -93,5 +95,13 @@
   },
   "footer": {
     "disclaimer": "掲載情報は参考用です。実際の営業情報と異なる場合がありますので、ご了承くださいね。"
+  },
+  "retail": {
+    "eyebrow": "ショッピングガイド",
+    "rankingWord": "ランキング",
+    "all": "すべて",
+    "empty": "まだ商品がありません。",
+    "storesTitle": "明洞の店舗",
+    "buyAt": "{retailer}で買える店舗"
   }
 }

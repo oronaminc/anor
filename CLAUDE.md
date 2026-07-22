@@ -174,6 +174,40 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
 - Schema lives in `db/schema.sql` (+ `db/seed.sql`). `Food` has `like_count`;
   keep it set in `demo-data.ts` and any new fixtures.
 
+## Retail pillar (올리브영 + 다이소) — second content axis
+
+Beyond street food, the app now ranks **Olive Young cosmetics** and **Daiso
+goods**. It's a parallel model to shops, deliberately kept separate (less risk
+than generalizing `shops`):
+
+- **Data**: `products` table (`db/schema.sql`) — `retailer` (`olive_young` |
+  `daiso`), `brand`, `category` (code within the retailer taxonomy), price,
+  thumbnail, `is_trending`, `short_id` (→ `/p/{n}`), and the SAME count
+  architecture as shops (real + `synthetic_*`, displayed = totals, **invariant
+  total views > total likes** enforced atomically in `toggle_product_like` and
+  `boostProduct`). `retail_stores` holds each retailer's Myeongdong locations
+  (the "where to buy" map). `product_likes` = one like per IP.
+- **Metadata**: `lib/retailers.ts` (isomorphic) — retailer labels/accent/emoji
+  + the fixed per-retailer category taxonomy (`RETAIL_CATEGORIES`). Brand accent
+  hexes (OY green `#00A54F`, Daiso red `#E60012`) are functional accents like
+  PayPay red / certified blue — used only on the badge + active chip.
+- **Queries**: `lib/products.ts` (server-only, demo fallback via
+  `lib/products-demo.ts`). Localization reuses `lib/i18n-food.ts`
+  (`localizedName`/`localizedPrice` etc — ja shows ¥ at ₩÷10, same rule).
+- **Public**: `/beauty` + `/daiso` (ranking, `RetailRankingPage` →
+  `RetailRankingView`), `/product/[id]` detail, `/p/[code]` short link, view/like
+  APIs under `/api/products/[id]/*` (mirror the shop ones). Bottom nav is now
+  홈·올영·다이소·지도·검색 (food `/trending` linked from the home hero).
+- **Admin**: `/admin/products` (list) + new/edit (`components/admin/ProductForm`,
+  `app/(admin)/admin/products/actions.ts`, controls in `ProductAdminControls`).
+- **Seed**: `scripts/seed-products.mjs` reads a research JSON
+  (`data/retail-data.json`, gitignored), writes brand-toned **SVG placeholder
+  tiles** to `public/products/*.svg`, inserts products + stores, and regenerates
+  `lib/products-demo.ts`. Real product photos are **not** rehosted (copyright);
+  swap a real photo per product via the admin form (R2), same pipeline as food.
+  Product data is real, currently-popular 2025-2026 items (several 2025 Olive
+  Young Awards winners); prices/availability are best-effort, not a live scrape.
+
 ## Design system — IMPORTANT
 
 The app was redesigned to a **clean monochrome black & white** look (was a

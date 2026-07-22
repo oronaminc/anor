@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <rect width="800" height="800" fill="#fdeef0"/>
+  <rect width="800" height="12" fill="#E60012"/>
+  <circle cx="400" cy="360" r="230" fill="#ffffff" opacity="0.55"/>
+  <text x="400" y="380" font-size="300" text-anchor="middle" dominant-baseline="central">🧷</text>
+  <text x="400" y="660" font-size="46" font-weight="800" fill="#E60012" text-anchor="middle" font-family="sans-serif">DAISO</text>
+</svg>

@@ -12,16 +12,19 @@ export function ShareButton({
   name,
   label,
   copied: copiedLabel,
+  basePath = "/s",
 }: {
   shortId: number;
   name: string;
   label: string;
   copied: string;
+  /** Short-link path prefix: "/s" for shops (default), "/p" for products. */
+  basePath?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
   async function onClick() {
-    const url = `${window.location.origin}/s/${shortId}`;
+    const url = `${window.location.origin}${basePath}/${shortId}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: name, url });

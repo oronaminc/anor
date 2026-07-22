@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Search } from "lucide-react";
+import { Search, Flame } from "lucide-react";
 
 import { getShops } from "@/lib/queries";
 import { ShopExplorer } from "@/components/ShopExplorer";
@@ -10,6 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const t = await getTranslations("home");
   const ts = await getTranslations("search");
+  const tn = await getTranslations("nav");
   const shops = await getShops();
 
   return (
@@ -26,13 +27,23 @@ export default async function HomePage() {
           {t("heroSubtitle")}
         </p>
 
-        <Link
-          href="/search"
-          className="mt-1 flex items-center gap-2.5 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors active:bg-muted"
-        >
-          <Search className="size-4" />
-          {ts("placeholder")}
-        </Link>
+        <div className="mt-1 flex items-center gap-2">
+          <Link
+            href="/search"
+            className="flex flex-1 items-center gap-2.5 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors active:bg-muted"
+          >
+            <Search className="size-4" />
+            {ts("placeholder")}
+          </Link>
+          <Link
+            href="/trending"
+            aria-label={tn("trending")}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2.5 text-sm font-semibold transition-colors active:bg-muted"
+          >
+            <Flame className="size-4 text-primary" />
+            {tn("trending")}
+          </Link>
+        </div>
       </section>
 
       <div className="px-5 pt-4">

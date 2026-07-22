@@ -40,6 +40,12 @@ export default async function AdminLayout({
               음식
             </Link>
             <Link
+              href="/admin/products"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              화장품·굿즈
+            </Link>
+            <Link
               href="/admin/analytics"
               className="text-sm text-muted-foreground hover:text-foreground"
             >

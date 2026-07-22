@@ -119,6 +119,58 @@ export type ShopInput = Omit<
   | "created_at"
 >;
 
+// ---------------------------------------------------------------------
+// Retail model (올리브영 화장품 + 다이소 굿즈) — the second content pillar.
+// A product belongs to a retailer + category and is ranked within its retailer.
+// Counts mirror shops: displayed = real + synthetic (both stored).
+// ---------------------------------------------------------------------
+
+export type Product = {
+  id: string;
+  /** 'olive_young' | 'daiso' — see lib/retailers.ts */
+  retailer: string;
+  name_ko: string;
+  name_en: string | null;
+  name_ja: string | null;
+  /** brand, e.g. 라운드랩 / TORRIDEN (olive young). */
+  brand: string | null;
+  /** category code within the retailer's taxonomy (lib/retailers.ts). */
+  category: string | null;
+  description: string | null;
+  translations: FoodTranslations | null;
+  price_range: string | null;
+  thumbnail_url: string | null;
+  is_trending: boolean;
+  view_count: number;
+  like_count: number;
+  synthetic_view_count: number;
+  synthetic_like_count: number;
+  short_id: number | null;
+  created_at: string;
+};
+
+export type ProductInput = Omit<
+  Product,
+  | "id"
+  | "short_id"
+  | "view_count"
+  | "like_count"
+  | "synthetic_view_count"
+  | "synthetic_like_count"
+  | "created_at"
+>;
+
+/** A retailer's Myeongdong store — the "where to buy" map point. */
+export type RetailStore = {
+  id: string;
+  retailer: string;
+  name_ko: string;
+  name_ja: string | null;
+  lat: number | null;
+  lng: number | null;
+  address: string | null;
+};
+
 /** One like per anonymized IP per food (sha256(ip + salt)). */
 export type FoodLike = {
   food_id: string;

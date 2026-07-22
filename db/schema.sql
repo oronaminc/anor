@@ -247,3 +247,115 @@ create table if not exists public.districts (
   lat  double precision,
   lng  double precision
 );
+
+-- =====================================================================
+-- RETAIL model (올리브영 화장품 + 다이소 굿즈) — a second content pillar
+-- alongside street food. A `product` is the unit of engagement (views/likes/
+-- trending/ranking) and belongs to a `retailer` ('olive_young' | 'daiso') with
+-- a category. Products are ranked within their retailer. Where to buy them is
+-- the retailer's Myeongdong stores (retail_stores → the map). Mirrors the shop
+-- count architecture: displayed count = real + synthetic (both stored), and the
+-- invariant total views > total likes holds.
+-- =====================================================================
+
+create table if not exists public.products (
+  id                   uuid primary key default gen_random_uuid(),
+  retailer             text not null,                 -- 'olive_young' | 'daiso'
+  name_ko              text not null,
+  name_en              text,
+  name_ja              text,
+  brand                text,                          -- e.g. 라운드랩 / TORRIDEN (olive young)
+  category             text,                          -- code within the retailer taxonomy (lib/retailers.ts)
+  description          text,
+  translations         jsonb not null default '{}'::jsonb,
+  price_range          text,                          -- won string; JA UI shows ¥ at ₩÷10
+  thumbnail_url        text,
+  is_trending          boolean not null default false,
+  view_count           int not null default 0,
+  like_count           int not null default 0,
+  synthetic_view_count int not null default 0,
+  synthetic_like_count int not null default 0,
+  created_at           timestamptz not null default now()
+);
+
+create index if not exists products_retailer_idx   on public.products (retailer);
+create index if not exists products_view_count_idx  on public.products (view_count desc);
+create index if not exists products_trending_idx    on public.products (is_trending);
+create index if not exists products_created_idx      on public.products (created_at desc);
+
+-- Short numeric id for shareable links: hellomyeongdong.com/p/42 (UUID still works).
+create sequence if not exists public.products_short_id_seq;
+alter table public.products add column if not exists short_id integer;
+alter table public.products alter column short_id set default nextval('public.products_short_id_seq');
+update public.products s set short_id = t.rn from (
+  select id, coalesce((select max(short_id) from public.products), 0)
+           + row_number() over (order by created_at) as rn
+    from public.products where short_id is null
+) t where s.id = t.id and s.short_id is null;
+create unique index if not exists products_short_id_key on public.products (short_id);
+
+-- One like per anonymized IP per product (mirrors shop_likes).
+create table if not exists public.product_likes (
+  product_id uuid not null references public.products(id) on delete cascade,
+  ip_hash    text not null,
+  created_at timestamptz not null default now(),
+  primary key (product_id, ip_hash)
+);
+create index if not exists product_likes_product_idx on public.product_likes (product_id);
+
+-- increment_product_view: +1 all-time views.
+create or replace function public.increment_product_view(p_product_id uuid)
+returns table (view_count integer)
+language plpgsql as $$
+begin
+  return query
+  update public.products s set view_count = s.view_count + 1
+  where s.id = p_product_id
+  returning s.view_count;
+end; $$;
+
+-- toggle_product_like: idempotent per IP; keeps the total-views > total-likes
+-- invariant by lifting synthetic views if a new like would otherwise catch up.
+create or replace function public.toggle_product_like(p_product_id uuid, p_ip_hash text)
+returns table (like_count integer, liked boolean)
+language plpgsql as $$
+declare
+  v_rows  int;
+  v_liked boolean;
+  v_delta int;
+begin
+  if exists (select 1 from public.product_likes where product_id = p_product_id and ip_hash = p_ip_hash) then
+    delete from public.product_likes where product_id = p_product_id and ip_hash = p_ip_hash;
+    get diagnostics v_rows = row_count;
+    v_liked := false;
+  else
+    insert into public.product_likes (product_id, ip_hash) values (p_product_id, p_ip_hash) on conflict do nothing;
+    get diagnostics v_rows = row_count;
+    v_liked := true;
+  end if;
+  v_delta := case when v_rows = 0 then 0 when v_liked then 1 else -1 end;
+
+  update public.products s set
+    like_count           = greatest(0, s.like_count + v_delta),
+    -- keep total views strictly above total likes after this like
+    synthetic_view_count = s.synthetic_view_count + greatest(0,
+      (s.like_count + s.synthetic_like_count + v_delta) - (s.view_count + s.synthetic_view_count) + 1)
+  where s.id = p_product_id;
+
+  return query
+  select s.like_count, v_liked from public.products s where s.id = p_product_id;
+end; $$;
+
+-- Retailer stores in/near Myeongdong — the "where to buy" map points. A product
+-- links to its retailer; the detail page shows that retailer's stores.
+create table if not exists public.retail_stores (
+  id         uuid primary key default gen_random_uuid(),
+  retailer   text not null,                           -- 'olive_young' | 'daiso'
+  name_ko    text not null,
+  name_ja    text,
+  lat        double precision,
+  lng        double precision,
+  address    text,
+  created_at timestamptz not null default now()
+);
+create index if not exists retail_stores_retailer_idx on public.retail_stores (retailer);
