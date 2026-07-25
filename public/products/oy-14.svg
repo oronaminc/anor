@@ -1,7 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
-  <rect width="800" height="800" fill="#eef7f0"/>
-  <rect width="800" height="12" fill="#00A54F"/>
-  <circle cx="400" cy="360" r="230" fill="#ffffff" opacity="0.55"/>
-  <text x="400" y="380" font-size="300" text-anchor="middle" dominant-baseline="central">💄</text>
-  <text x="400" y="660" font-size="46" font-weight="800" fill="#00A54F" text-anchor="middle" font-family="sans-serif">롬앤</text>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eefaf2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.5">
+      <stop offset="0" stop-color="#37c98a" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#37c98a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pkg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#f2f3f4"/>
+    </linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#0b1f14" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <rect width="800" height="800" fill="url(#glow)"/>
+  <circle cx="400" cy="352" r="196" fill="url(#pkg)" filter="url(#sh)"/>
+  <path d="M232 300a168 168 0 0 1 336 0z" fill="#ffffff" opacity="0.5"/>
+  <text x="400" y="372" font-size="196" text-anchor="middle" dominant-baseline="central">💄</text>
+  <rect x="300" y="612" width="200" height="6" rx="3" fill="#00A54F"/>
+  <text x="400" y="676" font-size="40" font-weight="800" letter-spacing="1" fill="#00A54F" text-anchor="middle" font-family="'Helvetica Neue',Arial,sans-serif">롬앤</text>
 </svg>
