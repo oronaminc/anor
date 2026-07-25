@@ -13,7 +13,8 @@
     "trending": "트렌딩",
     "search": "검색",
     "beauty": "올영",
-    "daiso": "다이소"
+    "daiso": "다이소",
+    "food": "길거리"
   },
   "home": {
     "heroEyebrow": "서울 · 명동",
@@ -62,8 +63,10 @@
   },
   "trending": {
     "title": "트렌딩",
-    "subtitle": "지금 명동에서 가장 인기 있는 길거리 가게",
-    "thisWeek": "이번 주"
+    "subtitle": "지금 명동에서 뜨는 길거리·올영·다이소 인기템 한눈에",
+    "thisWeek": "이번 주",
+    "seeAll": "전체 보기",
+    "sectionFood": "길거리 음식"
   },
   "map": {
     "title": "명동 음식 지도",

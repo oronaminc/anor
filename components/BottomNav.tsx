@@ -4,15 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { Home, Map, Search, Sparkles, ShoppingBag } from "lucide-react";
+import { UtensilsCrossed, Search, Sparkles, ShoppingBag, Flame } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { TrendingFlame } from "@/components/TrendingFlame";
 
 const ITEMS = [
-  { href: "/", key: "home", icon: Home },
+  { href: "/", key: "food", icon: UtensilsCrossed },
   { href: "/beauty", key: "beauty", icon: Sparkles },
   { href: "/daiso", key: "daiso", icon: ShoppingBag },
-  { href: "/map", key: "map", icon: Map },
+  { href: "/trending", key: "trending", icon: Flame },
   { href: "/search", key: "search", icon: Search },
 ] as const;
 
@@ -55,7 +56,11 @@ export function BottomNav() {
                       : "text-muted-foreground",
                   )}
                 >
-                  <Icon className="size-5" />
+                  {item.key === "trending" ? (
+                    <TrendingFlame interactive={false} className="size-5" />
+                  ) : (
+                    <Icon className="size-5" />
+                  )}
                 </span>
                 <span
                   className={cn(

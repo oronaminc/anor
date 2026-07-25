@@ -13,7 +13,8 @@
     "trending": "トレンド",
     "search": "検索",
     "beauty": "オリヤン",
-    "daiso": "ダイソー"
+    "daiso": "ダイソー",
+    "food": "屋台"
   },
   "home": {
     "heroEyebrow": "ソウル · 明洞",
@@ -62,8 +63,10 @@
   },
   "trending": {
     "title": "トレンド",
-    "subtitle": "いま明洞でいちばん人気の食べ歩きグルメ",
-    "thisWeek": "今週"
+    "subtitle": "いま明洞で話題の屋台・オリヤン・ダイソー人気アイテムをまとめてチェック",
+    "thisWeek": "今週",
+    "seeAll": "すべて見る",
+    "sectionFood": "屋台グルメ"
   },
   "map": {
     "title": "明洞グルメマップ",
