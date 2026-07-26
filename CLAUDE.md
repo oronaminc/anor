@@ -2,12 +2,19 @@
 
 Guidance for Claude Code (and humans) working in this repo.
 
+**This file = what the system is and which rules must hold.**
+For step-by-step recipes (run it, screenshot it, verify it, push it, manage
+content) see [`SKILL.md`](SKILL.md). Deployment/env setup: [`DEPLOY.md`](DEPLOY.md).
+Newcomer overview: [`README.md`](README.md).
+
 ## What this is
 
 A mobile-first web app for discovering Myeongdong (Seoul), aimed at Japanese
-women tourists (live at **hellomyeongdong.com**). Three content pillars:
-**street food** stalls, **Olive Young** K-beauty, and **Daiso** goods — each
-with a trending/ranking feed, search, and a Google Map of locations.
+women tourists — **헬로 명동 / ハロー明洞**, live at **hellomyeongdong.com**.
+Three content pillars: **street food** stalls, **Olive Young** K-beauty, and
+**Daiso** goods — each with a trending/ranking feed, one unified search, and a
+Google Map of locations. The brand copy (`common.appName`/`tagline`/
+`description`) must stay pillar-neutral: it names the whole guide, not food.
 **Japanese is the default locale**; Korean is the only other UI language.
 
 ## Stack
@@ -58,24 +65,19 @@ those as a deliberate, guarded one-off and call it out explicitly.
 Node 22 in CI. Playwright e2e `webServer` runs `build && start`; locally it
 reuses an already-running server (`reuseExistingServer` when not CI).
 
-## Running / screenshots without a backend
+## Demo fallback — why the app runs with zero config
 
 `lib/queries.ts` is resilient: when `DATABASE_URL` is **absent** (or
 `NEXT_PUBLIC_DEMO_MODE=1`), public pages render the built-in sample dataset
 (`lib/demo-data.ts`, thumbnails in `public/demo/*.svg`). So `npm run dev` works
-with **zero config** — no `.env.local` needed for UI work. With `DATABASE_URL`
-configured it always uses the real DB. The map shows a "no API key" placeholder
-locally; it renders normally when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set.
+with **no `.env.local`** for UI work. With `DATABASE_URL` configured it always
+uses the real DB. The map shows a "no API key" placeholder locally; it renders
+normally when `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set.
 
-**Run with a real backend (Neon + R2).** Copy `.env.local.example` →
-`.env.local` and set at least `DATABASE_URL` (Neon connection string),
-`ADMIN_PASSWORD` + `SESSION_SECRET` (admin login), and `IP_HASH_SALT`. Apply the
-schema once — `psql "$DATABASE_URL" -f db/schema.sql` (then `db/seed.sql` for
-sample rows). `R2_*` enables image upload; without it the admin form falls back
-to pasting an image URL. Full var list + deploy steps: `.env.local.example` and
-`DEPLOY.md`.
+Keep this property when adding queries: guard with `hasDb()` (`lib/env.ts`) and
+fall back to demo data, or UI work breaks for anyone without a database.
 
-To screenshot a page headlessly (mobile viewport), see the recipe in `SKILL.md`.
+→ Running it for real, screenshots: `SKILL.md` §1–§2. Env vars: `DEPLOY.md`.
 
 ## Layout
 
@@ -88,7 +90,7 @@ app/
     beauty/  daiso/             # Olive Young / Daiso rankings (+ product search)
     product/[id]/  p/[code]/    # product detail + short link
     trending/                   # UNIFIED hub: 길거리 + 올영 + 다이소 carousels
-    map/  search/               # street-food map + search
+    map/  search/               # street-food map + UNIFIED 3-pillar search
   (admin)/admin/
     page.tsx  shops/…           # street-food CRUD
     products/…                  # Olive Young / Daiso CRUD
@@ -102,6 +104,7 @@ components/
   TrendCarousel.tsx             # one trending strip (used ×3 on /trending)
   RetailRankingPage / RetailRankingView  # /beauty + /daiso (search + chips + list)
   ProductViewCount / ProductLikeButton / RetailerBadge  # retail (mirror shop ones)
+  ProductListItem.tsx           # product row: ranking (rank) + search (highlight)
   GoogleMap MapEmbed MapExplorer SearchView SiteHeader BottomNav LikeButton ShareButton
   PayPayBadge CertifiedBadge TrendingFlame HighlightText
   theme/                        # ThemeProvider, ThemeScript, theme.ts
@@ -111,6 +114,7 @@ lib/
   queries.ts (shops)  products.ts (retail)  retailers.ts (retailer meta+taxonomy)
   demo-data.ts  products-demo.ts  sort.ts  i18n-food.ts  counts.ts
   maps.ts utils.ts types.ts env.ts db.ts (lazy getSql())  search.ts  session.ts
+  product-search.ts             # pure ko+ja product matcher (search + rankings)
   auth.ts storage.ts ip.ts rate-limit.ts request-guard.ts  # server-only
 messages/                       # ja (default), ko
 db/                             # schema.sql + seed.sql (Neon Postgres)
@@ -141,27 +145,26 @@ tests/                          # unit/ (vitest), e2e/ (playwright)
   (`ShopViewCount` via `POST /view`, `LikeButton` via `GET …/like`). Consistency
   guarded by `tests/e2e/counts.spec.ts`; capacity by `npm run stress`
   (`scripts/stress.mjs`, ~100 concurrent reads at 100%/p95≈1s). See `SKILL.md` §6.
-- **Content / media via CSV + R2 (see `SKILL.md` §7)**: shops/foods/photos are
-  managed from gitignored CSVs (`npm run data:export` / `data:sync`, `scripts/
-  csv.mjs` writes a UTF-8 BOM so Excel keeps Korean/JA) + Cloudflare R2. The
-  `districts` table (`data/districts.csv`, `name,lat,lng`) is the **location
-  master**: a shop just stores a `district` code (e.g. `52-A`, free text) and the
-  sync/admin fill its lat/lng from it. Photos upload to a stable R2 key
-  `foods/<slug>.<ext>` (`npm run data:image`), so replacing a file in the R2
-  dashboard updates the app with no DB change; DB stores only the URL. A sync
-  never touches counts. Per-shop `district` + `pay_pay` (PayPay badge,
-  `components/PayPayBadge`; LINE Pay merged into PayPay in 2025) columns.
-  **Categories** (`shops.categories text[]`,
-  ≈20 fine codes in `lib/categories.ts` (each holds ≤10 shops), separate from the
-  specific menu foods) drive the map + home-feed filters — split finely so no
-  category is unwieldy on the map
-  (the home feed also lazy-loads 24 at a time with a back-to-top button). Assign
-  them via the admin form checkboxes, the CSV `categories` column (`|`-joined), or
-  bulk from foods with `scripts/_categorize.mjs`. `/map` filters by category
-  **client-side** (no extra Maps loads); to control Maps cost the home map is lazy (`LazyGoogleMap`),
-  detail uses the free **Maps Embed API** (`MapEmbed`), only `/map` is the billed
-  Dynamic map. Raster photos animate via `.animate-photo` (CSS Ken-Burns);
-  animated webp/SVG keep their own motion (served `unoptimized`).
+- **Content / media model** — the *rules*; the commands are in `SKILL.md` §7.
+  Shops/foods/photos are managed from **gitignored CSVs + Cloudflare R2**, never
+  by hand-editing the DB.
+  - **`districts` is the location master.** A shop stores only a `district` code
+    (e.g. `52-A`, free text) and **no coordinates**; lat/lng resolve by JOIN at
+    read time. Move a zone once → every shop in it moves.
+  - **R2 keys are stable** (`foods/<slug>.<ext>`), so replacing a file in the
+    Cloudflare dashboard updates the app with **no DB change**. The DB stores
+    only the URL. **A sync never touches counts.**
+  - **Categories** (`shops.categories text[]`, ≈20 fine codes in
+    `lib/categories.ts`, each holding ≤10 shops) are separate from the specific
+    menu foods and drive the map + home-feed filters. Split finely so no category
+    is unwieldy on the map. The home feed lazy-loads 24 at a time.
+  - **Maps cost is deliberate**: `/map` filters client-side (no extra Maps
+    loads), the home map is lazy (`LazyGoogleMap`), detail uses the free **Maps
+    Embed API** (`MapEmbed`), and **only `/map` uses the billed Dynamic map.**
+    Don't add a Dynamic map elsewhere without meaning to.
+  - Per-shop `pay_pay` drives the PayPay badge (`components/PayPayBadge`; LINE
+    Pay merged into PayPay in 2025). Raster photos animate via `.animate-photo`
+    (CSS Ken-Burns); animated webp/SVG keep their own motion (`unoptimized`).
 - **Data access**: `lib/db.ts` exposes `getSql()` (lazy Neon client). Query with
   tagged templates (`await getSql()\`SELECT ... ${id}\``) and call the SQL
   functions directly (`SELECT * FROM toggle_shop_like(${id}, ${ipHash})`). Always
@@ -207,11 +210,18 @@ than generalizing `shops`):
   `lib/products-demo.ts`). Localization reuses `lib/i18n-food.ts`
   (`localizedName`/`localizedPrice` etc — ja shows ¥ at ₩÷10, same rule).
 - **Public**: `/beauty` + `/daiso` (`RetailRankingPage` → `RetailRankingView`:
-  a per-page product **search** over name ja/ko/en + brand + category label — so
-  a Japanese OR Korean query matches — plus category chips + view-ranked list),
+  a per-page product **search** (`filterProducts`, see "Search is unified" below)
+  plus category chips + view-ranked list),
   `/product/[id]` detail (lists ALL of the retailer's Myeongdong stores — every
   product is sold at every store), `/p/[code]` short link, view/like APIs under
   `/api/products/[id]/*` (mirror the shop ones).
+- **Search is unified**: `/search` (`SearchView`) covers ALL three pillars with
+  scope chips (전체 / 길거리 음식 / 올리브영 / 다이소). Every pillar is filtered on
+  each keystroke so the chips can show live hit counts; 전체 groups results into
+  per-pillar sections. Product matching lives in `lib/product-search.ts`
+  (`filterProducts` — name ko/ja/en + brand + the category label in BOTH
+  languages) and is shared with the ranking pages, so both agree on a "match".
+  Shops still use `filterShops` (`lib/sort.ts`). All filtering is client-side.
 - **Nav / trending**: bottom nav = 길거리(홈)·올영·다이소·트렌딩·검색 — **no map
   tab** (`/map` is reached from detail pages). `/trending` is a **unified hub**:
   three `TrendCarousel` strips (길거리 음식 + 올리브영 + 다이소), each
@@ -276,9 +286,13 @@ use the hook. Add every key to **both** `messages/ja.json` AND `messages/ko.json
 machine translation.** Verify the term is actually idiomatic in each language.
 (e.g. official vendor certification is Japanese `認定`/`公認`, NOT `認証`, which
 means technical/login authentication.) When the owner asks for a new/changed
-string, produce the natural ja + ko wording, not a direct gloss. Food
-names/descriptions are localized via `lib/i18n-food.ts` (`localizedName`,
-`secondaryName` show the ja↔ko pair, `localizedDescription`).
+string, produce the natural ja + ko wording, not a direct gloss. A missing key
+breaks that language outright.
+
+**Brand names stay untranslated**: PayPay, Olive Young (nav abbrev オリヤン /
+올영), Daiso (ダイソー / 다이소). Food names/descriptions are localized via
+`lib/i18n-food.ts` (`localizedName`, `secondaryName` shows the ja↔ko pair,
+`localizedDescription`); `localizedPrice` shows ¥ at ₩÷10 for ja.
 
 ## Git / pushing
 

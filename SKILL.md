@@ -1,6 +1,8 @@
 # SKILL.md
 
-Repeatable recipes for working on this repo (read alongside `CLAUDE.md`).
+**Repeatable recipes — how to do things.** The architecture, invariants and
+rules they rest on live in [`CLAUDE.md`](CLAUDE.md); this file does not repeat
+them. Deployment/env: [`DEPLOY.md`](DEPLOY.md).
 
 ## 1. Run the app locally (zero config)
 
@@ -100,18 +102,28 @@ The home e2e asserts a hero heading and a `전체 메뉴` heading (an `sr-only` 
 in `components/ShopExplorer.tsx`) — keep it (or update the test) if you
 restructure the feed.
 
+**Korean assertions need the cookie, not the browser locale.** The app never
+sniffs `Accept-Language` — locale is the `NEXT_LOCALE` cookie only (ja default),
+so `test.use({ locale: "ko-KR" })` alone leaves the page in Japanese. Set the
+cookie in a `beforeEach` (see `tests/e2e/home.spec.ts`).
+
+Two local gotchas when running e2e by hand: `next start` still loads
+`.env.local`, so the write APIs hit the **real DB** unless you pass an empty
+`DATABASE_URL=`; and if the port is already taken the new server dies with
+`EADDRINUSE` while the tests silently run against the **old** one — check the
+server log says `Ready` before trusting a run.
+
 ## 5. Push / open a PR
 
-`origin` already points at `ssh://git@ssh.github.com:443/oronaminc/anor.git`
-(GitHub SSH over 443 — plain SSH/HTTPS are blocked here), so:
+Remote quirks (SSH over 443, the port-22 fallback, no `gh` CLI) are explained in
+`CLAUDE.md` § "Git / pushing" — read that first if a push stalls. Normal case:
 
 ```bash
 git push                      # works for the current branch
 git push -u origin <branch>   # new branch
 ```
 
-There is **no `gh` CLI / token** in this environment, so PRs/MRs cannot be
-created from the shell. Either:
+PRs can't be created from the shell (no `gh` / token). Either:
 
 - open one in the GitHub UI:
   `https://github.com/oronaminc/anor/compare/main...<branch>?expand=1`, or
@@ -124,48 +136,30 @@ created from the shell. Either:
 
 End commit messages with the `Co-Authored-By` trailer used across the history.
 
-## 6. Engagement counts (real + synthetic) — invariants & the bugs we fixed
+## 6. Engagement counts — operating & verifying them
 
-The number shown for a shop is **`view_count + synthetic_view_count`** (and the
-like equivalent) — two **stored** integers summed by `lib/counts.ts`
-(`totalViews` / `totalLikes`). `queries.ts` overwrites `view_count`/`like_count`
-with these totals so every surface just reads `shop.view_count`. There is **no
-compute-on-read growth, no live ticker** — the displayed value only moves when
-the DB moves.
+The count model, its invariant (**total views ALWAYS > total likes**) and the
+two bugs never to reintroduce are documented in `CLAUDE.md` § "Engagement,
+analytics & admin security". **Read that before touching count code.** Here are
+the operational bits:
 
-- **Real**: `view_count` (a real view → `increment_shop_view`), `like_count`
-  (a human like → `toggle_shop_like`, deduped one-per-IP via `shop_likes`).
-- **Synthetic** (`synthetic_view_count` / `synthetic_like_count`): admin "+1K"
-  buttons, the Telegram `/boost`, and the 5-min growth cron — all persisted.
-- **Cron**: GitHub Actions (`.github/workflows/grow.yml`, every ~5 min) →
-  `POST /api/cron/grow` (header `x-cron-secret: $CRON_SECRET`) →
-  `applyGrowthTick` adds a small random amount to synthetic. Set `CRON_SECRET`
-  in **both** Vercel env and the GitHub repo secret.
+**Growth cron.** GitHub Actions (`.github/workflows/grow.yml`, every ~5 min) →
+`POST /api/cron/grow` (header `x-cron-secret: $CRON_SECRET`) → `applyGrowthTick`
+adds a small random amount to the synthetic columns. Set `CRON_SECRET` in
+**both** the Vercel env and the GitHub repo secret — a mismatch silently stops
+growth (the endpoint just 401s).
 
-**Invariant — total views are ALWAYS > total likes.** Enforced atomically in SQL
-inside `applyBoost` (like boosts lift synthetic views) and `applyGrowthTick`
-(the like bump is capped). `lib/counts.ts` `cappedLikeInc` / `likeBoostViewLift`
-mirror that math and are fuzz-tested (`tests/unit/counts.test.ts`, 2000× each).
+**Verify a change to counts:**
 
-**Bugs fixed (do not reintroduce):**
-1. *Compute-on-read organic growth* made the number change every render →
-   home ≠ detail, like count drift/cancel. **Fix:** persist everything; display
-   the stored sum. Deleted `lib/growth.ts`, the live ticker, the speed slider.
-2. *Stale client / Next.js router cache* showed an old detail count (e.g. 9,871
-   when the DB said 5,350) on home→detail navigation. **Fix, layered:** pages are
-   `force-dynamic`; `next.config.mjs` sets `experimental.staleTimes
-   { dynamic: 0, static: 0 }`; shop links use `prefetch={false}`; and the detail
-   counts **reconcile to a fresh fetch on mount** — `ShopViewCount` uses the
-   `POST /view` response, `LikeButton` does `GET /api/shops/[id]/like`
-   (returns the fresh total + this-IP `liked`). So a stale render self-corrects.
-3. *Likes could exceed views* — see the invariant above.
+```bash
+npx vitest run tests/unit/counts.test.ts        # invariants, fuzzed 2000× each
+npx playwright test tests/e2e/counts.spec.ts    # home card ↔ detail consistency
+npm run stress -- https://anor-sable.vercel.app /   # read-only load test
+```
 
-**Tests / tools for this:** `tests/unit/counts.test.ts` (invariants),
-`tests/e2e/counts.spec.ts` (home card ↔ detail consistency via a real click;
-every card keeps views > likes), and `npm run stress` (`scripts/stress.mjs`,
-read-only load test — ramps concurrency, reports success%/latency and the
-healthy concurrency ceiling). Baseline: ~100 concurrent reads at 100% success,
-p95 ≈ 1 s (Vercel auto-scales; Neon connections are the real ceiling).
+`stress` (`scripts/stress.mjs`) ramps concurrency and reports success% / latency
+/ the healthy ceiling. Baseline: **~100 concurrent reads at 100% success,
+p95 ≈ 1 s** (Vercel auto-scales; Neon connections are the real ceiling).
 
 ## 7. Content management — CSV + R2 (`data/` is gitignored, never pushed)
 
@@ -181,50 +175,40 @@ npm run data:image -- "계란빵" data/images/gyeranppang.jpg  # one photo -> R2
 npm run r2:test       # R2 smoke test (upload / public GET / delete)
 ```
 
-- **`districts.csv` is the location master** (`name,lat,lng`). Put just a
-  `district` code (e.g. `52-A`) on a shop in `shops.csv`; the shop stores **no**
-  coordinates — `getShops`/`getShopById` resolve lat/lng from the `districts`
-  table by **JOIN at read time** (`COALESCE` to the shop's own lat/lng only as a
-  fallback). So change a zone's coords once and every shop in it moves.
-  `district` is free text, so codes or names both work.
-- **Photos live in R2**; the DB stores only the URL. `data:image`/`data:sync`
-  upload to a stable, readable key **`foods/<slug>.<ext>`** so the bucket's
-  `foods/` folder is browsable in the Cloudflare R2 dashboard and **replacing a
-  photo in place (same key) updates the app with no DB/CSV change**. `data/images/`
-  is just upload staging (deletable after). A sync **never touches counts**.
-- **One image per item — old ones are cleaned up.** The admin upload
-  (`lib/storage.ts`) uses a random key, so replacing a shop's photo — or deleting
-  a shop — removes the previous R2 object once nothing else points at it
-  (`deleteFromR2` + `deleteImageIfUnused` in the admin actions; `data:image`
-  cleans up its replaced image too). Shared images and non-R2 URLs (`/demo/*`) are
-  never touched. To sweep already-orphaned objects across the whole bucket:
-  `npm run r2:prune` (dry run — lists them), then `npm run r2:prune -- --yes`.
-- Images: animated webp / SVG keep animating (served `unoptimized` when the URL
-  is `/demo/*` or ends `.svg`); raster photos get a CSS Ken-Burns zoom
-  (`.animate-photo` in `app/globals.css`, honors reduced-motion). The demo SVGs
-  show Japanese food names.
-- Per-shop `district` + `pay_pay` (bool, PayPay badge) columns flow through
-  types, demo data, CSV and the admin form. The `/map` page filters shops by food
-  client-side (no extra Maps API loads). Maps cost: home map is lazy-loaded
-  (`LazyGoogleMap`, IntersectionObserver), shop detail uses the free **Maps Embed
-  API** (`MapEmbed`), only `/map` uses the billed Dynamic JS map.
+(The model behind this — districts as location master, stable R2 keys, sync never
+touching counts — is in `CLAUDE.md` § "Content / media model".)
 
-## 8. Localization — Japanese (default) + Korean, done properly
+- **Moving a whole zone:** edit that row's `lat,lng` in `districts.csv` and
+  `data:sync`. Every shop with that `district` code moves — you never edit shops.
+  `district` is free text, so codes (`52-A`) or names both work.
+- **Replacing one photo:** upload to the same key and the app picks it up with no
+  DB/CSV change — either `npm run data:image -- "<name>" <file>` or drop the file
+  in the R2 dashboard's `foods/` folder. `data/images/` is only upload staging,
+  deletable afterwards.
+- **Orphaned R2 objects.** The admin upload (`lib/storage.ts`) uses a random key,
+  so replacing/deleting a shop removes the old object once nothing points at it
+  (`deleteFromR2` + `deleteImageIfUnused`). Shared images and non-R2 URLs
+  (`/demo/*`) are never touched. To sweep the whole bucket:
+  ```bash
+  npm run r2:prune            # dry run — lists orphans
+  npm run r2:prune -- --yes   # actually delete
+  ```
+- **Assigning categories** — admin form checkboxes, the CSV `categories` column
+  (`|`-joined), or bulk from foods with `node scripts/_categorize.mjs`.
+- Demo SVGs show Japanese food names; keep that if you add more.
 
-The UI ships **ja (default) + ko only** (`i18n/config.ts`). When adding or
-changing any user-facing string:
+## 8. Adding or changing a user-facing string
 
-- Put the key in **both** `messages/ja.json` AND `messages/ko.json` — a missing
-  key breaks that language. Never hardcode a label in a component; use
-  `getTranslations` / `useTranslations` (a label-only component can be
-  `"use client"` just for the hook, e.g. `components/CertifiedBadge.tsx`).
-- Write **natural, idiomatic** wording for BOTH languages — not a literal /
-  machine translation, and not the same word for both. Verify the term is what
-  people actually say in that language. Example that was wrong: official vendor
-  certification → JA `認定`/`公認`, **not** `認証` (which means login/technical
-  authentication). Brand names (PayPay, Olive Young, Daiso) stay untranslated
-  (Olive Young → nav abbrev オリヤン/올영; Daiso → ダイソー/다이소).
-- Locale is a `NEXT_LOCALE` cookie; the picker reloads the page to apply it.
+The translation rules (both files, natural wording not a gloss, brand names
+untranslated, the `認証`/`認定` mistake) are in `CLAUDE.md` § "i18n". The
+mechanical steps:
+
+1. Add the key to **both** `messages/ja.json` AND `messages/ko.json`.
+2. Read it with `getTranslations(ns)` (server) or `useTranslations(ns)` (client).
+   A label-only component inside a server page can be `"use client"` just for the
+   hook — e.g. `components/CertifiedBadge.tsx`.
+3. Check both locales in the browser: the switcher sets a `NEXT_LOCALE` cookie
+   and reloads.
 
 ## 9. Retail pillar — Olive Young + Daiso (products)
 
