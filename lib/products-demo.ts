@@ -1112,5 +1112,50 @@ export const DEMO_RETAIL_STORES: RetailStore[] = [
     "lat": 37.5626,
     "lng": 126.9836,
     "address": "서울 중구 명동길 43"
+  },
+  {
+    "id": "demo-store-5",
+    "retailer": "olive_young",
+    "name_ko": "올리브영 센트럴 명동타운점",
+    "name_ja": "オリーブヤングセントラル明洞タウン店",
+    "lat": 37.5636,
+    "lng": 126.9843,
+    "address": "서울특별시 중구 명동8길 27 M플라자 B1~3층"
+  },
+  {
+    "id": "demo-store-6",
+    "retailer": "olive_young",
+    "name_ko": "올리브영 명동타임워크점",
+    "name_ja": "オリーブヤング明洞タイムウォーク店",
+    "lat": 37.5645,
+    "lng": 126.982,
+    "address": "서울특별시 중구 남대문로 78 1층 108~109호"
+  },
+  {
+    "id": "demo-store-7",
+    "retailer": "olive_young",
+    "name_ko": "올리브영 명동대로점",
+    "name_ja": "オリーブヤング明洞大路店",
+    "lat": 37.5607,
+    "lng": 126.9844,
+    "address": "서울특별시 중구 퇴계로 120 1층"
+  },
+  {
+    "id": "demo-store-8",
+    "retailer": "olive_young",
+    "name_ko": "올리브영 명동거리점",
+    "name_ja": "オリーブヤング明洞通り店",
+    "lat": 37.5628,
+    "lng": 126.9849,
+    "address": "서울특별시 중구 명동8나길 9 (충무로1가)"
+  },
+  {
+    "id": "demo-store-9",
+    "retailer": "olive_young",
+    "name_ko": "올리브영 명동2가점",
+    "name_ja": "オリーブヤング明洞2街店",
+    "lat": 37.5639,
+    "lng": 126.9834,
+    "address": "서울특별시 중구 명동2가 (명동 메인거리)"
   }
 ];

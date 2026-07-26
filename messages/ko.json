@@ -105,6 +105,10 @@
     "all": "전체",
     "empty": "아직 등록된 상품이 없어요.",
     "storesTitle": "명동 매장 위치",
-    "buyAt": "{retailer} 구매 매장"
+    "buyAt": "{retailer} 구매 매장",
+    "searchPlaceholder": "{retailer} 상품 검색",
+    "searchEmpty": "검색 결과가 없어요",
+    "resultCount": "{count}개",
+    "availableAllStores": "명동 전 매장에서 구매 가능"
   }
 }

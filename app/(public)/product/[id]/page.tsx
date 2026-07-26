@@ -142,6 +142,7 @@ export default async function ProductDetailPage({
               <MapPin className="size-5 text-primary" />
               {tr("buyAt", { retailer: locale === "ja" ? meta?.ja ?? "" : meta?.ko ?? "" })}
             </h2>
+            <p className="text-sm text-muted-foreground">{tr("availableAllStores")}</p>
             <GoogleMap
               shops={storePoints}
               height="220px"

@@ -105,6 +105,10 @@
     "all": "すべて",
     "empty": "まだ商品がありません。",
     "storesTitle": "明洞の店舗",
-    "buyAt": "{retailer}で買える店舗"
+    "buyAt": "{retailer}で買える店舗",
+    "searchPlaceholder": "{retailer}の商品を検索",
+    "searchEmpty": "検索結果がありません",
+    "resultCount": "{count}件",
+    "availableAllStores": "明洞の全店舗で購入できます"
   }
 }

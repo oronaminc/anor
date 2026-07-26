@@ -4,11 +4,12 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Eye } from "lucide-react";
+import { Eye, Search, X } from "lucide-react";
 
 import type { Product, RetailStore } from "@/lib/types";
 import {
   RETAIL_CATEGORIES,
+  retailCategoryLabel,
   retailerMeta,
   type Retailer,
 } from "@/lib/retailers";
@@ -37,17 +38,38 @@ export function RetailRankingView({
   const locale = useLocale();
   const t = useTranslations("retail");
   const [cat, setCat] = useState<string | null>(null);
+  const [q, setQ] = useState("");
   const meta = retailerMeta(retailer);
+  const retailerLabel = meta ? (locale === "ja" ? meta.ja : meta.ko) : "";
 
   const cats = useMemo(() => {
     const present = new Set(products.map((p) => p.category).filter(Boolean));
     return RETAIL_CATEGORIES[retailer].filter((c) => present.has(c.code));
   }, [products, retailer]);
 
+  // Category chip + free-text search (matches both languages: name_ko / name_ja /
+  // name_en / brand / category label — so a JP user typing Japanese matches too).
   const ranked = useMemo(() => {
-    const list = cat ? products.filter((p) => p.category === cat) : products;
+    const query = q.trim().toLowerCase();
+    let list = cat ? products.filter((p) => p.category === cat) : products;
+    if (query) {
+      list = list.filter((p) => {
+        const hay = [
+          p.name_ko,
+          p.name_ja,
+          p.name_en,
+          p.brand,
+          retailCategoryLabel(retailer, p.category, "ko"),
+          retailCategoryLabel(retailer, p.category, "ja"),
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return hay.includes(query);
+      });
+    }
     return list.map((p, i) => ({ rank: i + 1, product: p }));
-  }, [products, cat]);
+  }, [products, cat, q, retailer]);
 
   const mapPoints = useMemo(
     () =>
@@ -64,7 +86,31 @@ export function RetailRankingView({
   );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
+      {/* Search */}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="search"
+          inputMode="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={t("searchPlaceholder", { retailer: retailerLabel })}
+          aria-label={t("searchPlaceholder", { retailer: retailerLabel })}
+          className="w-full rounded-full border border-border bg-card py-2.5 pl-9 pr-9 text-sm outline-none transition-colors focus:border-foreground/40 [&::-webkit-search-cancel-button]:hidden"
+        />
+        {q && (
+          <button
+            type="button"
+            onClick={() => setQ("")}
+            aria-label="clear"
+            className="absolute right-2.5 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+      </div>
+
       {/* Category filter chips */}
       {cats.length > 0 && (
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar">
@@ -87,7 +133,7 @@ export function RetailRankingView({
       {/* Ranked product list */}
       {ranked.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-          {t("empty")}
+          {q.trim() ? t("searchEmpty") : t("empty")}
         </p>
       ) : (
         <ol className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card/70">
