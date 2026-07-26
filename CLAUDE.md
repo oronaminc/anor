@@ -4,15 +4,17 @@ Guidance for Claude Code (and humans) working in this repo.
 
 ## What this is
 
-A mobile-first web app for discovering Myeongdong (Seoul) street food:
-trending feed, rankings, search, and a Google Map of stalls. Korean is the
-default locale; EN / JA / ES are also supported.
+A mobile-first web app for discovering Myeongdong (Seoul), aimed at Japanese
+women tourists (live at **hellomyeongdong.com**). Three content pillars:
+**street food** stalls, **Olive Young** K-beauty, and **Daiso** goods — each
+with a trending/ranking feed, search, and a Google Map of locations.
+**Japanese is the default locale**; Korean is the only other UI language.
 
 ## Stack
 
 - **Next.js (App Router)** + React + TypeScript
 - **Tailwind CSS** with CSS-variable design tokens (`app/globals.css`)
-- **next-intl** for i18n (`messages/{ko,en,ja,es}.json`, `middleware.ts`)
+- **next-intl** for i18n (`messages/{ja,ko}.json`, `middleware.ts`; ja default)
 - **Neon Postgres** (`@neondatabase/serverless`, raw SQL in `lib/db.ts`) for data
 - **Admin auth**: password + signed HttpOnly cookie (Web Crypto HMAC in
   `lib/session.ts` / `lib/auth.ts`) — no external auth service
@@ -79,35 +81,42 @@ To screenshot a page headlessly (mobile viewport), see the recipe in `SKILL.md`.
 
 ```
 app/
-  layout.tsx              # root: fonts, ThemeScript, cyber-bg, providers
+  layout.tsx                    # root: fonts, ThemeScript, bg, providers
   (public)/
-    page.tsx              # HOME — Threads-style single-column feed
-    food/[id]/page.tsx    # detail
-    map/  search/  trending/
-  (admin)/admin/...       # CRUD + login + analytics (password cookie auth)
-  api/foods/[id]/view     # view-count increment
-  api/foods/[id]/like     # anonymous like toggle (IP-deduped)
-  api/search/log          # search-term collection (analytics)
-  robots.ts  sitemap.ts   # SEO; /admin + /api are disallowed/noindex
+    page.tsx                    # HOME — street-food Threads-style feed
+    shop/[id]/  s/[code]/       # street-food detail + short link
+    beauty/  daiso/             # Olive Young / Daiso rankings (+ product search)
+    product/[id]/  p/[code]/    # product detail + short link
+    trending/                   # UNIFIED hub: 길거리 + 올영 + 다이소 carousels
+    map/  search/               # street-food map + search
+  (admin)/admin/
+    page.tsx  shops/…           # street-food CRUD
+    products/…                  # Olive Young / Daiso CRUD
+    login/  analytics/          # password-cookie auth + search analytics
+  api/shops/[id]/{view,like}    # street-food count APIs
+  api/products/[id]/{view,like} # product count APIs (mirror shops)
+  api/search/log  api/cron/grow  api/telegram/webhook
+  robots.ts  sitemap.ts         # SEO; /admin + /api disallowed/noindex
 components/
-  FoodPost.tsx            # Threads-style feed row (home)
-  FoodExplorer.tsx        # the home feed (sort tabs + list of FoodPost)
-  FoodCard.tsx            # grid/carousel card (search, trending pages)
-  TrendingSection / RankingSection   # used on /trending (not home anymore)
-  GoogleMap, SearchView, SiteHeader, BottomNav, HighlightText, ViewTracker
-  LikeButton.tsx          # anonymous, optimistic, localStorage dedupe
-  theme/                  # ThemeProvider, ThemeScript, theme.ts
-  AppearancePanel / AppearanceSheet  # mode + accent + language picker
-  admin/                  # FoodForm, DeleteFoodButton, TrendingToggle
+  ShopPost / ShopExplorer / ShopCard   # street-food home feed + cards
+  TrendCarousel.tsx             # one trending strip (used ×3 on /trending)
+  RetailRankingPage / RetailRankingView  # /beauty + /daiso (search + chips + list)
+  ProductViewCount / ProductLikeButton / RetailerBadge  # retail (mirror shop ones)
+  GoogleMap MapEmbed MapExplorer SearchView SiteHeader BottomNav LikeButton ShareButton
+  PayPayBadge CertifiedBadge TrendingFlame HighlightText
+  theme/                        # ThemeProvider, ThemeScript, theme.ts
+  AppearancePanel / AppearanceSheet / LanguageSwitcher
+  admin/                        # ShopForm, ProductForm, ProductAdminControls, …
 lib/
-  queries.ts demo-data.ts sort.ts i18n-food.ts maps.ts utils.ts types.ts env.ts
-  db.ts                   # Neon sql client (lazy; getSql())
-  search.ts               # normalizeQuery (shared client/server)
-  session.ts              # Web Crypto HMAC sign/verify (edge + node)
+  queries.ts (shops)  products.ts (retail)  retailers.ts (retailer meta+taxonomy)
+  demo-data.ts  products-demo.ts  sort.ts  i18n-food.ts  counts.ts
+  maps.ts utils.ts types.ts env.ts db.ts (lazy getSql())  search.ts  session.ts
   auth.ts storage.ts ip.ts rate-limit.ts request-guard.ts  # server-only
-messages/                 # ko (default), en, ja, es
-db/                       # schema.sql + seed.sql (Neon Postgres)
-tests/                    # unit/ (vitest), e2e/ (playwright)
+messages/                       # ja (default), ko
+db/                             # schema.sql + seed.sql (Neon Postgres)
+scripts/                        # seed-products, regen-product-tiles, sync-stores,
+                                # csv, data-export/sync, db-push, stress, …
+tests/                          # unit/ (vitest), e2e/ (playwright)
 ```
 
 ## Engagement, analytics & admin security
@@ -140,8 +149,9 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
   sync/admin fill its lat/lng from it. Photos upload to a stable R2 key
   `foods/<slug>.<ext>` (`npm run data:image`), so replacing a file in the R2
   dashboard updates the app with no DB change; DB stores only the URL. A sync
-  never touches counts. Per-shop `district` + `line_pay` (LINE Pay badge,
-  `components/PayPayBadge`) columns. **Categories** (`shops.categories text[]`,
+  never touches counts. Per-shop `district` + `pay_pay` (PayPay badge,
+  `components/PayPayBadge`; LINE Pay merged into PayPay in 2025) columns.
+  **Categories** (`shops.categories text[]`,
   ≈20 fine codes in `lib/categories.ts` (each holds ≤10 shops), separate from the
   specific menu foods) drive the map + home-feed filters — split finely so no
   category is unwieldy on the map
@@ -154,11 +164,13 @@ tests/                    # unit/ (vitest), e2e/ (playwright)
   animated webp/SVG keep their own motion (served `unoptimized`).
 - **Data access**: `lib/db.ts` exposes `getSql()` (lazy Neon client). Query with
   tagged templates (`await getSql()\`SELECT ... ${id}\``) and call the SQL
-  functions directly (`SELECT * FROM toggle_like(${id}, ${ipHash})`). Always
+  functions directly (`SELECT * FROM toggle_shop_like(${id}, ${ipHash})`). Always
   guard with `hasDb()` (`lib/env.ts`) and fall back to demo data when absent.
-- **Likes** (`/api/foods/[id]/like` + `LikeButton`): no login. The hard
-  "one like per IP" guarantee is the DB UNIQUE on `food_likes (food_id,
-  ip_hash)` via the `toggle_like` function; the client also keeps a localStorage
+- **Likes** (`/api/shops/[id]/like` + `LikeButton`; products mirror this at
+  `/api/products/[id]/like`): no login. The hard "one like per IP" guarantee is
+  the DB UNIQUE on `shop_likes (shop_id, ip_hash)` via the `toggle_shop_like`
+  function (`product_likes` + `toggle_product_like` for products); the client
+  also keeps a localStorage
   flag for instant UX. Raw IPs are never stored — only `sha256(ip +
   IP_HASH_SALT)` (`lib/ip.ts`); IP comes from `cf-connecting-ip`/`x-real-ip`.
 - **Search collection** (`/api/search/log`): `SearchView` fire-and-forgets the
@@ -194,19 +206,31 @@ than generalizing `shops`):
 - **Queries**: `lib/products.ts` (server-only, demo fallback via
   `lib/products-demo.ts`). Localization reuses `lib/i18n-food.ts`
   (`localizedName`/`localizedPrice` etc — ja shows ¥ at ₩÷10, same rule).
-- **Public**: `/beauty` + `/daiso` (ranking, `RetailRankingPage` →
-  `RetailRankingView`), `/product/[id]` detail, `/p/[code]` short link, view/like
-  APIs under `/api/products/[id]/*` (mirror the shop ones). Bottom nav is now
-  홈·올영·다이소·지도·검색 (food `/trending` linked from the home hero).
+- **Public**: `/beauty` + `/daiso` (`RetailRankingPage` → `RetailRankingView`:
+  a per-page product **search** over name ja/ko/en + brand + category label — so
+  a Japanese OR Korean query matches — plus category chips + view-ranked list),
+  `/product/[id]` detail (lists ALL of the retailer's Myeongdong stores — every
+  product is sold at every store), `/p/[code]` short link, view/like APIs under
+  `/api/products/[id]/*` (mirror the shop ones).
+- **Nav / trending**: bottom nav = 길거리(홈)·올영·다이소·트렌딩·검색 — **no map
+  tab** (`/map` is reached from detail pages). `/trending` is a **unified hub**:
+  three `TrendCarousel` strips (길거리 음식 + 올리브영 + 다이소), each
+  trending-first then top-viewed. (Legacy `TrendingSection`/`RankingSection` are
+  superseded there.)
 - **Admin**: `/admin/products` (list) + new/edit (`components/admin/ProductForm`,
   `app/(admin)/admin/products/actions.ts`, controls in `ProductAdminControls`).
-- **Seed**: `scripts/seed-products.mjs` reads a research JSON
-  (`data/retail-data.json`, gitignored), writes brand-toned **SVG placeholder
-  tiles** to `public/products/*.svg`, inserts products + stores, and regenerates
-  `lib/products-demo.ts`. Real product photos are **not** rehosted (copyright);
-  swap a real photo per product via the admin form (R2), same pipeline as food.
-  Product data is real, currently-popular 2025-2026 items (several 2025 Olive
-  Young Awards winners); prices/availability are best-effort, not a live scrape.
+- **Seed / scripts** (all read `data/retail-data.json`, gitignored):
+  `scripts/seed-products.mjs` writes brand-toned **SVG placeholder tiles** to
+  `public/products/*.svg`, inserts 24 Olive Young + 24 Daiso products + the
+  stores, and regenerates `lib/products-demo.ts` (**re-inserting resets counts —
+  run once**). `scripts/regen-product-tiles.mjs` rewrites ONLY the tiles in place
+  (stable filenames → DB/counts untouched). `scripts/sync-stores.mjs` replaces
+  `retail_stores` (**8 Olive Young + 2 Daiso** Myeongdong stores) + regenerates
+  the demo store list, without touching products. Real product photos are **not**
+  rehosted (copyright) — swap one per product via the admin form (R2), same
+  pipeline as food. Product data is real, currently-popular 2025-2026 items
+  (several 2025 Olive Young Awards winners); prices/availability are best-effort,
+  not a live scrape.
 
 ## Design system — IMPORTANT
 
@@ -258,12 +282,21 @@ names/descriptions are localized via `lib/i18n-food.ts` (`localizedName`,
 
 ## Git / pushing
 
-`origin` is set to GitHub over **SSH on port 443** (`ssh://git@ssh.github.com:443/oronaminc/anor.git`)
-because plain SSH (22) and authenticated HTTPS are blocked on this machine.
-`git push` / `git fetch` work normally with that URL. There is **no `gh` CLI
-and no GitHub token** in this environment, so PRs/MRs cannot be opened
-programmatically — open them in the GitHub UI (compare link), or merge to
-`main` locally and push. End commit messages with the project's
+`origin` is `ssh://git@ssh.github.com:443/oronaminc/anor.git` — GitHub over **SSH
+on port 443**, historically the reliable path here (plain SSH:22 and authenticated
+HTTPS have both been blocked at times). **This is fluid.** If 443 stalls
+(`Connection timed out during banner exchange`), plain **SSH port 22 has worked** —
+push via the explicit URL and then sync the tracking ref:
+
+```bash
+git push ssh://git@github.com/oronaminc/anor.git main
+git update-ref refs/remotes/origin/main HEAD
+```
+
+Read-only verification always works over HTTPS:
+`git ls-remote https://github.com/oronaminc/anor.git refs/heads/main`. There is
+**no `gh` CLI and no GitHub token** — open PRs in the GitHub UI (compare link), or
+merge to `main` locally and push. End commit messages with the project's
 `Co-Authored-By` trailer.
 
 ## Conventions
@@ -273,4 +306,6 @@ programmatically — open them in the GitHub UI (compare link), or merge to
   state, framer-motion).
 - Run `npm run typecheck` and `npm run build` before shipping; keep the two
   e2e home assertions passing (hero heading + a `전체 메뉴` heading — the latter
-  is an `sr-only` heading in `FoodExplorer`).
+  is an `sr-only` heading in `ShopExplorer`).
+- Add every new user-facing string to **both** `messages/ja.json` and
+  `messages/ko.json` (ja is default) — natural translations, never a gloss.

@@ -97,7 +97,7 @@ PORT=3210 ADMIN_PASSWORD=x npx playwright test tests/e2e/admin-login.spec.ts --p
 ```
 
 The home e2e asserts a hero heading and a `전체 메뉴` heading (an `sr-only` `<h2>`
-in `components/FoodExplorer.tsx`) — keep it (or update the test) if you
+in `components/ShopExplorer.tsx`) — keep it (or update the test) if you
 restructure the feed.
 
 ## 5. Push / open a PR
@@ -203,7 +203,7 @@ npm run r2:test       # R2 smoke test (upload / public GET / delete)
   is `/demo/*` or ends `.svg`); raster photos get a CSS Ken-Burns zoom
   (`.animate-photo` in `app/globals.css`, honors reduced-motion). The demo SVGs
   show Japanese food names.
-- Per-shop `district` + `line_pay` (bool, LINE Pay badge) columns flow through
+- Per-shop `district` + `pay_pay` (bool, PayPay badge) columns flow through
   types, demo data, CSV and the admin form. The `/map` page filters shops by food
   client-side (no extra Maps API loads). Maps cost: home map is lazy-loaded
   (`LazyGoogleMap`, IntersectionObserver), shop detail uses the free **Maps Embed
@@ -222,5 +222,29 @@ changing any user-facing string:
   machine translation, and not the same word for both. Verify the term is what
   people actually say in that language. Example that was wrong: official vendor
   certification → JA `認定`/`公認`, **not** `認証` (which means login/technical
-  authentication). Brand names (LINE Pay) stay untranslated.
+  authentication). Brand names (PayPay, Olive Young, Daiso) stay untranslated
+  (Olive Young → nav abbrev オリヤン/올영; Daiso → ダイソー/다이소).
 - Locale is a `NEXT_LOCALE` cookie; the picker reloads the page to apply it.
+
+## 9. Retail pillar — Olive Young + Daiso (products)
+
+Second content axis alongside street food; architecture lives in `CLAUDE.md`
+(§ "Retail pillar"). Operational recipes:
+
+- **Replace one product's photo (real image)** — same as food: upload via the
+  admin form at `/admin/products/<id>/edit` (→ R2), or set the image URL field.
+  DB stores only the URL; no redeploy needed (pages are `force-dynamic`).
+- **Re-skin the placeholder tiles** without touching data:
+  `node scripts/regen-product-tiles.mjs` — rewrites `public/products/*.svg` at
+  their stable filenames, so DB rows, trending flags and counts are untouched.
+- **Add / edit Myeongdong stores** — edit the `stores` array in
+  `data/retail-data.json` (gitignored), then `node scripts/sync-stores.mjs`:
+  replaces `retail_stores` in the DB and regenerates `DEMO_RETAIL_STORES` in
+  `lib/products-demo.ts`. Products/counts are never touched. Every product detail
+  shows ALL of its retailer's stores (every product is sold at every store).
+- **Re-seed products** (`node scripts/seed-products.mjs`) DELETEs + re-inserts
+  the seeded rows → **resets their counts**. Run once; use the two scripts above
+  for day-to-day changes. Product engagement uses the same synthetic-count model
+  as shops (admin `+1K`, `is_trending` toggle) with the views > likes invariant.
+- **Trending / search**: `/beauty` + `/daiso` each have a product search (matches
+  ja/ko/en name + brand + category); `/trending` shows all three pillars at once.
