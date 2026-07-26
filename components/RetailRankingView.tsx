@@ -1,25 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { Eye, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 import type { Product, RetailStore } from "@/lib/types";
 import {
   RETAIL_CATEGORIES,
-  retailCategoryLabel,
   retailerMeta,
   type Retailer,
 } from "@/lib/retailers";
-import { localizedName, localizedPrice } from "@/lib/i18n-food";
-import { formatViewCount, isUnoptimizedImage, photoAnim } from "@/lib/utils";
+import { filterProducts } from "@/lib/product-search";
 import { cn } from "@/lib/utils";
-import { TrendingFlame } from "@/components/TrendingFlame";
+import { ProductListItem } from "@/components/ProductListItem";
 import GoogleMap from "@/components/GoogleMap";
-
-const MEDALS: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
 
 /**
  * The retailer ranking experience (올리브영 / 다이소): category filter chips over
@@ -47,29 +41,12 @@ export function RetailRankingView({
     return RETAIL_CATEGORIES[retailer].filter((c) => present.has(c.code));
   }, [products, retailer]);
 
-  // Category chip + free-text search (matches both languages: name_ko / name_ja /
-  // name_en / brand / category label — so a JP user typing Japanese matches too).
+  // Category chip + free-text search (`filterProducts` matches both languages,
+  // so a JP user typing Japanese hits the same rows a KR user does).
   const ranked = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    let list = cat ? products.filter((p) => p.category === cat) : products;
-    if (query) {
-      list = list.filter((p) => {
-        const hay = [
-          p.name_ko,
-          p.name_ja,
-          p.name_en,
-          p.brand,
-          retailCategoryLabel(retailer, p.category, "ko"),
-          retailCategoryLabel(retailer, p.category, "ja"),
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return hay.includes(query);
-      });
-    }
-    return list.map((p, i) => ({ rank: i + 1, product: p }));
-  }, [products, cat, q, retailer]);
+    const list = cat ? products.filter((p) => p.category === cat) : products;
+    return filterProducts(list, q).map((p, i) => ({ rank: i + 1, product: p }));
+  }, [products, cat, q]);
 
   const mapPoints = useMemo(
     () =>
@@ -137,67 +114,14 @@ export function RetailRankingView({
         </p>
       ) : (
         <ol className="divide-y divide-border overflow-hidden rounded-3xl border border-border bg-card/70">
-          {ranked.map(({ rank, product }) => {
-            const name = localizedName(product, locale);
-            return (
-              <li key={product.id}>
-                <Link
-                  prefetch={false}
-                  href={`/product/${product.id}`}
-                  className="flex items-center gap-3 p-3 transition-colors hover:bg-muted/60"
-                >
-                  <span
-                    className={cn(
-                      "w-7 shrink-0 text-center font-display text-lg font-extrabold tabular-nums",
-                      rank <= 3 ? "" : "text-muted-foreground",
-                    )}
-                  >
-                    {MEDALS[rank] ?? rank}
-                  </span>
-                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted">
-                    {product.thumbnail_url ? (
-                      <Image
-                        src={product.thumbnail_url}
-                        alt={name}
-                        fill
-                        sizes="64px"
-                        unoptimized={isUnoptimizedImage(product.thumbnail_url)}
-                        className={`object-cover ${photoAnim(product.id)}`}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-2xl">
-                        {meta?.emoji ?? "🛍️"}
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    {product.brand && (
-                      <p className="truncate text-xs font-semibold text-muted-foreground">
-                        {product.brand}
-                      </p>
-                    )}
-                    <p className="line-clamp-2 text-sm font-semibold leading-tight">
-                      {name}
-                    </p>
-                    <div className="mt-1 flex items-center gap-2.5">
-                      {product.price_range && (
-                        <span className="text-sm font-bold text-foreground">
-                          {localizedPrice(product.price_range, locale)}
-                        </span>
-                      )}
-                      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground tabular-nums">
-                        <Eye className="size-3.5" />
-                        {formatViewCount(product.view_count)}
-                      </span>
-                      {product.is_trending && (
-                        <TrendingFlame interactive={false} className="size-3.5" />
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            );
-          })}
+          {ranked.map(({ rank, product }) => (
+            <ProductListItem
+              key={product.id}
+              product={product}
+              rank={rank}
+              query={q}
+            />
+          ))}
         </ol>
       )}
 

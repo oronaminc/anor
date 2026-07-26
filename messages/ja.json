@@ -40,11 +40,14 @@
   },
   "search": {
     "title": "検索",
-    "placeholder": "料理名・お店・ハッシュタグで検索",
+    "placeholder": "グルメ・コスメ・ダイソーを検索",
     "results": "{count}件見つかりました",
     "empty": "見つかりませんでした",
     "emptyHint": "別のキーワードで探してみてくださいね",
-    "prompt": "気になる料理を検索してみましょう"
+    "prompt": "気になるものを検索してみましょう",
+    "scopeLabel": "検索する種類",
+    "scopeAll": "すべて",
+    "scopeFood": "屋台グルメ"
   },
   "badge": {
     "hot": "HOT",
