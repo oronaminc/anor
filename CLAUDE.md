@@ -46,18 +46,25 @@ npm run db:seed    # insert the demo foods (db/seed.sql) into the DB (idempotent
 npm run db:seed:clear  # remove ONLY the demo foods (thumbnail_url like /demo/%)
 ```
 
-### Database migrations are automatic — do NOT hand-paste SQL
+### Database migrations — do NOT hand-paste SQL
 
-`scripts/db-push.mjs` applies `db/schema.sql` idempotently and runs
-**automatically as part of `npm run build`** (so every Vercel deploy syncs the
-schema), and on demand via `npm run db:push`. It loads `.env.local` itself and
-no-ops when `DATABASE_URL` is absent (CI/demo).
+`scripts/db-push.mjs` applies `db/schema.sql` idempotently. It loads
+`.env.local` itself and no-ops when `DATABASE_URL` is absent (CI/demo).
 
 So when a feature needs a schema change, **edit `db/schema.sql` only**, using
 idempotent DDL — `create table if not exists`, `create index if not exists`,
 `create or replace function`, and for new columns
-`alter table ... add column if not exists`. The next deploy (or a local
-`npm run db:push`) applies it; nobody touches the Neon console.
+`alter table ... add column if not exists`. Then apply it with
+`npm run db:push`; nobody touches the Neon console.
+
+**It does NOT run on deploy, despite the name of the `build` script.**
+`package.json` has `"build": "node scripts/db-push.mjs && next build"`, but
+`vercel.json` sets `"buildCommand": "next build"`, which wins — so Vercel skips
+the schema sync. **Run `npm run db:push` yourself after changing the schema.**
+Pointing `buildCommand` at `npm run build` would automate it, at the cost of
+coupling deploys to the database: `db-push.mjs` exits 1 on failure, so any DB
+outage (see the compute-quota note below) would then break every deploy instead
+of just leaving the site empty. Decide deliberately; don't "fix" it by accident.
 
 Destructive changes (drop/rename column or table) are NOT idempotent — write
 those as a deliberate, guarded one-off and call it out explicitly.
@@ -132,8 +139,15 @@ tests/                          # unit/ (vitest), e2e/ (playwright)
   growth, no live ticker** — the number only moves when the DB moves, so home,
   cards and detail always agree. *Real* = `view_count` (`increment_shop_view`) +
   `like_count` (`toggle_shop_like`, one-per-IP via `shop_likes`). *Synthetic* =
-  admin "+1K", Telegram `/boost`, and the 5-min growth cron (`/api/cron/grow`,
-  `applyGrowthTick`, GitHub Actions `grow.yml`, `CRON_SECRET`). **Invariant:**
+  admin "+1K", Telegram `/boost`, and the **hourly** growth cron
+  (`/api/cron/grow` → `growAllShops`, GitHub Actions `grow.yml`, `CRON_SECRET`;
+  one call = `TICKS_PER_RUN` 5-min ticks, so the rate per hour is unchanged).
+  **Database compute is the budget, not a free resource** — the cron must grow
+  the whole table in ONE statement and must leave hour-long gaps so the
+  serverless compute can auto-suspend. Growing row-by-row every 5 minutes is
+  what exhausted the Neon quota on 2026-07-26: every query returned HTTP 402 and
+  the whole live site rendered its "no shops yet" empty state, because
+  `getShops`/`getProducts` swallow errors and return `[]`. **Invariant:**
   total views are ALWAYS > total likes — enforced atomically in `applyBoost`
   /`applyGrowthTick` SQL and mirrored + fuzz-tested in `lib/counts.ts`
   (`cappedLikeInc`/`likeBoostViewLift`, `tests/unit/counts.test.ts`).

@@ -2,16 +2,27 @@ import { NextResponse } from "next/server";
 
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
-import { applyGrowthTick } from "@/lib/boost";
+import { growAllShops } from "@/lib/boost";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Periodic "organic" growth — called every ~5 minutes by the GitHub Actions
- * cron (.github/workflows/grow.yml). Adds a small RANDOM amount to each shop's
+ * How many 5-minute ticks' worth of growth one call applies. The cron fires
+ * HOURLY (.github/workflows/grow.yml) rather than every 5 minutes so the Neon
+ * compute can auto-suspend in between — 12 × 5min = the same growth per hour.
+ * Keep this in step with the workflow's schedule.
+ */
+const TICKS_PER_RUN = 12;
+
+/**
+ * Periodic "organic" growth — called hourly by the GitHub Actions cron
+ * (.github/workflows/grow.yml). Adds a small RANDOM amount to each shop's
  * SYNTHETIC counts, persisted in the DB, so the displayed number (real +
  * synthetic) is always stable and consistent. Views grow faster than likes and
  * the like bump is capped so total likes can never reach total views.
+ *
+ * The whole table grows in ONE statement (`growAllShops`); doing it row by row
+ * is what exhausted the database's compute quota.
  *
  * Secured by the x-cron-secret header (CRON_SECRET). No-op without it.
  */
@@ -25,29 +36,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const sql = getSql();
-    const shops = (await sql`
-      SELECT id, is_trending, growth_weight FROM shops
-    `) as Array<{
-      id: string;
-      is_trending: boolean;
-      growth_weight: number | string | null;
-    }>;
-
-    let grown = 0;
-    for (const s of shops) {
-      const weight = Number(s.growth_weight) || 1;
-      const trend = s.is_trending ? 2 : 1;
-      // Per-shop random so shops keep diverging; trending grows faster.
-      const viewInc = Math.max(1, Math.round((5 + Math.random() * 22) * weight * trend));
-      const likeInc = Math.round(viewInc * (0.05 + Math.random() * 0.12));
-
-      await applyGrowthTick(sql, s.id, viewInc, likeInc);
-      grown += 1;
-    }
+    const grown = await growAllShops(getSql(), TICKS_PER_RUN);
     return NextResponse.json({ ok: true, grown });
   } catch (err) {
-    console.error("cron grow error:", (err as Error).message);
-    return NextResponse.json({ ok: false, error: "failed" }, { status: 500 });
+    const message = (err as Error).message;
+    console.error("cron grow error:", message);
+    // Surface the reason to the caller (the workflow log) — a quota/billing
+    // stop reads as a generic failure otherwise, which is how the last outage
+    // went unnoticed. This route is already behind CRON_SECRET.
+    return NextResponse.json(
+      { ok: false, error: "failed", detail: message },
+      { status: 500 },
+    );
   }
 }

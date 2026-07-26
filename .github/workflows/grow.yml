@@ -1,17 +1,23 @@
 name: grow
 
-# GitHub heavily throttles short-interval scheduled workflows, so a "*/5" cron
-# actually fires only ~once an hour. To still grow every 5 minutes, ONE run
-# loops internally: it calls the endpoint, sleeps 5 min, and repeats for ~an
-# hour — so whenever GitHub does fire it, the gap is covered. (Public repo →
-# Actions minutes are free. If you make the repo private, drop TICKS or switch
-# to an external cron like cron-job.org so you don't burn the free minutes.)
+# Runs ONCE per hour and applies an hour's worth of growth in a single request
+# (the endpoint's TICKS_PER_RUN). It used to loop internally — one call every 5
+# minutes for ~an hour — which meant the database was queried around the clock
+# and its serverless compute NEVER auto-suspended (Neon suspends after ~5 min
+# idle). That burned the whole monthly compute quota: every query then failed
+# with HTTP 402 and the live site rendered empty on every page.
+#
+# So: keep the gaps long enough for the compute to sleep. Don't reintroduce a
+# short interval or an internal sleep loop.
+#
+# The minute is offset from :00 because GitHub delays runs scheduled on the hour
+# (everyone's crons pile up there).
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "17 * * * *"
   workflow_dispatch: {}
 
-# Never run two loops at once; a new trigger waits for the current one.
+# Never run two of these at once; a new trigger waits for the current one.
 concurrency:
   group: grow
   cancel-in-progress: false
@@ -19,13 +25,12 @@ concurrency:
 jobs:
   grow:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 5
     steps:
-      - name: Grow every 5 min for ~1 hour
+      - name: Apply one hour of growth
         env:
           SITE_URL: ${{ vars.SITE_URL || 'https://anor-sable.vercel.app' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          TICKS: "12" # 12 ticks × 5 min ≈ covers the hour until the next trigger
         run: |
           if [ -z "$CRON_SECRET" ]; then
             echo "::error::CRON_SECRET is empty. Add it as a *Repository* secret"
@@ -33,14 +38,12 @@ jobs:
             echo "::error::name CRON_SECRET, value matching Vercel's CRON_SECRET env."
             exit 1
           fi
-          for i in $(seq 1 "$TICKS"); do
-            code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
-              -X POST "$SITE_URL/api/cron/grow" -H "x-cron-secret: $CRON_SECRET")
-            echo "tick $i/$TICKS → HTTP $code  $(cat /tmp/resp.json 2>/dev/null)"
-            if [ "$code" != "200" ]; then
-              echo "::error::Growth endpoint returned $code (401 = the GitHub CRON_SECRET"
-              echo "::error::does not match Vercel's CRON_SECRET env). Re-set the secret to match."
-              exit 1
-            fi
-            if [ "$i" -lt "$TICKS" ]; then sleep 300; fi
-          done
+          code=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+            -X POST "$SITE_URL/api/cron/grow" -H "x-cron-secret: $CRON_SECRET")
+          echo "HTTP $code  $(cat /tmp/resp.json 2>/dev/null)"
+          if [ "$code" != "200" ]; then
+            echo "::error::Growth endpoint returned $code. 401 = the GitHub CRON_SECRET"
+            echo "::error::does not match Vercel's CRON_SECRET env. 500 with a quota/"
+            echo "::error::compute message in \"detail\" = the database is out of quota."
+            exit 1
+          fi

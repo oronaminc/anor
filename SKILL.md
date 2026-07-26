@@ -143,11 +143,26 @@ two bugs never to reintroduce are documented in `CLAUDE.md` § "Engagement,
 analytics & admin security". **Read that before touching count code.** Here are
 the operational bits:
 
-**Growth cron.** GitHub Actions (`.github/workflows/grow.yml`, every ~5 min) →
-`POST /api/cron/grow` (header `x-cron-secret: $CRON_SECRET`) → `applyGrowthTick`
-adds a small random amount to the synthetic columns. Set `CRON_SECRET` in
-**both** the Vercel env and the GitHub repo secret — a mismatch silently stops
-growth (the endpoint just 401s).
+**Growth cron.** GitHub Actions (`.github/workflows/grow.yml`, **hourly**) →
+`POST /api/cron/grow` (header `x-cron-secret: $CRON_SECRET`) → `growAllShops`
+adds a small random amount to every shop's synthetic columns in ONE statement.
+Set `CRON_SECRET` in **both** the Vercel env and the GitHub repo secret — a
+mismatch silently stops growth (the endpoint just 401s).
+
+Hourly, batched, and unchanged in rate (one call = `TICKS_PER_RUN` 5-min ticks)
+— all three on purpose. The old version ran one UPDATE **per shop** every 5
+minutes, so Neon's compute never got its 5-minute idle window and the monthly
+compute quota ran out; every query then failed with **HTTP 402** and the site
+silently rendered empty. Don't shorten the interval or go back to a loop.
+
+**Site suddenly empty on every page?** Check the database before the code — the
+queries swallow errors and return `[]`, which looks identical to "no content":
+
+```bash
+node -e 'import("./scripts/lib.mjs").then(async (m)=>{m.loadEnvLocal();
+  try{console.log(await m.neon(m.databaseUrl())`select count(*) from shops`)}
+  catch(e){console.log("DB DOWN:",e.message)}})'
+```
 
 **Verify a change to counts:**
 
