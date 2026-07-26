@@ -1,21 +1,30 @@
 import { test, expect } from "@playwright/test";
 
-// Force Korean so locale auto-detection is deterministic in CI.
+// Force Korean so the assertions below are deterministic. The app does NOT
+// sniff Accept-Language — locale is the `NEXT_LOCALE` cookie only (ja default),
+// so the browser locale alone would leave the page in Japanese.
 test.use({ locale: "ko-KR" });
+
+test.beforeEach(async ({ context, baseURL }) => {
+  await context.addCookies([
+    { name: "NEXT_LOCALE", value: "ko", url: baseURL ?? "http://127.0.0.1:3000" },
+  ]);
+});
 
 test.describe("Home page", () => {
   test("loads and shows the hero header", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBeLessThan(400);
 
-    // Hero heading is always present.
+    // Hero heading is always present. Matched on a distinctive fragment so it
+    // can't collide with a shop-name heading in the feed.
     await expect(
-      page.getByRole("heading", { name: /명동 길거리 음식/ }),
+      page.getByRole("heading", { name: /이 한 페이지에/ }),
     ).toBeVisible();
 
     // Header brand link is present.
     await expect(
-      page.getByRole("link", { name: /명동 길거리 음식/ }).first(),
+      page.getByRole("link", { name: /헬로 명동/ }).first(),
     ).toBeVisible();
   });
 

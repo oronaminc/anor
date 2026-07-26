@@ -8,15 +8,19 @@ import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
+  // Title carries the tagline so search results / the browser tab say the site
+  // covers all three pillars, not just street food.
+  const title = `${t("appName")} — ${t("tagline")}`;
   return {
-    title: t("appName"),
-    description: t("tagline"),
+    title: { default: title, template: `%s — ${t("appName")}` },
+    description: t("description"),
     metadataBase: new URL(
       process.env.NEXT_PUBLIC_SITE_URL || "https://hellomyeongdong.com",
     ),
     openGraph: {
-      title: t("appName"),
-      description: t("tagline"),
+      siteName: t("appName"),
+      title,
+      description: t("description"),
       type: "website",
     },
   };

@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 
+import { RETAILERS } from "@/lib/retailers";
 import { RetailRankingPage } from "@/components/RetailRankingPage";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "올리브영 인기 랭킹 · 명동",
-  description: "명동에서 사는 올리브영 K-뷰티 인기 화장품 랭킹.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = RETAILERS.olive_young;
+  const ja = locale === "ja";
+  return {
+    title: ja ? `${m.ja}人気ランキング` : `${m.ko} 인기 랭킹`,
+    description: ja ? m.tagline_ja : m.tagline_ko,
+  };
+}
 
 export default function BeautyPage() {
   return <RetailRankingPage retailer="olive_young" />;

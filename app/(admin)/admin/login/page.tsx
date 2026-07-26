@@ -37,7 +37,7 @@ export default function AdminLoginPage({
           <p className="text-3xl">🍢</p>
           <h1 className="text-xl font-extrabold tracking-tight">관리자 로그인</h1>
           <p className="text-sm text-muted-foreground">
-            명동 길거리 음식 가이드 관리
+            명동 올인원 가이드 관리
           </p>
         </div>
 
