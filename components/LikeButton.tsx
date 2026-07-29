@@ -11,13 +11,18 @@ const storageKey = (id: string) => `anor:liked:${id}`;
 
 /**
  * Anonymous "like" toggle. No login.
- *  - The count is NEVER taken from the server-rendered value (a client/router
- *    cache may serve old); it shows a tiny placeholder and then ONLY the live
- *    count fetched on mount. So a stale cache can't flash a wrong number.
- *  - Tap → optimistic +1/-1 and a red heart pop, then reconcile to the server.
+ *  - The count shown is the server value, which comes from the shared read
+ *    cache (lib/cache.ts) — the same snapshot the cards and the feed render, so
+ *    every surface already agrees. There is deliberately NO fetch on mount: it
+ *    cost a database round-trip on every detail open just to re-read a number
+ *    the page already had, and the database is billed by compute time.
+ *  - Tap → optimistic +1/-1 and a red heart pop, then reconcile to the server's
+ *    response (that write is user-initiated and rare, so it stays live).
  *  - localStorage remembers this device's liked state; the real one-like-per-IP
- *    guarantee is the DB UNIQUE on shop_likes. `initialCount` is an offline
- *    fallback only.
+ *    guarantee is the DB UNIQUE on shop_likes. Trade-off of dropping the mount
+ *    fetch: on a device with no stored flag the heart starts empty even if this
+ *    IP already liked, so the first tap un-likes — the response reconciles the
+ *    state and the count immediately.
  */
 export function LikeButton({
   shopId,
@@ -30,7 +35,7 @@ export function LikeButton({
 }) {
   const t = useTranslations("detail");
   const [liked, setLiked] = useState(false);
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState(initialCount);
   const [pending, setPending] = useState(false);
   const heart = useAnimationControls();
 
@@ -48,25 +53,13 @@ export function LikeButton({
     } catch {
       /* private mode — ignore */
     }
-    // Show only the live count + server-known liked state.
-    fetch(`/api/shops/${shopId}/like`)
-      .then((r) => r.json())
-      .then((data) => {
-        setCount(typeof data?.like_count === "number" ? data.like_count : initialCount);
-        if (typeof data?.liked === "boolean") {
-          setLiked(data.liked);
-          persist(data.liked);
-        }
-      })
-      .catch(() => setCount(initialCount));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shopId]);
 
   async function onToggle() {
     if (pending) return;
     setPending(true);
 
-    const base = count ?? initialCount;
+    const base = count;
     const prevLiked = liked;
     const prevCount = count;
     const nextLiked = !liked;
@@ -118,16 +111,9 @@ export function LikeButton({
       <motion.span animate={heart} className="inline-flex">
         <Heart className={cn("size-4", liked && "fill-red-500 text-red-500")} />
       </motion.span>
-      {count === null ? (
-        <span
-          className="inline-block h-[1em] w-8 animate-pulse rounded bg-foreground/20 align-[-0.15em]"
-          aria-hidden
-        />
-      ) : (
-        <span data-testid="like-count" className="tabular-nums">
-          {count.toLocaleString()}
-        </span>
-      )}
+      <span data-testid="like-count" className="tabular-nums">
+        {count.toLocaleString()}
+      </span>
     </button>
   );
 }

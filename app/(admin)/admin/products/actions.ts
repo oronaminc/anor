@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+
+import { revalidateProducts } from "@/lib/cache";
 import { redirect } from "next/navigation";
 
 import { getSql } from "@/lib/db";
@@ -90,6 +92,7 @@ export async function createProduct(
     return { error: (err as Error).message };
   }
 
+  revalidateProducts();
   revalidatePath("/admin/products");
   revalidatePath("/beauty");
   revalidatePath("/daiso");
@@ -132,6 +135,7 @@ export async function updateProduct(
     return { error: (err as Error).message };
   }
 
+  revalidateProducts();
   revalidatePath("/admin/products");
   revalidatePath("/beauty");
   revalidatePath("/daiso");
@@ -147,6 +151,7 @@ export async function deleteProduct(id: string) {
   const url = (rows[0]?.thumbnail_url as string | null) ?? null;
   await sql`DELETE FROM products WHERE id = ${id}`;
   await deleteImageIfUnused(sql, url);
+  revalidateProducts();
   revalidatePath("/admin/products");
   revalidatePath("/beauty");
   revalidatePath("/daiso");
@@ -156,6 +161,7 @@ export async function toggleProductTrending(id: string, next: boolean) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
   await getSql()`UPDATE products SET is_trending = ${next} WHERE id = ${id}`;
+  revalidateProducts();
   revalidatePath("/admin/products");
   revalidatePath("/beauty");
   revalidatePath("/daiso");
@@ -180,6 +186,7 @@ export async function boostProduct(id: string, kind: "view" | "like") {
       WHERE id = ${id}
     `;
   }
+  revalidateProducts();
   revalidatePath("/admin/products");
   revalidatePath("/beauty");
   revalidatePath("/daiso");

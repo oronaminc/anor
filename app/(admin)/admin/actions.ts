@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+
+import { revalidateShops } from "@/lib/cache";
 import { redirect } from "next/navigation";
 import { cookies, headers } from "next/headers";
 
@@ -355,6 +357,7 @@ export async function createShop(
     return { error: (err as Error).message };
   }
 
+  revalidateShops();
   revalidatePath("/admin");
   revalidatePath("/");
   redirect("/admin");
@@ -407,6 +410,7 @@ export async function updateShop(
     return { error: (err as Error).message };
   }
 
+  revalidateShops();
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath(`/shop/${id}`);
@@ -428,6 +432,7 @@ export async function deleteShop(id: string) {
   // Cascade (shop_foods, shop_likes) is handled by ON DELETE CASCADE.
   await sql`DELETE FROM shops WHERE id = ${id}`;
   for (const url of urls) await deleteImageIfUnused(sql, url);
+  revalidateShops();
   revalidatePath("/admin");
   revalidatePath("/");
 }
@@ -436,6 +441,7 @@ export async function toggleTrending(id: string, next: boolean) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
   await getSql()`UPDATE shops SET is_trending = ${next} WHERE id = ${id}`;
+  revalidateShops();
   revalidatePath("/admin");
   revalidatePath("/");
 }
@@ -445,6 +451,7 @@ export async function boostShop(id: string, kind: BoostKind) {
   if (!(await isAdmin())) return;
   if (!hasDb()) return;
   await applyBoost(getSql(), id, kind);
+  revalidateShops();
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath(`/shop/${id}`);

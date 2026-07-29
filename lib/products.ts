@@ -1,6 +1,7 @@
 import "server-only";
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
+import { CACHE_TAGS, cachedRead } from "@/lib/cache";
 import { isDemoMode } from "@/lib/demo-data";
 import { DEMO_PRODUCTS, DEMO_RETAIL_STORES } from "@/lib/products-demo";
 import { totalViews, totalLikes } from "@/lib/counts";
@@ -12,23 +13,46 @@ function withTotals(p: Product): Product {
   return { ...p, view_count: totalViews(p), like_count: totalLikes(p) };
 }
 
-/** All products for a retailer, ranked by views desc (trending pinned first). */
-export async function getProducts(retailer: Retailer): Promise<Product[]> {
-  if (isDemoMode() || !hasDb()) {
-    return DEMO_PRODUCTS.filter((p) => p.retailer === retailer).map(withTotals);
-  }
-  try {
+/**
+ * As in lib/queries.ts, the loaders go through the shared Data Cache and THROW
+ * rather than returning a fallback, so a transient database outage is never
+ * stored as "no products" for the rest of the TTL.
+ */
+const loadProducts = cachedRead(
+  ["products:by-retailer"],
+  async (retailer: Retailer): Promise<Product[]> => {
     const sql = getSql();
     const rows = (await sql`
       SELECT * FROM products WHERE retailer = ${retailer}
        ORDER BY (view_count + synthetic_view_count) DESC, created_at DESC
     `) as Product[];
     return rows.map(withTotals);
+  },
+  [CACHE_TAGS.products],
+);
+
+/** All products for a retailer, ranked by views desc (trending pinned first). */
+export async function getProducts(retailer: Retailer): Promise<Product[]> {
+  if (isDemoMode() || !hasDb()) {
+    return DEMO_PRODUCTS.filter((p) => p.retailer === retailer).map(withTotals);
+  }
+  try {
+    return await loadProducts(retailer);
   } catch (err) {
     console.error("getProducts error:", err);
     return [];
   }
 }
+
+const loadProductById = cachedRead(
+  ["products:by-id"],
+  async (id: string): Promise<Product | null> => {
+    const sql = getSql();
+    const rows = (await sql`SELECT * FROM products WHERE id = ${id} LIMIT 1`) as Product[];
+    return rows[0] ? withTotals(rows[0]) : null;
+  },
+  [CACHE_TAGS.products],
+);
 
 export async function getProductById(id: string): Promise<Product | null> {
   if (isDemoMode() || !hasDb()) {
@@ -36,14 +60,24 @@ export async function getProductById(id: string): Promise<Product | null> {
     return p ? withTotals(p) : null;
   }
   try {
-    const sql = getSql();
-    const rows = (await sql`SELECT * FROM products WHERE id = ${id} LIMIT 1`) as Product[];
-    return rows[0] ? withTotals(rows[0]) : null;
+    return await loadProductById(id);
   } catch (err) {
     console.error("getProductById error:", err);
     return null;
   }
 }
+
+const loadProductIdByShortId = cachedRead(
+  ["products:by-short-id"],
+  async (shortId: number): Promise<string | null> => {
+    const sql = getSql();
+    const rows = (await sql`SELECT id FROM products WHERE short_id = ${shortId} LIMIT 1`) as {
+      id: string;
+    }[];
+    return rows[0]?.id ?? null;
+  },
+  [CACHE_TAGS.products],
+);
 
 /** Resolve a product's UUID from its short numeric id (for /p/{n} links). */
 export async function getProductIdByShortId(shortId: number): Promise<string | null> {
@@ -51,16 +85,24 @@ export async function getProductIdByShortId(shortId: number): Promise<string | n
     return DEMO_PRODUCTS.find((p) => p.short_id === shortId)?.id ?? null;
   }
   try {
-    const sql = getSql();
-    const rows = (await sql`SELECT id FROM products WHERE short_id = ${shortId} LIMIT 1`) as {
-      id: string;
-    }[];
-    return rows[0]?.id ?? null;
+    return await loadProductIdByShortId(shortId);
   } catch (err) {
     console.error("getProductIdByShortId error:", err);
     return null;
   }
 }
+
+const loadRetailStores = cachedRead(
+  ["retail-stores:by-retailer"],
+  async (retailer: Retailer): Promise<RetailStore[]> => {
+    const sql = getSql();
+    return (await sql`
+      SELECT id, retailer, name_ko, name_ja, lat, lng, address
+        FROM retail_stores WHERE retailer = ${retailer} ORDER BY created_at
+    `) as RetailStore[];
+  },
+  [CACHE_TAGS.products],
+);
 
 /** The retailer's Myeongdong stores — the "where to buy" map points. */
 export async function getRetailStores(retailer: Retailer): Promise<RetailStore[]> {
@@ -68,11 +110,7 @@ export async function getRetailStores(retailer: Retailer): Promise<RetailStore[]
     return DEMO_RETAIL_STORES.filter((s) => s.retailer === retailer);
   }
   try {
-    const sql = getSql();
-    return (await sql`
-      SELECT id, retailer, name_ko, name_ja, lat, lng, address
-        FROM retail_stores WHERE retailer = ${retailer} ORDER BY created_at
-    `) as RetailStore[];
+    return await loadRetailStores(retailer);
   } catch (err) {
     console.error("getRetailStores error:", err);
     return [];

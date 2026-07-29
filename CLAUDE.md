@@ -155,10 +155,28 @@ tests/                          # unit/ (vitest), e2e/ (playwright)
   home≠detail / like drift — deleted `lib/growth.ts`+ticker, persist everything;
   (2) stale client/router cache showed an old detail count on home→detail — pages
   are `force-dynamic`, `staleTimes {dynamic:0,static:0}`, shop links
-  `prefetch={false}`, and detail counts **reconcile to a fresh fetch on mount**
-  (`ShopViewCount` via `POST /view`, `LikeButton` via `GET …/like`). Consistency
-  guarded by `tests/e2e/counts.spec.ts`; capacity by `npm run stress`
-  (`scripts/stress.mjs`, ~100 concurrent reads at 100%/p95≈1s). See `SKILL.md` §6.
+  `prefetch={false}`, and **every surface now renders one shared cached snapshot**
+  (see "Read caching" below), so they agree by construction. Detail counts used
+  to reconcile to a fresh fetch on mount; that is **removed on purpose** — it
+  cost 3 queries per detail open. Consistency guarded by
+  `tests/e2e/counts.spec.ts`, traffic by `tests/e2e/db-traffic.spec.ts`, capacity
+  by `npm run stress` (`scripts/stress.mjs`). See `SKILL.md` §6.
+- **Read caching — the database budget is COMPUTE TIME, not queries.** Neon's
+  compute wakes on any query and only suspends after ~5 idle minutes, so a
+  trickle of traffic spread through the day keeps it billing 24/7. Every public
+  read therefore goes through `lib/cache.ts` (`cachedRead` → `unstable_cache`,
+  tags `shops`/`products`, TTL `DB_CACHE_TTL_SECONDS`, default 1h to match the
+  growth cron). Rules:
+  - **Never set a TTL near the ~5-minute suspend delay** — the refreshes alone
+    would keep the compute permanently awake, which defeats the whole thing.
+  - Loaders **throw** on DB errors and the exported wrappers catch; a rejected
+    promise isn't cached, so an outage can't be stored as "no content" for a
+    whole TTL.
+  - Admin mutations call `revalidateShops()`/`revalidateProducts()` so edits
+    publish instantly. **Views/likes must NOT revalidate** — busting the cache on
+    engagement would restore the per-visit query it exists to avoid.
+  - A view is recorded fire-and-forget and deduped per device for 6h
+    (`lib/record-view.ts`); `/view` routes are **write-only** (no read-back).
 - **Content / media model** — the *rules*; the commands are in `SKILL.md` §7.
   Shops/foods/photos are managed from **gitignored CSVs + Cloudflare R2**, never
   by hand-editing the DB.

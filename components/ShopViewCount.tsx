@@ -2,14 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { recordView } from "@/lib/record-view";
+
 /**
- * The shop's view count on the detail page. To avoid ever flashing a stale
- * number, it does NOT display the server-rendered value (which a client/router
- * cache may serve old). It shows a tiny placeholder, fetches the LIVE count from
- * the API on mount (which also records this view), and shows only that. So no
- * matter what's cached, the visible number is always the live DB value.
- * `initial` is used only as an offline fallback. The `fired` ref de-dupes mount;
- * the API rate-limits per IP.
+ * The shop's view count on the detail page.
+ *
+ * It renders the server value straight away. That value comes from the shared
+ * read cache (lib/cache.ts), which is the SAME snapshot the home feed and its
+ * cards render from — so the number already agrees everywhere and there is
+ * nothing to reconcile. (The old version hid the server value and fetched a
+ * live count on mount to defeat a stale *client router* cache; `staleTimes: 0`
+ * plus `prefetch={false}` already handle that, and the fetch cost a database
+ * round-trip on every single detail open.)
+ *
+ * Recording the view is fire-and-forget and deduped per device — see
+ * lib/record-view.ts. The `+1` is applied locally when this visit counted.
  */
 export function ShopViewCount({
   shopId,
@@ -18,29 +25,15 @@ export function ShopViewCount({
   shopId: string;
   initial: number;
 }) {
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState(initial);
   const fired = useRef(false);
 
   useEffect(() => {
     if (fired.current) return;
     fired.current = true;
-    fetch(`/api/shops/${shopId}/view`, { method: "POST" })
-      .then((r) => r.json())
-      .then((data) =>
-        setCount(typeof data?.view_count === "number" ? data.view_count : initial + 1),
-      )
-      .catch(() => setCount(initial + 1));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (recordView("shops", shopId)) setCount((c) => c + 1);
   }, [shopId]);
 
-  if (count === null) {
-    return (
-      <span
-        className="inline-block h-[1em] w-12 animate-pulse rounded bg-muted align-[-0.15em]"
-        aria-hidden
-      />
-    );
-  }
   return (
     <span data-testid="view-count" className="tabular-nums">
       {count.toLocaleString()}

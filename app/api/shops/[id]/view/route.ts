@@ -9,7 +9,12 @@ import { clientIpHash } from "@/lib/ip";
 export const dynamic = "force-dynamic";
 
 /** Increment a shop's view count by one when its detail page is opened.
- *  Same-origin + per-IP rate limit; returns the new stored view_count. */
+ *  Same-origin + per-IP rate limit.
+ *
+ *  Write-only on purpose: the client sends this fire-and-forget (deduped per
+ *  device in lib/record-view.ts) and renders the cached count it already has,
+ *  so reading the totals back would be a second query per detail open on a
+ *  database billed by compute time. See lib/cache.ts. */
 export async function POST(
   request: Request,
   { params }: { params: { id: string } },
@@ -43,18 +48,7 @@ export async function POST(
   try {
     const sql = getSql();
     await sql`SELECT increment_shop_view(${id})`;
-    // Return the fresh DISPLAY totals (real + synthetic) so the client can
-    // reconcile away any stale server-rendered/cached number on mount.
-    const rows = await sql`
-      SELECT (view_count + synthetic_view_count) AS view_count,
-             (like_count + synthetic_like_count) AS like_count
-        FROM shops WHERE id = ${id}
-    `;
-    return NextResponse.json({
-      ok: true,
-      view_count: rows[0]?.view_count ?? null,
-      like_count: rows[0]?.like_count ?? null,
-    });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("view route exception:", (err as Error).message);
     return NextResponse.json(

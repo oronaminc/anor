@@ -34,18 +34,12 @@ export async function POST(
   }
 
   try {
+    // Write-only, like the shop route: the client renders the cached count and
+    // sends this fire-and-forget, so a read-back would double the query cost of
+    // every detail open. See lib/cache.ts + lib/record-view.ts.
     const sql = getSql();
     await sql`SELECT increment_product_view(${id})`;
-    const rows = await sql`
-      SELECT (view_count + synthetic_view_count) AS view_count,
-             (like_count + synthetic_like_count) AS like_count
-        FROM products WHERE id = ${id}
-    `;
-    return NextResponse.json({
-      ok: true,
-      view_count: rows[0]?.view_count ?? null,
-      like_count: rows[0]?.like_count ?? null,
-    });
+    return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("product view route exception:", (err as Error).message);
     return NextResponse.json({ ok: false, error: "request failed" }, { status: 500 });

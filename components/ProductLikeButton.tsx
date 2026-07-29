@@ -10,9 +10,10 @@ import { cn } from "@/lib/utils";
 const storageKey = (id: string) => `anor:liked-product:${id}`;
 
 /**
- * Anonymous "like" toggle for a product. Mirrors LikeButton: live count fetched
- * on mount (never the stale SSR number), optimistic toggle + heart pop, and a
- * localStorage device flag over the DB's one-like-per-IP guarantee.
+ * Anonymous "like" toggle for a product. Mirrors LikeButton: the count shown is
+ * the cached server value (no fetch on mount — that was a database round-trip
+ * per detail open), optimistic toggle + heart pop, and a localStorage device
+ * flag over the DB's one-like-per-IP guarantee. See lib/cache.ts.
  */
 export function ProductLikeButton({
   productId,
@@ -25,7 +26,7 @@ export function ProductLikeButton({
 }) {
   const t = useTranslations("detail");
   const [liked, setLiked] = useState(false);
-  const [count, setCount] = useState<number | null>(null);
+  const [count, setCount] = useState(initialCount);
   const [pending, setPending] = useState(false);
   const heart = useAnimationControls();
 
@@ -43,24 +44,13 @@ export function ProductLikeButton({
     } catch {
       /* private mode — ignore */
     }
-    fetch(`/api/products/${productId}/like`)
-      .then((r) => r.json())
-      .then((data) => {
-        setCount(typeof data?.like_count === "number" ? data.like_count : initialCount);
-        if (typeof data?.liked === "boolean") {
-          setLiked(data.liked);
-          persist(data.liked);
-        }
-      })
-      .catch(() => setCount(initialCount));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   async function onToggle() {
     if (pending) return;
     setPending(true);
 
-    const base = count ?? initialCount;
+    const base = count;
     const prevLiked = liked;
     const prevCount = count;
     const nextLiked = !liked;
@@ -112,16 +102,9 @@ export function ProductLikeButton({
       <motion.span animate={heart} className="inline-flex">
         <Heart className={cn("size-4", liked && "fill-red-500 text-red-500")} />
       </motion.span>
-      {count === null ? (
-        <span
-          className="inline-block h-[1em] w-8 animate-pulse rounded bg-foreground/20 align-[-0.15em]"
-          aria-hidden
-        />
-      ) : (
-        <span data-testid="product-like-count" className="tabular-nums">
-          {count.toLocaleString()}
-        </span>
-      )}
+      <span data-testid="product-like-count" className="tabular-nums">
+        {count.toLocaleString()}
+      </span>
     </button>
   );
 }

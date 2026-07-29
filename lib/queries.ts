@@ -1,6 +1,7 @@
 import "server-only";
 import { getSql } from "@/lib/db";
 import { hasDb } from "@/lib/env";
+import { CACHE_TAGS, cachedRead } from "@/lib/cache";
 import type { Shop, ShopFood, ShopWithFoods } from "@/lib/types";
 import { DEMO_SHOPS, isDemoMode } from "@/lib/demo-data";
 import { totalViews, totalLikes } from "@/lib/counts";
@@ -40,12 +41,16 @@ function attachFoods(shops: ShopRow[], foods: ShopFood[]): ShopWithFoods[] {
 }
 
 /**
- * Fetch all shops with their menu foods. Counts are the stored totals; location
- * is resolved from each shop's zone. Falls back to the demo dataset with no DB.
+ * The loaders below are wrapped in the shared Data Cache (see lib/cache.ts), so
+ * ordinary page views don't re-query — and the database's compute can suspend.
+ *
+ * They deliberately THROW instead of returning a fallback: a rejected promise is
+ * not stored, so a transient outage can't get cached and blank the site for the
+ * whole TTL. The exported functions below catch and fall back.
  */
-export async function getShops(): Promise<ShopWithFoods[]> {
-  if (isDemoMode() || !hasDb()) return DEMO_SHOPS;
-  try {
+const loadShops = cachedRead(
+  ["shops:all"],
+  async (): Promise<ShopWithFoods[]> => {
     const sql = getSql();
     const shops = (await sql`
       SELECT s.*, d.lat AS zone_lat, d.lng AS zone_lng
@@ -57,11 +62,35 @@ export async function getShops(): Promise<ShopWithFoods[]> {
       SELECT * FROM shop_foods ORDER BY shop_id, sort_order
     `) as ShopFood[];
     return attachFoods(shops, foods);
+  },
+  [CACHE_TAGS.shops],
+);
+
+/**
+ * Fetch all shops with their menu foods. Counts are the stored totals; location
+ * is resolved from each shop's zone. Falls back to the demo dataset with no DB.
+ */
+export async function getShops(): Promise<ShopWithFoods[]> {
+  if (isDemoMode() || !hasDb()) return DEMO_SHOPS;
+  try {
+    return await loadShops();
   } catch (err) {
     console.error("getShops error:", err);
     return [];
   }
 }
+
+const loadShopIdByShortId = cachedRead(
+  ["shops:by-short-id"],
+  async (shortId: number): Promise<string | null> => {
+    const sql = getSql();
+    const rows = (await sql`
+      SELECT id FROM shops WHERE short_id = ${shortId} LIMIT 1
+    `) as { id: string }[];
+    return rows[0]?.id ?? null;
+  },
+  [CACHE_TAGS.shops],
+);
 
 /** Resolve a shop's UUID from a short numeric id (for /s/{n} share links). */
 export async function getShopIdByShortId(shortId: number): Promise<string | null> {
@@ -69,22 +98,16 @@ export async function getShopIdByShortId(shortId: number): Promise<string | null
     return DEMO_SHOPS.find((s) => s.short_id === shortId)?.id ?? null;
   }
   try {
-    const sql = getSql();
-    const rows = (await sql`
-      SELECT id FROM shops WHERE short_id = ${shortId} LIMIT 1
-    `) as { id: string }[];
-    return rows[0]?.id ?? null;
+    return await loadShopIdByShortId(shortId);
   } catch (err) {
     console.error("getShopIdByShortId error:", err);
     return null;
   }
 }
 
-export async function getShopById(id: string): Promise<ShopWithFoods | null> {
-  if (isDemoMode() || !hasDb()) {
-    return DEMO_SHOPS.find((s) => s.id === id) ?? null;
-  }
-  try {
+const loadShopById = cachedRead(
+  ["shops:by-id"],
+  async (id: string): Promise<ShopWithFoods | null> => {
     const sql = getSql();
     const shops = (await sql`
       SELECT s.*, d.lat AS zone_lat, d.lng AS zone_lng
@@ -99,6 +122,16 @@ export async function getShopById(id: string): Promise<ShopWithFoods | null> {
       SELECT * FROM shop_foods WHERE shop_id = ${id} ORDER BY sort_order
     `) as ShopFood[];
     return { ...withDerived(shop), foods };
+  },
+  [CACHE_TAGS.shops],
+);
+
+export async function getShopById(id: string): Promise<ShopWithFoods | null> {
+  if (isDemoMode() || !hasDb()) {
+    return DEMO_SHOPS.find((s) => s.id === id) ?? null;
+  }
+  try {
+    return await loadShopById(id);
   } catch (err) {
     console.error("getShopById error:", err);
     return null;
